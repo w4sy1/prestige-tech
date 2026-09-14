@@ -1,36 +1,36 @@
 {
   "projects": 26,
-  "tests": 316,
+  "tests": 391,
   "passed": true,
   "results": [
     {
       "project": "prestige-adb-diagnostic",
       "passed": true,
-      "tests": 13,
+      "tests": 16,
       "missing": []
     },
     {
       "project": "prestige-ai-diagnostic-assistant",
       "passed": true,
-      "tests": 13,
+      "tests": 16,
       "missing": []
     },
     {
       "project": "prestige-android-inspector",
       "passed": true,
-      "tests": 11,
+      "tests": 15,
       "missing": []
     },
     {
       "project": "prestige-backup",
       "passed": true,
-      "tests": 11,
+      "tests": 16,
       "missing": []
     },
     {
       "project": "prestige-dns-benchmark",
       "passed": true,
-      "tests": 14,
+      "tests": 16,
       "missing": []
     },
     {
@@ -42,13 +42,13 @@
     {
       "project": "prestige-folder-watch",
       "passed": true,
-      "tests": 12,
+      "tests": 14,
       "missing": []
     },
     {
       "project": "prestige-hash-checker",
       "passed": true,
-      "tests": 11,
+      "tests": 12,
       "missing": []
     },
     {
@@ -60,37 +60,37 @@
     {
       "project": "prestige-internet-diagnostic",
       "passed": true,
-      "tests": 13,
+      "tests": 17,
       "missing": []
     },
     {
       "project": "prestige-lan-radar",
       "passed": true,
-      "tests": 10,
+      "tests": 13,
       "missing": []
     },
     {
       "project": "prestige-malware-triage",
       "passed": true,
-      "tests": 12,
+      "tests": 18,
       "missing": []
     },
     {
       "project": "prestige-netradar",
       "passed": true,
-      "tests": 13,
+      "tests": 16,
       "missing": []
     },
     {
       "project": "prestige-network-optimizer",
       "passed": true,
-      "tests": 12,
+      "tests": 14,
       "missing": []
     },
     {
       "project": "prestige-network-snapshot",
       "passed": true,
-      "tests": 11,
+      "tests": 14,
       "missing": []
     },
     {
@@ -102,7 +102,7 @@
     {
       "project": "prestige-pc-cleanup",
       "passed": true,
-      "tests": 11,
+      "tests": 13,
       "missing": []
     },
     {
@@ -114,13 +114,13 @@
     {
       "project": "prestige-security-check",
       "passed": true,
-      "tests": 12,
+      "tests": 19,
       "missing": []
     },
     {
       "project": "prestige-system-snapshot",
       "passed": true,
-      "tests": 11,
+      "tests": 14,
       "missing": []
     },
     {
@@ -138,25 +138,25 @@
     {
       "project": "prestige-termux-setup",
       "passed": true,
-      "tests": 11,
+      "tests": 14,
       "missing": []
     },
     {
       "project": "prestige-termux-toolkit",
       "passed": true,
-      "tests": 11,
+      "tests": 14,
       "missing": []
     },
     {
       "project": "prestige-usb-toolkit",
       "passed": true,
-      "tests": 10,
+      "tests": 13,
       "missing": []
     },
     {
       "project": "prestige-windows-toolkit",
       "passed": true,
-      "tests": 26,
+      "tests": 39,
       "missing": []
     }
   ]

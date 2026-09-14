@@ -40,6 +40,12 @@ def main():
         backup=temp/'backup'
         invoke(base+['backup','backup','--source',data,'--destination',backup,'--apply'])
         invoke(base+['backup','verify','--destination',backup]);checks.append('backup and SHA256 verification on synthetic files')
+        restored=temp/'restored'
+        invoke(base+['backup','restore','--destination',backup,'--restore-to',restored,'--apply'])
+        if (restored/'1-data/sample.txt').read_text(encoding='utf-8')!='changed':raise RuntimeError('Restored content mismatch')
+        checks.append('verified backup restore through installed CLI')
+        invoke(base+['prestige-hash-checker','compare-folders','--root',data,'--other',restored/'1-data'])
+        checks.append('direct folder comparison through installed CLI')
     result={'passed':True,'checks':checks}
     (ROOT/'development/integration.json').write_text(json.dumps(result,indent=2),encoding='utf-8')
     print(json.dumps(result,indent=2))

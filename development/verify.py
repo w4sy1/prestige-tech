@@ -18,7 +18,7 @@ def main():
             command=[sys.executable,'-m','unittest','discover','-s','tests','-v']
             help_command=[sys.executable,'app.py','--help']
         else:
-            command=['pwsh','-NoProfile','-Command','& ./tests/run.ps1; if ($LASTEXITCODE) {exit $LASTEXITCODE}; & ./tests/operations.ps1']
+            command=['pwsh','-NoProfile','-Command',"$ErrorActionPreference='Stop'; Get-ChildItem ./tests/*.ps1 | ForEach-Object { & pwsh -NoProfile -File $_.FullName; if($LASTEXITCODE){exit $LASTEXITCODE} }"]
             help_command=['pwsh','-NoProfile','-File','prestige.ps1','-Command','modules']
         test=subprocess.run(command,cwd=project,capture_output=True,text=True,encoding='utf-8',errors='replace',timeout=90)
         output=test.stdout+test.stderr

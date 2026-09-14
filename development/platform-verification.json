@@ -1,0 +1,15 @@
+{
+  "date": "2026-09-14",
+  "platform": "Windows / Python 3.14 / PowerShell 7",
+  "checks": {
+    "native_file_watcher": "Created and Deleted events observed on temporary fixtures",
+    "mtu_loopback": "10 of 10 ICMP DF replies at MTU 1500",
+    "malware_read_only": "20 sections, 16 process/persistence correlations; no unknown sections in this run",
+    "network_inspection": "TCP, IPv4/IPv6, bindings and DNS cache OK; NIC power saving UNKNOWN"
+  },
+  "limitations": [
+    "No real system repair or configuration change",
+    "No physical Android/Termux validation",
+    "No live LAN or Nmap scan"
+  ]
+}

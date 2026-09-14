@@ -3,15 +3,20 @@ from pathlib import Path
 import hashlib
 import json
 import zipfile
+import argparse
+import re
 from checkpoint import git
 
 ROOT=Path(__file__).resolve().parents[1]
 
 def main():
+    parser=argparse.ArgumentParser();parser.add_argument('--version',default='0.2.0');args=parser.parse_args()
+    if not re.fullmatch(r'\d+\.\d+\.\d+',args.version):raise ValueError('Wersja musi mieć format X.Y.Z.')
     verification=json.loads((ROOT/'development/verification.json').read_text())
     if not verification['passed']:raise RuntimeError('Tests have not passed.')
     destination=ROOT/'dist';destination.mkdir(exist_ok=True)
-    archive=destination/'prestige-tech-0.1.0.zip'
+    archive=destination/f'prestige-tech-{args.version}.zip'
+    if archive.exists():raise FileExistsError(archive)
     entries=[]
     for project in sorted(ROOT.glob('prestige-*')):
         if not (project/'.git').exists():continue
@@ -23,7 +28,9 @@ def main():
             if any(part in ('.git','__pycache__') or part.startswith('.env') for part in Path(relative).parts):raise RuntimeError('Unexpected private file')
             if Path(relative).parts[0] in ('logs','reports') and Path(relative).name!='.gitkeep':raise RuntimeError('Private runtime data staged')
             entries.append((path,f'{project.name}/{relative}'))
-        if not git(project,'tag','--list','v0.1.0').stdout.strip():git(project,'tag','v0.1.0')
+        version=json.loads((project/'metadata.json').read_text(encoding='utf-8'))['version']
+        if not re.fullmatch(r'\d+\.\d+\.\d+',version):raise ValueError('Nieprawidłowa wersja projektu.')
+        if not git(project,'tag','--list','v'+version).stdout.strip():git(project,'tag','v'+version)
     for name in ('README.md','LICENSE','PROJECT-STATUS.md','SPECIFICATION.txt'):
         entries.append((ROOT/name,name))
     for path in sorted((ROOT/'development').glob('*')):
@@ -36,7 +43,8 @@ def main():
             actual=z.read(project['project']+'/LICENSE').decode('utf-8').replace('\r\n','\n')
             if actual!=(ROOT/'LICENSE').read_text(encoding='utf-8'):raise RuntimeError('MIT mismatch')
     value=hashlib.sha256(archive.read_bytes()).hexdigest()
-    (destination/'SHA256SUMS.txt').write_text(value+'  '+archive.name+'\n',encoding='utf-8')
+    sums=[hashlib.sha256(path.read_bytes()).hexdigest()+'  '+path.name for path in sorted(destination.glob('prestige-tech-*.zip'))]
+    (destination/'SHA256SUMS.txt').write_text('\n'.join(sums)+'\n',encoding='utf-8')
     print(json.dumps({'archive':str(archive),'files':len(entries),'bytes':archive.stat().st_size,'sha256':value}))
 
 if __name__=='__main__':main()

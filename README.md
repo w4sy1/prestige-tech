@@ -1,7 +1,7 @@
 # PRESTIGE TECH
 by Dominik Wasilak
 
-Zestaw **26 samodzielnych projektów MVP 0.1.0**: diagnostyka, administracja,
+Zestaw **26 samodzielnych projektów (0.1.0 / 0.2.0)**: diagnostyka, administracja,
 monitoring, integralność, Android i raporty. Wszystkie na licencji MIT.
 
 ## Szybki start
@@ -37,7 +37,7 @@ Launcher nie dodaje --apply/-Execute ani nie zatwierdza operacji za użytkownika
 To nie jest ukończona implementacja każdego punktu specyfikacji.
 `python development/verify.py` uruchamia testy wszystkich samodzielnych projektów.
 
-Wynik: **316 testów**, 26 testów uruchomienia i osobne testy integracji instalowanej
+Wynik: **391 testów**, 26 testów uruchomienia i 8 testów integracji instalowanej
 komendy CLI. Weryfikacja na Windows z Python 3.14 i PowerShell 7. Nie wykonano pełnej
 macierzy wersji Python ani testów fizycznych urządzeń Android/Termux.
 
