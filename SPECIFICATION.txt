@@ -1,0 +1,1761 @@
+Jesteś głównym programistą i architektem projektu:
+
+PRESTIGE TECH
+by Dominik Wasilak
+
+Masz stworzyć zestaw niezależnych narzędzi IT, diagnostycznych, administracyjnych, sieciowych i cybersecurity, a następnie zintegrować je w jeden wspólny system.
+
+JĘZYK INTERFEJSU:
+Polski.
+
+AUTOR:
+Dominik Wasilak
+
+MARKA:
+Prestige Tech
+
+==================================================
+GŁÓWNA ZASADA PROJEKTU
+==================================================
+
+Każde narzędzie ma powstać najpierw jako SAMODZIELNY program.
+
+Dopiero po ukończeniu i przetestowaniu poszczególnych aplikacji mają one zostać połączone w:
+
+1. Prestige Tech Dashboard
+2. Prestige Tech CLI
+
+Nie twórz od początku jednego wielkiego monolitu.
+
+Każdy program musi działać niezależnie.
+
+Wspólne moduły mogą być później wydzielone do wspólnej biblioteki.
+
+==================================================
+WAŻNE WYŁĄCZENIA
+==================================================
+
+Na tym etapie NIE twórz:
+
+1. Prestige Nmap Android
+2. generatora słowników / Wordlist Lab
+3. Password Analyzer
+4. Homelab
+5. OSINT Toolkit
+6. Web Security Check
+7. WordPress Health
+
+Te projekty zostaną zaprojektowane osobno w przyszłości.
+
+Nie dodawaj ich na własną rękę.
+
+==================================================
+BRANDING
+==================================================
+
+Każdy program powinien zawierać:
+
+PRESTIGE TECH
+by Dominik Wasilak
+
+W konsoli może wyglądać np.:
+
+====================================================
+              PRESTIGE TECH
+             by Dominik Wasilak
+====================================================
+
+Nazwa aktualnego narzędzia
+Wersja programu
+
+====================================================
+
+Nie przesadzaj z ASCII-artem.
+
+Interfejs ma wyglądać profesjonalnie i technicznie.
+
+==================================================
+INFORMACJA O PRZEZNACZENIU
+==================================================
+
+W narzędziach związanych z sieciami, monitoringiem i cybersecurity umieść informację:
+
+"Narzędzie przeznaczone do celów edukacyjnych, diagnostycznych oraz do pracy z systemami i sieciami, których właścicielem jest użytkownik lub na których testowanie posiada zgodę."
+
+Program nie może przedstawiać funkcji ofensywnych jako narzędzi do atakowania osób trzecich.
+
+==================================================
+WESPRZYJ AUTORA
+==================================================
+
+Każde narzędzie ma mieć pozycję:
+
+"Wesprzyj autora"
+
+Na razie nie mamy podanych docelowych linków do płatności.
+
+Dlatego stwórz centralny plik konfiguracyjny np.:
+
+config/author.json
+
+z polami:
+
+{
+    "author": "Dominik Wasilak",
+    "brand": "Prestige Tech",
+    "email": "prestigetech@gmail.com",
+    "support_url": "",
+    "github_url": "",
+    "instagram_url": "https://www.instagram.com/projekt.ocalenie/"
+}
+
+Jeśli support_url jest pusty, wyświetl:
+
+"Opcja wsparcia autora zostanie udostępniona w przyszłości."
+
+Nie wpisuj fałszywych linków.
+
+==================================================
+ARCHITEKTURA
+==================================================
+
+Preferowane technologie:
+
+Windows:
+PowerShell 7 oraz Python tam, gdzie daje to realną korzyść.
+
+Cross-platform:
+Python 3.11+.
+
+Linux / Termux:
+Bash + Python.
+
+GUI:
+na początku NIE jest wymagane.
+
+Najpierw stabilne CLI/TUI.
+
+Architektura powinna umożliwiać późniejsze stworzenie GUI.
+
+Kod musi być:
+
+modularny
+czytelny
+udokumentowany
+wersjonowany
+łatwy do rozbudowy
+bez hardcodowanych ścieżek
+bez niepotrzebnych uprawnień administratora
+
+Jeżeli funkcja wymaga administratora, program ma to wyraźnie powiedzieć.
+
+==================================================
+WSPÓLNE STANDARDY
+==================================================
+
+Każdy projekt powinien posiadać:
+
+README.md
+LICENSE
+CHANGELOG.md
+SECURITY.md
+CONTRIBUTING.md
+requirements.txt lub pyproject.toml, jeżeli Python jest używany
+config/
+logs/
+reports/
+tests/
+docs/
+
+README po polsku.
+
+README ma zawierać:
+
+opis programu
+funkcje
+wymagania
+instalację
+uruchomienie
+przykłady
+ograniczenia
+bezpieczeństwo
+autor
+licencję
+sekcję "Wesprzyj autora"
+
+==================================================
+LOGOWANIE
+==================================================
+
+Programy wykonujące działania systemowe muszą prowadzić logi.
+
+Format:
+
+data
+czas
+moduł
+akcja
+wynik
+błąd
+
+Nie zapisuj haseł, tokenów ani innych sekretów.
+
+==================================================
+TRYB DRY RUN
+==================================================
+
+Każdy program mogący:
+
+usuwać pliki
+modyfikować konfigurację
+restartować usługę
+zmieniać ustawienia sieci
+zmieniać ustawienia systemu
+
+musi posiadać tryb:
+
+DRY RUN
+
+czyli:
+
+pokaż co zostanie wykonane
+nie wykonuj zmian
+
+==================================================
+ROLLBACK
+==================================================
+
+Przed zmianami systemowymi twórz kopię ustawień tam, gdzie jest to technicznie możliwe.
+
+Program powinien umożliwiać cofnięcie zmian.
+
+==================================================
+FORMATY RAPORTÓW
+==================================================
+
+Tam, gdzie ma to sens:
+
+TXT
+JSON
+HTML
+
+HTML powinien posiadać prosty branding:
+
+Prestige Tech
+by Dominik Wasilak
+
+Nie używaj zewnętrznych bibliotek frontendowych, jeżeli nie są potrzebne.
+
+==================================================
+PROJEKT 1
+PRESTIGE WINDOWS TOOLKIT
+==================================================
+
+Nazwa repo:
+
+prestige-windows-toolkit
+
+Cel:
+
+główne narzędzie serwisowe Windows.
+
+MODUŁ SYSTEM INFO:
+
+Windows Edition
+wersja
+build
+architektura
+hostname
+uptime
+BIOS
+UEFI
+Secure Boot
+producent komputera
+model
+płyta główna
+CPU
+RAM
+GPU
+numer seryjny, jeżeli dostępny
+
+MODUŁ DYSKI:
+
+dyski fizyczne
+partycje
+system plików
+pojemność
+wolne miejsce
+procent wolnej przestrzeni
+podstawowe informacje SMART, jeśli dostępne
+ostrzeżenie przy małej ilości miejsca
+
+MODUŁ WINDOWS:
+
+Windows Update
+ostatnie aktualizacje
+pending reboot
+aktywacja systemu
+SFC
+DISM
+usługi
+
+MODUŁ SECURITY:
+
+Microsoft Defender
+Real Time Protection
+ostatni skan
+wykrycia
+Firewall
+UAC
+SmartScreen
+TPM
+Secure Boot
+BitLocker
+
+MODUŁ NETWORK:
+
+IP
+IPv4
+IPv6
+gateway
+DNS
+DHCP
+interfejsy
+MAC
+link speed
+ping gateway
+ping Internet
+test DNS
+
+MODUŁ PROCESY:
+
+PID
+nazwa
+CPU
+RAM
+ścieżka
+użytkownik
+podpis cyfrowy, jeżeli możliwe
+
+MODUŁ AUTOSTART:
+
+Startup
+Run registry
+RunOnce
+usługi
+Scheduled Tasks
+
+MODUŁ SOFTWARE:
+
+zainstalowane programy
+wersje
+producent
+data instalacji, jeśli dostępna
+
+MODUŁ EVENT LOG:
+
+System
+Application
+
+Filtrowanie:
+
+Critical
+Error
+ważne Warning
+
+Nie zalewaj użytkownika tysiącami wpisów.
+
+MODUŁ NAPRAWA:
+
+SFC
+DISM ScanHealth
+DISM RestoreHealth
+flush DNS
+reset Winsock
+renew DHCP
+
+Każda operacja osobno.
+
+MODUŁ CLEANUP:
+
+TEMP
+Windows TEMP
+kosz
+cache możliwe do bezpiecznego usunięcia
+
+Najpierw SCAN.
+
+Potem PREVIEW.
+
+Potem CLEAN.
+
+MODUŁ REPORT:
+
+pełny raport HTML
+TXT
+JSON
+
+==================================================
+PROJEKT 2
+PRESTIGE SECURITY CHECK
+==================================================
+
+Repo:
+
+prestige-security-check
+
+Cel:
+
+audyt konfiguracji bezpieczeństwa Windows.
+
+Sprawdź:
+
+Defender
+Firewall
+Windows Update
+Secure Boot
+TPM
+BitLocker
+UAC
+SmartScreen
+RDP
+SMB
+PowerShell execution policy
+usługi
+autostart
+Scheduled Tasks
+proxy
+hosts
+DNS
+otwarte porty lokalne
+aktywne połączenia
+procesy
+podpisy cyfrowe
+Defender detections
+nietypowe lokalizacje uruchomionych programów
+
+Stwórz scoring:
+
+INFORMACYJNE
+NISKIE
+ŚREDNIE
+WYSOKIE
+KRYTYCZNE
+
+Każdy alert ma posiadać:
+
+co wykryto
+dlaczego może być istotne
+poziom ryzyka
+co sprawdzić
+
+Nie oznaczaj automatycznie nietypowej rzeczy jako malware.
+
+==================================================
+PROJEKT 3
+PRESTIGE NETRADAR
+==================================================
+
+Repo:
+
+prestige-netradar
+
+Cel:
+
+lokalne wykrywanie potencjalnego skanowania i nietypowych prób połączeń kierowanych na komputer użytkownika.
+
+Windows i Linux, jeśli możliwe.
+
+Monitoruj:
+
+połączenia przychodzące
+Windows Firewall log
+Linux firewall log
+TCP SYN
+częstotliwość prób
+liczbę portów
+powtarzające się źródła
+
+Wykrywaj potencjalne:
+
+port scan
+RDP probing
+SSH probing
+SMB probing
+częste próby do wielu portów
+
+Stwórz heurystykę.
+
+Przykład:
+
+Źródło:
+192.168.1.20
+
+Liczba prób:
+46
+
+Unikalne porty:
+17
+
+Klasyfikacja:
+Możliwy port scan
+
+Pewność:
+0.86
+
+NIE twierdź, że to na pewno atak.
+
+Dodaj:
+
+whitelist
+ignore list
+historię
+JSON log
+alerty
+
+==================================================
+PROJEKT 4
+PRESTIGE LAN RADAR
+==================================================
+
+Repo:
+
+prestige-lan-radar
+
+Cel:
+
+monitorowanie własnej sieci LAN.
+
+Funkcje:
+
+IP
+MAC
+hostname
+vendor
+pierwsze wykrycie
+ostatnie wykrycie
+status online/offline
+
+Zapamiętuj znane urządzenia.
+
+Wykrywaj:
+
+nowe urządzenie
+zniknięcie urządzenia
+zmianę IP
+zmianę MAC lub hostname
+powrót urządzenia
+
+Historia w SQLite.
+
+Możliwość oznaczenia:
+
+Moje
+Rodzina
+IoT
+Router
+Nieznane
+
+==================================================
+PROJEKT 5
+PRESTIGE NMAP PROFILES
+==================================================
+
+Repo:
+
+prestige-nmap-profiles
+
+NIE jest to Nmap Android.
+
+To zestaw bezpiecznych profili i wrapperów dla Nmap na Windows i Linux.
+
+Program powinien:
+
+sprawdzić, czy Nmap jest zainstalowany
+obsługiwać własny localhost
+własną sieć LAN
+wskazany host, do którego użytkownik posiada zgodę
+
+Profile:
+
+Quick Scan
+LAN Discovery
+Service Detection
+Localhost Audit
+TCP Audit
+Basic UDP
+Compare Scans
+Export Results
+
+Obsługa:
+
+XML
+TXT
+JSON po parsowaniu wyników
+
+Dodaj porównanie skanów:
+
+nowy host
+host zniknął
+nowy port
+zamknięty port
+zmiana usługi
+
+==================================================
+PROJEKT 6
+PRESTIGE INTERNET DIAGNOSTIC
+==================================================
+
+Repo:
+
+prestige-internet-diagnostic
+
+Cel:
+
+wykrywanie przyczyn problemów z Internetem.
+
+Testuj:
+
+gateway latency
+Internet latency
+packet loss
+jitter
+DNS latency
+traceroute
+MTU
+IPv4
+IPv6
+WiFi RSSI
+link speed
+interfejs
+DNS
+DHCP
+
+Na końcu spróbuj sklasyfikować:
+
+problem lokalny
+problem WiFi
+problem DNS
+problem routera
+problem operatora
+brak wystarczających danych
+
+Podaj poziom pewności.
+
+==================================================
+PROJEKT 7
+PRESTIGE NETWORK OPTIMIZER
+==================================================
+
+Repo:
+
+prestige-network-optimizer
+
+Nie reklamuj programu jako magiczny "Internet Booster".
+
+Program ma diagnozować i optymalizować tylko ustawienia, które można racjonalnie zmierzyć.
+
+Moduły:
+
+DNS
+MTU
+TCP configuration
+NIC power saving
+link speed
+IPv4 / IPv6
+DNS cache
+
+Proces:
+
+TEST BEFORE
+BACKUP
+PROPONOWANA ZMIANA
+ZGODA UŻYTKOWNIKA
+ZMIANA
+TEST AFTER
+PORÓWNANIE
+ROLLBACK
+
+Jeżeli wynik się pogorszył, rekomenduj rollback.
+
+==================================================
+PROJEKT 8
+PRESTIGE DNS BENCHMARK
+==================================================
+
+Repo:
+
+prestige-dns-benchmark
+
+Testuj:
+
+aktualny DNS
+router
+DNS operatora, jeśli możliwe
+Cloudflare
+Google
+Quad9
+
+Tryby:
+
+10 zapytań
+50
+100
+500
+
+Mierz:
+
+min
+max
+średnia
+mediana
+percentyl 95
+timeout
+error rate
+
+Nie rekomenduj tylko na podstawie jednego pinga.
+
+==================================================
+PROJEKT 9
+PRESTIGE TERMUX SETUP
+==================================================
+
+Repo:
+
+prestige-termux-setup
+
+Cel:
+
+automatyczna konfiguracja Termuxa.
+
+Profile:
+
+Minimal
+Developer
+Network
+Security
+Full
+
+Instalacja:
+
+git
+python
+openssh
+curl
+wget
+nano
+vim
+tmux
+jq
+zip
+unzip
+dnsutils
+nmap
+inne rozsądne podstawowe pakiety
+
+Foldery:
+
+~/projects
+~/tools
+~/scripts
+~/logs
+~/backup
+
+Konfiguracja:
+
+.bashrc
+aliasy
+PATH
+SSH
+Git
+
+Nie nadpisuj istniejącej konfiguracji bez backupu.
+
+==================================================
+PROJEKT 10
+PRESTIGE TERMUX TOOLKIT
+==================================================
+
+Repo:
+
+prestige-termux-toolkit
+
+Mobilny panel narzędzi.
+
+Menu:
+
+SYSTEM
+NETWORK
+FILES
+GIT
+SSH
+ANDROID
+BACKUP
+DIAGNOSTICS
+
+Nie kopiuj bezmyślnie funkcji z innych narzędzi.
+
+Jeżeli istnieje odpowiednie narzędzie systemowe, użyj go jako backend.
+
+==================================================
+PROJEKT 11
+PRESTIGE ADB DIAGNOSTIC
+==================================================
+
+Repo:
+
+prestige-adb-diagnostic
+
+Diagnostyka Androida poprzez ADB.
+
+Sprawdzaj:
+
+model
+producent
+Android
+security patch
+kernel
+CPU
+RAM
+storage
+battery
+battery temperature
+uptime
+packages
+aplikacje użytkownika
+usługi
+podstawowe permissions
+network
+USB state
+ADB state
+podstawowe logcat errors
+
+Nie zbieraj domyślnie IMEI ani innych niepotrzebnych identyfikatorów.
+
+Raport:
+
+HTML
+JSON
+TXT
+
+==================================================
+PROJEKT 12
+PRESTIGE ANDROID INSPECTOR
+==================================================
+
+Repo:
+
+prestige-android-inspector
+
+Analiza aplikacji z urządzenia użytkownika poprzez ADB.
+
+Dla każdej aplikacji:
+
+package
+nazwa
+wersja
+data instalacji
+data aktualizacji
+system/user
+installer source
+permissions
+requested permissions
+granted permissions
+
+Analizuj szczególnie:
+
+Accessibility
+Device Admin
+VPN
+overlay
+notification access
+unknown sources
+
+Nie określaj aplikacji automatycznie jako malware.
+
+Nadaj poziom zainteresowania:
+
+NORMAL
+WARTO SPRAWDZIĆ
+NIETYPOWE
+
+==================================================
+PROJEKT 13
+PRESTIGE BACKUP
+==================================================
+
+Repo:
+
+prestige-backup
+
+Backup przed serwisem.
+
+Obsługa:
+
+Desktop
+Documents
+Pictures
+Downloads
+wybrane foldery użytkownika
+bookmarks
+lista aplikacji
+sterowniki
+podstawowa konfiguracja systemu
+
+Dodaj:
+
+SHA256
+manifest
+log
+błędy
+progress
+
+Tryb dry run.
+
+Nie kopiuj:
+
+haseł
+cookies sesyjnych
+tokenów
+sekretów
+
+==================================================
+PROJEKT 14
+PRESTIGE PC CLEANUP
+==================================================
+
+Repo:
+
+prestige-pc-cleanup
+
+Tryby:
+
+SCAN
+PREVIEW
+CLEAN
+
+Analizuj:
+
+TEMP
+Windows TEMP
+kosz
+cache
+thumbnails
+logi
+duże pliki
+stare instalatory
+Downloads
+
+Nigdy nie usuwaj automatycznie osobistych plików użytkownika.
+
+==================================================
+PROJEKT 15
+PRESTIGE MALWARE TRIAGE
+==================================================
+
+Repo:
+
+prestige-malware-triage
+
+To NIE jest pełny antywirus.
+
+To narzędzie do wstępnej diagnostyki podejrzanego Windowsa.
+
+Wymagane moduły:
+
+PROCESY
+PID
+CPU
+RAM
+ścieżka
+parent process
+podpis cyfrowy
+hash SHA256
+
+AUTOSTART
+
+Registry:
+
+HKCU\Software\Microsoft\Windows\CurrentVersion\Run
+HKCU\Software\Microsoft\Windows\CurrentVersion\RunOnce
+
+HKLM\Software\Microsoft\Windows\CurrentVersion\Run
+HKLM\Software\Microsoft\Windows\CurrentVersion\RunOnce
+
+oraz inne uzasadnione lokalizacje persistence.
+
+SCHEDULED TASKS
+
+SERVICES
+
+WMI PERSISTENCE, jeśli możliwe do bezpiecznego sprawdzenia
+
+STARTUP FOLDERS
+
+BROWSER EXTENSIONS, jeśli możliwe
+
+DNS
+
+PROXY
+
+HOSTS
+
+ACTIVE CONNECTIONS
+
+DEFENDER HISTORY
+
+WINDOWS EVENT LOGS
+
+TEMP
+
+APPDATA
+
+PROGRAMDATA
+
+PODEJRZANE LOKALIZACJE
+
+==================================================
+SZCZEGÓLNY MODUŁ
+WINDOWS INSTALLATION TRUST CHECK
+==================================================
+
+Dodaj moduł sprawdzający, czy instalacja Windows może wykazywać anomalie sugerujące zmodyfikowany obraz systemu.
+
+Ma być szczególnie przydatny, gdy użytkownik:
+
+zainstalował Windows z przypadkowego pendrive
+pobrał ISO z niepewnego źródła
+użył zmodyfikowanego Windows ISO
+kupił komputer z gotowym systemem
+
+Sprawdzaj między innymi:
+
+stan Windows Defender
+wyłączenia Defendera
+nietypowe polityki Defendera
+Windows Security settings
+nietypowe local/group policies
+wyłączone aktualizacje
+nietypowe usługi
+Scheduled Tasks
+Run registry
+RunOnce
+AppInit_DLLs, jeśli dotyczy
+Image File Execution Options
+nietypowe PowerShell profiles
+Startup folders
+WMI subscriptions
+nietypowe sterowniki
+nietypowe certyfikaty root, jeśli możliwe
+zmodyfikowany hosts
+proxy
+DNS
+nietypowe procesy uruchamiane z AppData/Temp/ProgramData
+procesy bez podpisu
+połączenia sieciowe
+
+==================================================
+MINER / CRYPTOMINER INDICATORS
+==================================================
+
+Dodaj detekcję HEURYSTYCZNĄ potencjalnych koparek kryptowalut.
+
+Nie twierdź automatycznie, że proces jest minerem.
+
+Sprawdzaj:
+
+bardzo wysokie CPU przez dłuższy czas
+bardzo wysokie GPU, jeśli możliwe
+proces bez interfejsu użytkownika
+proces działający w tle
+proces uruchomiony z nietypowej lokalizacji
+brak podpisu cyfrowego
+nietypowe połączenia sieciowe
+autostart
+Scheduled Task
+service
+WMI persistence
+
+Szukaj również znanych nazw popularnego oprogramowania miningowego WYŁĄCZNIE jako wskaźnika diagnostycznego.
+
+Nie usuwaj nic automatycznie.
+
+Raport:
+
+"Potencjalny wskaźnik cryptominera"
+
+a nie:
+
+"To jest wirus."
+
+==================================================
+REJESTR WINDOWS
+==================================================
+
+Registry scanner ma być jednym z głównych modułów Malware Triage.
+
+Analizuj istotne lokalizacje związane z:
+
+startup
+persistence
+services
+Winlogon
+Shell
+Userinit
+AppInit
+IFEO
+Windows Defender
+proxy
+policies
+
+Każda wykryta wartość:
+
+ścieżka klucza
+nazwa
+wartość
+dlaczego została pokazana
+ocena ryzyka
+
+==================================================
+PROJEKT 16
+PRESTIGE FILE INSPECTOR
+==================================================
+
+Repo:
+
+prestige-file-inspector
+
+Analiza pliku BEZ jego uruchamiania.
+
+Pokaż:
+
+ścieżka
+nazwa
+extension
+MIME
+rozmiar
+created
+modified
+SHA256
+SHA512
+SHA1
+MD5 dla kompatybilności
+digital signature
+publisher
+entropy
+basic strings
+metadata
+
+Opcjonalnie:
+
+PE headers dla EXE/DLL.
+
+==================================================
+PROJEKT 17
+PRESTIGE HASH CHECKER
+==================================================
+
+Repo:
+
+prestige-hash-checker
+
+Obsługa:
+
+plik
+folder
+manifest
+
+Algorytmy:
+
+SHA256
+SHA512
+
+MD5 i SHA1 wyłącznie jako starsze algorytmy kompatybilności.
+
+Funkcje:
+
+generate manifest
+verify manifest
+compare folder
+find changed files
+find missing files
+find new files
+
+==================================================
+PROJEKT 18
+PRESTIGE FOLDER WATCH
+==================================================
+
+Repo:
+
+prestige-folder-watch
+
+Monitoruj katalog.
+
+Zdarzenia:
+
+create
+modify
+delete
+rename
+
+Zapisuj:
+
+czas
+ścieżkę
+typ operacji
+SHA256, jeśli plik istnieje
+
+SQLite log.
+
+==================================================
+PROJEKT 19
+PRESTIGE INTEGRITY MONITOR
+==================================================
+
+Repo:
+
+prestige-integrity-monitor
+
+Pierwsze uruchomienie:
+
+BASELINE.
+
+Dla każdego pliku:
+
+path
+size
+mtime
+SHA256
+
+Później:
+
+NEW
+MODIFIED
+DELETED
+UNCHANGED
+
+Możliwość aktualizacji baseline po potwierdzeniu.
+
+==================================================
+PROJEKT 20
+PRESTIGE USB TOOLKIT
+==================================================
+
+Repo:
+
+prestige-usb-toolkit
+
+Program przygotowujący pendrive serwisowy Prestige Tech.
+
+Struktura:
+
+PrestigeUSB/
+    Diagnostics/
+    Windows/
+    Network/
+    Android/
+    Backup/
+    Recovery/
+    Reports/
+    Tools/
+
+Program ma:
+
+utworzyć strukturę
+skopiować wskazane narzędzia Prestige Tech
+tworzyć manifest SHA256
+weryfikować integralność
+sprawdzać wersje
+
+Nie pobieraj losowych programów z Internetu.
+
+==================================================
+PROJEKT 21
+PRESTIGE REPAIR REPORT
+==================================================
+
+Repo:
+
+prestige-repair-report
+
+Generator raportów serwisowych.
+
+Pola:
+
+numer zlecenia
+klient
+urządzenie
+producent
+model
+serial opcjonalny
+data
+zgłoszony problem
+diagnoza
+wykonane czynności
+części
+test końcowy
+zalecenia
+czas pracy
+technik
+
+Technik domyślnie:
+
+Dominik Wasilak
+Prestige Tech
+
+Eksport:
+
+HTML
+JSON
+TXT
+
+PDF przygotuj dopiero później, jeśli będzie potrzebny.
+
+==================================================
+PROJEKT 22
+PRESTIGE SYSTEM SNAPSHOT
+==================================================
+
+Repo:
+
+prestige-system-snapshot
+
+Twórz snapshot systemu.
+
+Zawiera:
+
+hardware
+Windows
+updates
+programy
+services
+processes
+startup
+scheduled tasks
+network
+security
+disk
+drivers
+
+Możliwość:
+
+SNAPSHOT BEFORE
+SNAPSHOT AFTER
+
+oraz:
+
+COMPARE
+
+Raport różnic.
+
+==================================================
+PROJEKT 23
+PRESTIGE NETWORK SNAPSHOT
+==================================================
+
+Repo:
+
+prestige-network-snapshot
+
+Snapshot sieci LAN.
+
+Zapisuj:
+
+IP
+MAC
+hostname
+vendor
+czas
+status
+
+Porównuj dwa snapshoty:
+
+NEW HOST
+REMOVED HOST
+IP CHANGE
+HOSTNAME CHANGE
+
+==================================================
+PROJEKT 24
+PRESTIGE TECH DASHBOARD
+==================================================
+
+Repo:
+
+prestige-tech-dashboard
+
+To projekt integracyjny.
+
+Nie twórz go zanim podstawowe narzędzia nie będą miały działających wersji.
+
+Dashboard ma być wspólnym launcherem.
+
+Menu:
+
+==================================================
+PRESTIGE TECH
+by Dominik Wasilak
+==================================================
+
+1. Diagnostyka Windows
+2. Bezpieczeństwo
+3. Sieć
+4. Monitoring sieci
+5. Android / ADB
+6. Backup
+7. Czyszczenie
+8. Analiza plików
+9. Integralność
+10. Raporty
+11. Narzędzia serwisowe
+12. AI Diagnostic Assistant
+13. Ustawienia
+14. Wesprzyj autora
+0. Wyjście
+
+==================================================
+
+Dashboard nie powinien kopiować całego kodu każdego programu.
+
+Powinien korzystać z ich modułów lub uruchamiać je poprzez wspólny interfejs.
+
+==================================================
+PROJEKT 25
+PRESTIGE AI DIAGNOSTIC ASSISTANT
+==================================================
+
+Repo:
+
+prestige-ai-diagnostic-assistant
+
+Cel:
+
+analiza raportów wygenerowanych przez inne narzędzia Prestige Tech.
+
+Program NIE powinien wykonywać samodzielnie działań administracyjnych.
+
+Input:
+
+JSON
+
+pochodzący np. z:
+
+Windows Toolkit
+Security Check
+Internet Diagnostic
+Malware Triage
+System Snapshot
+Network Snapshot
+ADB Diagnostic
+
+Stwórz warstwę:
+
+normalization
+rules
+scoring
+AI provider abstraction
+
+Najpierw program ma mieć działający lokalny rule engine bez AI.
+
+Przykład:
+
+{
+    "disk_free_percent": 4,
+    "packet_loss": 8,
+    "defender_enabled": true,
+    "critical_errors": 3
+}
+
+Rule engine:
+
+mało miejsca
+packet loss
+błędy systemowe
+
+Dopiero jako opcjonalny moduł umożliw integrację z zewnętrznym modelem AI.
+
+Klucze API:
+
+NIGDY w kodzie.
+
+Użyj:
+
+.env
+environment variables
+
+Program musi jasno zaznaczać, czy dane opuszczają komputer.
+
+Domyślnie:
+
+LOCAL MODE.
+
+==================================================
+PROJEKT 26
+PRESTIGE TECH CLI
+==================================================
+
+Repo:
+
+prestige-tech-cli
+
+Docelowa wspólna komenda:
+
+prestige
+
+Przykład:
+
+prestige system
+prestige security
+prestige network
+prestige android
+prestige backup
+prestige files
+prestige integrity
+prestige report
+prestige ai
+
+CLI ma być warstwą integracyjną.
+
+Nie duplikuj kodu.
+
+==================================================
+WSPÓLNA ARCHITEKTURA DOCELOWA
+==================================================
+
+Po ustabilizowaniu projektów przygotuj możliwość wydzielenia wspólnych komponentów do:
+
+prestige-tech-core
+
+Przykład:
+
+prestige-tech-core/
+    logging/
+    reports/
+    branding/
+    config/
+    privilege/
+    system/
+    network/
+    models/
+
+NIE twórz core przedwcześnie.
+
+Najpierw znajdź faktycznie powtarzający się kod.
+
+==================================================
+KOLEJNOŚĆ REALIZACJI
+==================================================
+
+Pracuj dokładnie w tej kolejności:
+
+FAZA 1
+
+1. Prestige Windows Toolkit
+2. Prestige Security Check
+3. Prestige Internet Diagnostic
+4. Prestige DNS Benchmark
+5. Prestige Termux Setup
+6. Prestige ADB Diagnostic
+
+FAZA 2
+
+7. Prestige Malware Triage
+8. Prestige File Inspector
+9. Prestige Hash Checker
+10. Prestige Backup
+11. Prestige PC Cleanup
+12. Prestige System Snapshot
+
+FAZA 3
+
+13. Prestige NetRadar
+14. Prestige LAN Radar
+15. Prestige Nmap Profiles
+16. Prestige Network Optimizer
+17. Prestige Network Snapshot
+18. Prestige Android Inspector
+
+FAZA 4
+
+19. Prestige Folder Watch
+20. Prestige Integrity Monitor
+21. Prestige USB Toolkit
+22. Prestige Repair Report
+23. Prestige Termux Toolkit
+
+FAZA 5
+
+24. Prestige AI Diagnostic Assistant
+25. Prestige Tech Dashboard
+26. Prestige Tech CLI
+
+==================================================
+SPOSÓB PRACY
+==================================================
+
+NIE generuj wszystkich projektów naraz.
+
+Dla KAŻDEGO projektu:
+
+KROK 1
+Zaprojektuj architekturę.
+
+KROK 2
+Pokaż strukturę katalogów.
+
+KROK 3
+Określ zależności.
+
+KROK 4
+Zaimplementuj MVP.
+
+KROK 5
+Uruchom lub przygotuj testy.
+
+KROK 6
+Napraw błędy.
+
+KROK 7
+Dodaj logging.
+
+KROK 8
+Dodaj raportowanie.
+
+KROK 9
+Dodaj README.
+
+KROK 10
+Dodaj wersję v0.1.0.
+
+KROK 11
+Przejdź do następnego projektu.
+
+Nie pytaj użytkownika o potwierdzenie po każdym małym kroku.
+
+Pytaj tylko wtedy, kiedy:
+brakuje informacji koniecznej do podjęcia decyzji
+operacja może być destrukcyjna
+potrzebny jest klucz API
+potrzebny jest konkretny zewnętrzny link
+istnieją dwie istotnie różne architektury i wybór wpłynie na cały projekt
+
+==================================================
+TESTOWANIE
+==================================================
+
+Każdy projekt powinien posiadać testy.
+
+Minimum:
+
+unit tests
+test nieprawidłowych danych
+test braku uprawnień
+test braku zależności
+test pustego wyniku
+test błędów systemowych
+
+Narzędzia systemowe testuj defensywnie.
+
+==================================================
+BEZPIECZEŃSTWO
+==================================================
+
+Nie implementuj:
+
+automatycznej eksploatacji
+credential theft
+token theft
+browser password dumping
+persistence malware
+ukrywania procesu
+omijania Defendera
+wyłączania zabezpieczeń dla wygody
+remote code execution przeciwko innym urządzeniom
+
+Jeżeli komponent wykrywa podejrzane zachowanie, ma je RAPORTOWAĆ.
+
+Nie usuwaj automatycznie podejrzanych plików.
+
+==================================================
+PRYWATNOŚĆ
+==================================================
+
+Domyślnie wszystkie dane pozostają lokalnie.
+
+Żaden program nie może wysyłać:
+
+raportów
+logów
+nazw plików
+danych sprzętu
+IP
+list aplikacji
+
+do zewnętrznego serwera bez świadomego działania użytkownika.
+
+==================================================
+WERSJONOWANIE
+==================================================
+
+Używaj Semantic Versioning:
+
+0.1.0
+0.2.0
+0.3.0
+1.0.0
+
+Nie oznaczaj programu jako 1.0, dopóki nie osiągnie stabilnego zakresu.
+
+==================================================
+GIT
+==================================================
+
+Każdy projekt jako osobne repozytorium.
+
+Commity mają być małe i logiczne.
+
+Przykład:
+
+feat: dodano diagnostykę dysków
+fix: poprawiono wykrywanie Defendera
+docs: dodano instrukcję instalacji
+test: dodano test parsera raportu
+
+==================================================
+LICENCJA
+==================================================
+
+Przygotuj odpowiednią licencję open source, ale przed ostatecznym wyborem licencji opisz różnice pomiędzy:
+
+MIT
+Apache 2.0
+GPLv3
+
+i zaproponuj najlepszą dla projektu Prestige Tech.
+
+Nie wybieraj ostatecznej licencji bez pokazania konsekwencji.
+
+==================================================
+PIERWSZE ZADANIE
+==================================================
+
+Zacznij od:
+
+PRESTIGE WINDOWS TOOLKIT
+
+Nie przechodź od razu do pisania setek linii kodu.
+
+Najpierw przedstaw:
+
+1. architekturę
+2. język i technologie
+3. strukturę katalogów
+4. moduły
+5. zależności
+6. ryzyka
+7. plan MVP v0.1.0
+
+Następnie rozpocznij implementację.
+
+Po ukończeniu działającego MVP automatycznie przejdź do kolejnych etapów projektu zgodnie z kolejnością określoną powyżej.

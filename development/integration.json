@@ -1,0 +1,11 @@
+{
+  "passed": true,
+  "checks": [
+    "wheel installation in isolated venv",
+    "24 tools available via installed console command",
+    "manifest generation and verification through CLI",
+    "verification failure exit code preserved by CLI",
+    "local diagnostic normalization and three expected alerts",
+    "backup and SHA256 verification on synthetic files"
+  ]
+}

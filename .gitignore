@@ -1,0 +1,5 @@
+prestige-*/
+dist/
+__pycache__/
+development/__pycache__/
+.env

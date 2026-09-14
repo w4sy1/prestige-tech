@@ -1,0 +1,106 @@
+[
+  {
+    "project": "prestige-adb-diagnostic",
+    "commit": "2ddd4baac910c81da0b9d2f9ed5699049ad8c420"
+  },
+  {
+    "project": "prestige-ai-diagnostic-assistant",
+    "commit": "a8db1582158e224af83ffa5c42f800336fe05544"
+  },
+  {
+    "project": "prestige-android-inspector",
+    "commit": "eb67689986d27b8c41abe19b14407ff777574a27"
+  },
+  {
+    "project": "prestige-backup",
+    "commit": "916e7f3cc1f38f2faceeee54a353586c7aa0528e"
+  },
+  {
+    "project": "prestige-dns-benchmark",
+    "commit": "a7f63807879e6c15f87c60b3bf54ad330f9e1675"
+  },
+  {
+    "project": "prestige-file-inspector",
+    "commit": "8bf2386960da4af80e67645944deb4158c8df1d4"
+  },
+  {
+    "project": "prestige-folder-watch",
+    "commit": "e3e3725800e6a3c58562703bfd87a2730a4c4836"
+  },
+  {
+    "project": "prestige-hash-checker",
+    "commit": "856423b5f43960875f9b00b6b192a92e18c08e7d"
+  },
+  {
+    "project": "prestige-integrity-monitor",
+    "commit": "fe6e7fc63694f73b0f41d57172395660be02a58a"
+  },
+  {
+    "project": "prestige-internet-diagnostic",
+    "commit": "e6bad8bf43c9639e7f668e6240d4a68bcb4bcfad"
+  },
+  {
+    "project": "prestige-lan-radar",
+    "commit": "4ddf7d0001e4563f773ee5fedc7b29dc80dc70f7"
+  },
+  {
+    "project": "prestige-malware-triage",
+    "commit": "b2fb47c2cb62ef205133d87c33ee6f649c567c15"
+  },
+  {
+    "project": "prestige-netradar",
+    "commit": "1442696908a0417b531082bce332f33b89dd540b"
+  },
+  {
+    "project": "prestige-network-optimizer",
+    "commit": "d8f64b3fb95a27897b61a97faa578e9666ba8af6"
+  },
+  {
+    "project": "prestige-network-snapshot",
+    "commit": "69e9192bc2fab68ac616675f17058b769f44a22e"
+  },
+  {
+    "project": "prestige-nmap-profiles",
+    "commit": "f218ee81d96abe439891407a262da769916374a6"
+  },
+  {
+    "project": "prestige-pc-cleanup",
+    "commit": "be9b66483e2b0d8fb9a35365dfbeb282a05df22a"
+  },
+  {
+    "project": "prestige-repair-report",
+    "commit": "f2f7c9ab7d2008884da68a966700999b4670b632"
+  },
+  {
+    "project": "prestige-security-check",
+    "commit": "5945be6298cd5b76ee63826c3e8a3445268a618b"
+  },
+  {
+    "project": "prestige-system-snapshot",
+    "commit": "370644d493a5fdf79c14106d6b27c4220151ec6c"
+  },
+  {
+    "project": "prestige-tech-cli",
+    "commit": "e2c0797578da8f15f607154c66d054138468c2da"
+  },
+  {
+    "project": "prestige-tech-dashboard",
+    "commit": "37a61539726929dd5ba71b2f143e7822147f97fa"
+  },
+  {
+    "project": "prestige-termux-setup",
+    "commit": "6e36a6ff8fea04f8244743b7d985474f54e65dd5"
+  },
+  {
+    "project": "prestige-termux-toolkit",
+    "commit": "48a806be07057bc22079e6ff588fa2485cf26d5e"
+  },
+  {
+    "project": "prestige-usb-toolkit",
+    "commit": "00ab4298b7b4c044c6b03110f75488341a0a4e5d"
+  },
+  {
+    "project": "prestige-windows-toolkit",
+    "commit": "0fe8cfc2d201f5d31e9264a64e88b2d738b205a3"
+  }
+]
