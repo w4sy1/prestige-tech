@@ -6,9 +6,11 @@ import os
 import subprocess
 import tempfile
 import time
+import argparse
 
 ROOT=Path(__file__).resolve().parents[1]
-DIRECTORY=ROOT/'dist/desktop-0.3.2'
+parser=argparse.ArgumentParser();parser.add_argument('--version',default='0.3.4');args=parser.parse_args()
+DIRECTORY=ROOT/'dist'/('desktop-'+args.version)
 checks=[]
 with tempfile.TemporaryDirectory(prefix='prestige-recovery-') as temporary:
     root=Path(temporary);environment=dict(os.environ,LOCALAPPDATA=str(root/'local'))
@@ -56,6 +58,6 @@ with tempfile.TemporaryDirectory(prefix='prestige-recovery-') as temporary:
     result=run('prestige-backup','verify','--destination',interrupted,expected=2)
     assert result['data']['ok'] is False
     checks.append('forcibly interrupted fixture backup retains valid incomplete manifest')
-report={'version':'0.3.2','passed':True,'checks':checks}
+report={'version':args.version,'passed':True,'checks':checks}
 (ROOT/'development/recovery-frozen-verification.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
 print(json.dumps(report,indent=2))

@@ -1,7 +1,7 @@
 {
   "passed": true,
-  "version": "0.3.2",
+  "version": "0.3.4",
   "executables": 26,
-  "bytes": 695685571,
-  "sha256": "82042724c935f956a2bf9a26b06d8c90cfffb8941cc6d700a71c5f1edfdc2a39"
+  "bytes": 695688785,
+  "sha256": "d4e452b3a5eb1165afd0f94d5d0311a581638c4f2fc8731a37ac1042d79ede22"
 }

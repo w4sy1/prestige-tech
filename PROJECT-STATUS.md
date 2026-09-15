@@ -1,5 +1,15 @@
 # Prestige Tech — stan realizacji
 
+## Aktualizacja zestawu 0.3.4 — 2026-09-15
+
+445 testów przechodzi. PC Cleanup sprawdza brakujące pliki przed rollbackiem
+i nie nadpisuje nowo utworzonego pliku docelowego. USB Toolkit sprawdza zapisaną
+poprzednią wersję przed jej przywróceniem. Termux Setup zapisuje konfigurację
+atomowo; Network Optimizer nie nadpisuje późniejszego trybu automatycznego DNS
+i rozpoznaje ustawienia już przywrócone. Testy obejmują błędy i przerwania.
+PC Cleanup/USB mają wersję 0.3.3, Termux Setup/Network Optimizer 0.3.4;
+pozostałe wersje zachowano. Zestaw pozostaje wydaniem testowym.
+
 ## Aktualizacja zestawu 0.3.2 — 2026-09-15
 
 Backup i Integrity Monitor podniesiono do 0.3.2; 24 pozostałe narzędzia pozostają

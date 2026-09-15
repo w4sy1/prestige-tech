@@ -53,7 +53,7 @@
   },
   {
     "project": "prestige-network-optimizer",
-    "commit": "9611fc2b0f3820a4fca7c420b33540c7e682d978"
+    "commit": "013651b041445a88f0819f6ae894cdc3debafa8a"
   },
   {
     "project": "prestige-network-snapshot",
@@ -65,7 +65,7 @@
   },
   {
     "project": "prestige-pc-cleanup",
-    "commit": "294419ab0cd31570b5c2261bb36783500114a767"
+    "commit": "9411fbae51ca37576a61e483fd28ac454dd0d677"
   },
   {
     "project": "prestige-repair-report",
@@ -89,7 +89,7 @@
   },
   {
     "project": "prestige-termux-setup",
-    "commit": "1f8e04de4ed4310563a8091c5f187fcafb41474b"
+    "commit": "8df20987c10436f48a08b754ec90d5ceccd01822"
   },
   {
     "project": "prestige-termux-toolkit",
@@ -97,7 +97,7 @@
   },
   {
     "project": "prestige-usb-toolkit",
-    "commit": "fc31000e59974f5ba1c8854c7cf4933537a0db65"
+    "commit": "9e93d0d4c58c79d04df38966233f0c2a5ae1d367"
   },
   {
     "project": "prestige-windows-toolkit",

@@ -1,5 +1,13 @@
 # Rozszerzony zakres zatwierdzony przez użytkownika
 
+## Najnowszy stan 0.3.4
+
+Przejrzano rollback Cleanup, USB, Termux Setup i Network Optimizer. Naprawiono
+ciche pomijanie brakującej kwarantanny, brak weryfikacji starej wersji USB,
+nieatomowe zapisy konfiguracji i nadpisywanie późniejszego trybu DNS.
+445 testów PASS. Poprawki Cleanup/USB sprawdzone także z EXE; Termux i sieć
+na plikach próbnych/atrapach. Zbudowano kompletną paczkę EXE 0.3.4.
+
 ## Najnowszy stan 0.3.2
 
 Backup: naprawiony przedwczesny complete, sprawdzanie błędów/rozmiarów manifestu,

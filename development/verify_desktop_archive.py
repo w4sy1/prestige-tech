@@ -6,7 +6,7 @@ import zipfile
 import argparse
 
 ROOT = Path(__file__).resolve().parents[1]
-parser=argparse.ArgumentParser();parser.add_argument('--version',default='0.3.2');args=parser.parse_args()
+parser=argparse.ArgumentParser();parser.add_argument('--version',default='0.3.4');args=parser.parse_args()
 archive = ROOT / ('dist/prestige-tech-desktop-'+args.version+'-windows-x64.zip')
 build = json.loads((ROOT / 'development/desktop-build.json').read_text())
 assert len(build['results']) == 26

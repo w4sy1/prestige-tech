@@ -10,7 +10,7 @@ import argparse
 ROOT = Path(__file__).resolve().parents[1]
 
 def main():
-    parser=argparse.ArgumentParser();parser.add_argument('--version',default='0.3.2');args=parser.parse_args()
+    parser=argparse.ArgumentParser();parser.add_argument('--version',default='0.3.4');args=parser.parse_args()
     DIRECTORY = ROOT / ('dist/desktop-'+args.version)
     executable = DIRECTORY / 'prestige-hash-checker.exe'
     checks = []

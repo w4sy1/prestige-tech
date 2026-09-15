@@ -1,0 +1,8 @@
+{
+  "version": "0.3.4",
+  "passed": true,
+  "checks": [
+    "missing quarantine file refuses rollback before restoring any file",
+    "corrupt saved USB version is refused while installed version stays intact"
+  ]
+}

@@ -1,5 +1,5 @@
 {
-  "version": "0.3.2",
+  "version": "0.3.4",
   "passed": true,
   "checks": [
     "real EXE restore journal COMPLETE and verified file",

@@ -36,6 +36,11 @@ każdym urządzeniu; raport powinien zachować UNKNOWN/PARTIAL.
 
 ## Poprawki wynikające z bieżącego przeglądu
 
+- 0.3.3: brakująca kwarantanna i uszkodzona kopia USB blokują rollback.
+- 0.3.3: docelowy plik odtwarzany jest wyłącznie jako nowy, także po wyścigu z innym zapisem.
+- 0.3.4: konfiguracja Termuxa i jej rollback używają atomowego zapisu.
+- 0.3.4: rollback sieci respektuje już przywrócone ustawienia i późniejszy tryb DNS.
+
 - 0.3.2: manifest backupu nie jest oznaczany jako kompletny przed końcem eksportów.
 - 0.3.2: dziennik restore i test rzeczywistego przerwania procesu na plikach próbnych.
 - 0.3.2: UNKNOWN ACL/ADS daje INCOMPLETE i nie nadpisuje zaufanego baseline.

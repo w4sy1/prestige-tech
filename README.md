@@ -1,13 +1,14 @@
 # PRESTIGE TECH
 by Dominik Wasilak
 
-Zestaw **26 samodzielnych projektów — paczka 0.3.2 (wydanie testowe)**: diagnostyka, administracja,
+Zestaw **26 samodzielnych projektów — paczka 0.3.4 (wydanie testowe)**: diagnostyka, administracja,
 monitoring, integralność, Android i raporty. Własny kod na MIT; zależności zachowują swoje licencje.
 
 ## Windows: interfejs graficzny
 
-Backup i Integrity Monitor mają wersję 0.3.2; pozostałe programy zachowują 0.3.1.
-Rozpakuj `dist/prestige-tech-desktop-0.3.2-windows-x64.zip` i uruchom
+Wersje programów pozostają niezależne: Backup/Integrity 0.3.2, Cleanup/USB 0.3.3,
+Termux Setup/Network Optimizer 0.3.4, pozostałe 0.3.1.
+Rozpakuj `dist/prestige-tech-desktop-0.3.4-windows-x64.zip` i uruchom
 `prestige-tech-dashboard.exe`. Każdy EXE jest również samodzielnym programem.
 Python jest dołączony. PowerShell 7, ADB, Nmap i środowisko Termux pozostają
 zewnętrznymi zależnościami dla odpowiednich funkcji.
@@ -53,11 +54,14 @@ Launcher nie dodaje --apply/-Execute ani nie zatwierdza operacji za użytkownika
 To nie jest ukończona implementacja każdego punktu specyfikacji.
 `python development/verify.py` uruchamia testy wszystkich samodzielnych projektów.
 
-Wynik: **434 testy**, kontrole uruchomienia EXE, pięć scenariuszy integracji EXE
+Wynik: **445 testów**, kontrole uruchomienia EXE, pięć scenariuszy integracji EXE
 i osiem testów integracji instalowanej komendy CLI. Dodatkowo sprawdzono GUI
 z dużym wynikiem, UTF-8 i zatrzymaniem/restartem procesu.
 W 0.3.2 dodano cztery testy integracyjne odzyskiwania z EXE, w tym rzeczywiste
 przerwanie backupu na plikach próbnych i weryfikację niekompletnego manifestu.
+W 0.3.4 sprawdzono też odmowę rollbacku uszkodzonej kwarantanny oraz kopii USB
+bezpośrednio z EXE. Błędy zapisu konfiguracji Termuxa i rollback sieci sprawdzono
+lokalnie na plikach próbnych i atrapach, bez zmiany konfiguracji tego komputera.
 Weryfikacja na Windows z Python 3.14 i PowerShell 7. Nie wykonano pełnej
 macierzy wersji Python ani testów fizycznych urządzeń Android/Termux.
 
