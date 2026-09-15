@@ -1,0 +1,468 @@
+{
+  "date": "2026-09-15",
+  "public_repositories": 27,
+  "prereleases": 27,
+  "program_workflows_passed": 26,
+  "history_secret_scan": "Gitleaks 8.30.1: no findings across all 27 repositories",
+  "uploaded_binary_and_archive_sha256": "26 EXEs and both suite ZIPs match GitHub asset digests",
+  "repositories": [
+    {
+      "name": "prestige-pc-cleanup",
+      "visibility": "PUBLIC",
+      "runs": [
+        {
+          "conclusion": "success",
+          "status": "completed",
+          "url": "https://github.com/w4sy1/prestige-pc-cleanup/actions/runs/34983534073"
+        }
+      ],
+      "releases": [
+        {
+          "isPrerelease": true,
+          "tagName": "v0.3.3"
+        }
+      ]
+    },
+    {
+      "name": "prestige-tech",
+      "visibility": "PUBLIC",
+      "runs": [],
+      "releases": [
+        {
+          "isPrerelease": true,
+          "tagName": "v0.3.4"
+        }
+      ]
+    },
+    {
+      "name": "prestige-windows-toolkit",
+      "visibility": "PUBLIC",
+      "runs": [
+        {
+          "conclusion": "success",
+          "status": "completed",
+          "url": "https://github.com/w4sy1/prestige-windows-toolkit/actions/runs/34979436980"
+        }
+      ],
+      "releases": [
+        {
+          "isPrerelease": true,
+          "tagName": "v0.3.1"
+        }
+      ]
+    },
+    {
+      "name": "prestige-usb-toolkit",
+      "visibility": "PUBLIC",
+      "runs": [
+        {
+          "conclusion": "success",
+          "status": "completed",
+          "url": "https://github.com/w4sy1/prestige-usb-toolkit/actions/runs/34979390481"
+        }
+      ],
+      "releases": [
+        {
+          "isPrerelease": true,
+          "tagName": "v0.3.3"
+        }
+      ]
+    },
+    {
+      "name": "prestige-termux-toolkit",
+      "visibility": "PUBLIC",
+      "runs": [
+        {
+          "conclusion": "success",
+          "status": "completed",
+          "url": "https://github.com/w4sy1/prestige-termux-toolkit/actions/runs/34979344733"
+        }
+      ],
+      "releases": [
+        {
+          "isPrerelease": true,
+          "tagName": "v0.3.1"
+        }
+      ]
+    },
+    {
+      "name": "prestige-termux-setup",
+      "visibility": "PUBLIC",
+      "runs": [
+        {
+          "conclusion": "success",
+          "status": "completed",
+          "url": "https://github.com/w4sy1/prestige-termux-setup/actions/runs/34983795501"
+        }
+      ],
+      "releases": [
+        {
+          "isPrerelease": true,
+          "tagName": "v0.3.4"
+        }
+      ]
+    },
+    {
+      "name": "prestige-tech-dashboard",
+      "visibility": "PUBLIC",
+      "runs": [
+        {
+          "conclusion": "success",
+          "status": "completed",
+          "url": "https://github.com/w4sy1/prestige-tech-dashboard/actions/runs/34979246319"
+        }
+      ],
+      "releases": [
+        {
+          "isPrerelease": true,
+          "tagName": "v0.3.1"
+        }
+      ]
+    },
+    {
+      "name": "prestige-tech-cli",
+      "visibility": "PUBLIC",
+      "runs": [
+        {
+          "conclusion": "success",
+          "status": "completed",
+          "url": "https://github.com/w4sy1/prestige-tech-cli/actions/runs/34979200274"
+        }
+      ],
+      "releases": [
+        {
+          "isPrerelease": true,
+          "tagName": "v0.3.1"
+        }
+      ]
+    },
+    {
+      "name": "prestige-system-snapshot",
+      "visibility": "PUBLIC",
+      "runs": [
+        {
+          "conclusion": "success",
+          "status": "completed",
+          "url": "https://github.com/w4sy1/prestige-system-snapshot/actions/runs/34979149672"
+        }
+      ],
+      "releases": [
+        {
+          "isPrerelease": true,
+          "tagName": "v0.3.1"
+        }
+      ]
+    },
+    {
+      "name": "prestige-security-check",
+      "visibility": "PUBLIC",
+      "runs": [
+        {
+          "conclusion": "success",
+          "status": "completed",
+          "url": "https://github.com/w4sy1/prestige-security-check/actions/runs/34979095738"
+        }
+      ],
+      "releases": [
+        {
+          "isPrerelease": true,
+          "tagName": "v0.3.1"
+        }
+      ]
+    },
+    {
+      "name": "prestige-repair-report",
+      "visibility": "PUBLIC",
+      "runs": [
+        {
+          "conclusion": "success",
+          "status": "completed",
+          "url": "https://github.com/w4sy1/prestige-repair-report/actions/runs/34979045426"
+        }
+      ],
+      "releases": [
+        {
+          "isPrerelease": true,
+          "tagName": "v0.3.1"
+        }
+      ]
+    },
+    {
+      "name": "prestige-nmap-profiles",
+      "visibility": "PUBLIC",
+      "runs": [
+        {
+          "conclusion": "success",
+          "status": "completed",
+          "url": "https://github.com/w4sy1/prestige-nmap-profiles/actions/runs/34978950487"
+        }
+      ],
+      "releases": [
+        {
+          "isPrerelease": true,
+          "tagName": "v0.3.1"
+        }
+      ]
+    },
+    {
+      "name": "prestige-network-snapshot",
+      "visibility": "PUBLIC",
+      "runs": [
+        {
+          "conclusion": "success",
+          "status": "completed",
+          "url": "https://github.com/w4sy1/prestige-network-snapshot/actions/runs/34978898859"
+        }
+      ],
+      "releases": [
+        {
+          "isPrerelease": true,
+          "tagName": "v0.3.1"
+        }
+      ]
+    },
+    {
+      "name": "prestige-network-optimizer",
+      "visibility": "PUBLIC",
+      "runs": [
+        {
+          "conclusion": "success",
+          "status": "completed",
+          "url": "https://github.com/w4sy1/prestige-network-optimizer/actions/runs/34978850264"
+        }
+      ],
+      "releases": [
+        {
+          "isPrerelease": true,
+          "tagName": "v0.3.4"
+        }
+      ]
+    },
+    {
+      "name": "prestige-netradar",
+      "visibility": "PUBLIC",
+      "runs": [
+        {
+          "conclusion": "success",
+          "status": "completed",
+          "url": "https://github.com/w4sy1/prestige-netradar/actions/runs/34978801198"
+        }
+      ],
+      "releases": [
+        {
+          "isPrerelease": true,
+          "tagName": "v0.3.1"
+        }
+      ]
+    },
+    {
+      "name": "prestige-malware-triage",
+      "visibility": "PUBLIC",
+      "runs": [
+        {
+          "conclusion": "success",
+          "status": "completed",
+          "url": "https://github.com/w4sy1/prestige-malware-triage/actions/runs/34978749711"
+        }
+      ],
+      "releases": [
+        {
+          "isPrerelease": true,
+          "tagName": "v0.3.1"
+        }
+      ]
+    },
+    {
+      "name": "prestige-lan-radar",
+      "visibility": "PUBLIC",
+      "runs": [
+        {
+          "conclusion": "success",
+          "status": "completed",
+          "url": "https://github.com/w4sy1/prestige-lan-radar/actions/runs/34978697480"
+        }
+      ],
+      "releases": [
+        {
+          "isPrerelease": true,
+          "tagName": "v0.3.1"
+        }
+      ]
+    },
+    {
+      "name": "prestige-internet-diagnostic",
+      "visibility": "PUBLIC",
+      "runs": [
+        {
+          "conclusion": "success",
+          "status": "completed",
+          "url": "https://github.com/w4sy1/prestige-internet-diagnostic/actions/runs/34978647743"
+        }
+      ],
+      "releases": [
+        {
+          "isPrerelease": true,
+          "tagName": "v0.3.1"
+        }
+      ]
+    },
+    {
+      "name": "prestige-integrity-monitor",
+      "visibility": "PUBLIC",
+      "runs": [
+        {
+          "conclusion": "success",
+          "status": "completed",
+          "url": "https://github.com/w4sy1/prestige-integrity-monitor/actions/runs/34978598042"
+        }
+      ],
+      "releases": [
+        {
+          "isPrerelease": true,
+          "tagName": "v0.3.2"
+        }
+      ]
+    },
+    {
+      "name": "prestige-hash-checker",
+      "visibility": "PUBLIC",
+      "runs": [
+        {
+          "conclusion": "success",
+          "status": "completed",
+          "url": "https://github.com/w4sy1/prestige-hash-checker/actions/runs/34978548328"
+        }
+      ],
+      "releases": [
+        {
+          "isPrerelease": true,
+          "tagName": "v0.3.1"
+        }
+      ]
+    },
+    {
+      "name": "prestige-folder-watch",
+      "visibility": "PUBLIC",
+      "runs": [
+        {
+          "conclusion": "success",
+          "status": "completed",
+          "url": "https://github.com/w4sy1/prestige-folder-watch/actions/runs/34978509945"
+        }
+      ],
+      "releases": [
+        {
+          "isPrerelease": true,
+          "tagName": "v0.3.1"
+        }
+      ]
+    },
+    {
+      "name": "prestige-file-inspector",
+      "visibility": "PUBLIC",
+      "runs": [
+        {
+          "conclusion": "success",
+          "status": "completed",
+          "url": "https://github.com/w4sy1/prestige-file-inspector/actions/runs/34978463284"
+        }
+      ],
+      "releases": [
+        {
+          "isPrerelease": true,
+          "tagName": "v0.3.1"
+        }
+      ]
+    },
+    {
+      "name": "prestige-dns-benchmark",
+      "visibility": "PUBLIC",
+      "runs": [
+        {
+          "conclusion": "success",
+          "status": "completed",
+          "url": "https://github.com/w4sy1/prestige-dns-benchmark/actions/runs/34978419097"
+        }
+      ],
+      "releases": [
+        {
+          "isPrerelease": true,
+          "tagName": "v0.3.1"
+        }
+      ]
+    },
+    {
+      "name": "prestige-backup",
+      "visibility": "PUBLIC",
+      "runs": [
+        {
+          "conclusion": "success",
+          "status": "completed",
+          "url": "https://github.com/w4sy1/prestige-backup/actions/runs/34978377517"
+        }
+      ],
+      "releases": [
+        {
+          "isPrerelease": true,
+          "tagName": "v0.3.2"
+        }
+      ]
+    },
+    {
+      "name": "prestige-android-inspector",
+      "visibility": "PUBLIC",
+      "runs": [
+        {
+          "conclusion": "success",
+          "status": "completed",
+          "url": "https://github.com/w4sy1/prestige-android-inspector/actions/runs/34978329334"
+        }
+      ],
+      "releases": [
+        {
+          "isPrerelease": true,
+          "tagName": "v0.3.1"
+        }
+      ]
+    },
+    {
+      "name": "prestige-ai-diagnostic-assistant",
+      "visibility": "PUBLIC",
+      "runs": [
+        {
+          "conclusion": "success",
+          "status": "completed",
+          "url": "https://github.com/w4sy1/prestige-ai-diagnostic-assistant/actions/runs/34978282015"
+        }
+      ],
+      "releases": [
+        {
+          "isPrerelease": true,
+          "tagName": "v0.3.1"
+        }
+      ]
+    },
+    {
+      "name": "prestige-adb-diagnostic",
+      "visibility": "PUBLIC",
+      "runs": [
+        {
+          "conclusion": "success",
+          "status": "completed",
+          "url": "https://github.com/w4sy1/prestige-adb-diagnostic/actions/runs/34978240452"
+        }
+      ],
+      "releases": [
+        {
+          "isPrerelease": true,
+          "tagName": "v0.3.1"
+        }
+      ]
+    }
+  ],
+  "test_only_corrections": [
+    "PC Cleanup: canonical temporary path in race fixture",
+    "Termux Setup: canonical temporary paths in atomic write fixtures"
+  ],
+  "release_note": "Published tags and binary assets preserved. Current default branches include the test-only corrections; original release source snapshots predate them."
+}

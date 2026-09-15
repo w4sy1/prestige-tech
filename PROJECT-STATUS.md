@@ -1,5 +1,13 @@
 # Prestige Tech — stan realizacji
 
+## Publikacja GitHub — 2026-09-15
+
+Opublikowano 26 samodzielnych repozytoriów i główne `w4sy1/prestige-tech`, wszystkie publiczne na MIT. Każde ma wydanie Pre-release; główne wydanie 0.3.4 zawiera pełną paczkę Windows i źródła. Linki: [PROGRAMS.md](PROGRAMS.md).
+
+Najnowsze testy GitHub Actions wszystkich 26 programów przeszły na Pythonie 3.11 i 3.14. Poprawiono wyłącznie ścieżki w testach PC Cleanup i Termux Setup, aby symulacje błędów działały także przy aliasach katalogu TEMP w Windows. Opublikowane tagi i EXE zachowano; poprawki testów są na domyślnych gałęziach, po tagach wydania. Historyczne wpisy poniżej opisują stan sprzed publikacji.
+
+Gitleaks nie wykrył sekretów w historii 27 repozytoriów. Sumy SHA-256 wszystkich EXE oraz obu zbiorczych archiwów są zgodne z metadanymi plików GitHuba. Dowody CI: `development/publication-verification.json`. Testy sprzętowe, administracyjne i udana odpowiedź zewnętrznego AI nadal pozostają do wykonania.
+
 ## Aktualizacja zestawu 0.3.4 — 2026-09-15
 
 445 testów przechodzi. PC Cleanup sprawdza brakujące pliki przed rollbackiem
