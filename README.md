@@ -4,6 +4,17 @@ by Dominik Wasilak
 Zestaw **26 samodzielnych projektów — paczka 0.3.4 (wydanie testowe)**: diagnostyka, administracja,
 monitoring, integralność, Android i raporty. Własny kod na MIT; zależności zachowują swoje licencje.
 
+## Pobieranie z GitHuba
+
+[Pełna paczka Windows EXE i źródła 0.3.4](https://github.com/w4sy1/prestige-tech/releases/tag/v0.3.4).
+Wydanie jest oznaczone jako **Pre-release**. Pobierz `prestige-tech-desktop-0.3.4-windows-x64.zip`,
+rozpakuj je i uruchom `prestige-tech-dashboard.exe` lub dowolny pojedynczy program.
+
+To repozytorium zawiera dokumentację zestawu i skrypty budowania. Kod 26 programów
+znajduje się w osobnych repozytoriach `w4sy1/prestige-*`; komplet źródeł ze strukturą
+katalogów potrzebną do budowania zawiera załącznik `prestige-tech-0.3.4.zip` w wydaniu.
+Automatyczny przycisk GitHuba „Source code” pobiera tylko zawartość tego repozytorium.
+
 ## Windows: interfejs graficzny
 
 Wersje programów pozostają niezależne: Backup/Integrity 0.3.2, Cleanup/USB 0.3.3,
