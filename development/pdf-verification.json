@@ -1,0 +1,10 @@
+{
+  "passed": true,
+  "pages": 12,
+  "checks": [
+    "Unicode extraction",
+    "long fields and pagination",
+    "last row retained",
+    "existing file preserved"
+  ]
+}

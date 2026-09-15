@@ -1,0 +1,8 @@
+{
+  "passed": true,
+  "checks": [
+    "packaged SHA256 and Unicode PDF export",
+    "packaged encrypted Ed25519 keys, signatures and tamper rejection",
+    "packaged dashboard discovers adjacent tools from unrelated cwd"
+  ]
+}

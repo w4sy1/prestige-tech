@@ -1,0 +1,6 @@
+{
+  "passed": false,
+  "error_type": "RuntimeError",
+  "message": "API zwr\u00f3ci\u0142o HTTP 429. Sprawd\u017a klucz, model i limit konta.",
+  "data": "synthetic metrics only"
+}

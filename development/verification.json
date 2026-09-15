@@ -1,6 +1,6 @@
 {
   "projects": 26,
-  "tests": 391,
+  "tests": 416,
   "passed": true,
   "results": [
     {
@@ -12,7 +12,7 @@
     {
       "project": "prestige-ai-diagnostic-assistant",
       "passed": true,
-      "tests": 16,
+      "tests": 19,
       "missing": []
     },
     {
@@ -24,7 +24,7 @@
     {
       "project": "prestige-backup",
       "passed": true,
-      "tests": 16,
+      "tests": 21,
       "missing": []
     },
     {
@@ -48,13 +48,13 @@
     {
       "project": "prestige-hash-checker",
       "passed": true,
-      "tests": 12,
+      "tests": 14,
       "missing": []
     },
     {
       "project": "prestige-integrity-monitor",
       "passed": true,
-      "tests": 10,
+      "tests": 13,
       "missing": []
     },
     {
@@ -66,19 +66,19 @@
     {
       "project": "prestige-lan-radar",
       "passed": true,
-      "tests": 13,
+      "tests": 16,
       "missing": []
     },
     {
       "project": "prestige-malware-triage",
       "passed": true,
-      "tests": 18,
+      "tests": 19,
       "missing": []
     },
     {
       "project": "prestige-netradar",
       "passed": true,
-      "tests": 16,
+      "tests": 19,
       "missing": []
     },
     {
@@ -90,13 +90,13 @@
     {
       "project": "prestige-network-snapshot",
       "passed": true,
-      "tests": 14,
+      "tests": 17,
       "missing": []
     },
     {
       "project": "prestige-nmap-profiles",
       "passed": true,
-      "tests": 12,
+      "tests": 14,
       "missing": []
     },
     {

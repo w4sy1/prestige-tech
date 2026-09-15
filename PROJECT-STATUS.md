@@ -1,5 +1,24 @@
 # Prestige Tech — stan realizacji
 
+## Aktualizacja desktop — 2026-09-15
+
+Dodano GUI do 26 programów, panel, PDF i formularz serwisowy, opcjonalny OpenAI,
+podpisy Ed25519, ACL/ADS, VSS, Firefox, wiele IP/MAC i live TCP SYN capture.
+Źródła mają samodzielne skrypty budowy EXE i konfigurację CI (jeszcze bez runu GitHub).
+Gotowa testowa paczka desktop 0.3.0 zawiera 26 EXE; ZIP i hashe zweryfikowano.
+416 testów i 78 kontroli startu EXE przeszło. Panel wykrywa 24 narzędzia.
+Numery backendów w oknach pozostają numerami
+poprzednich wydań. Aktualne wyniki są w `development/*verification.json`.
+
+Potwierdzono start 26 GUI, formularz SHA256, PDF wielostronicowy oraz podpisy
+i PDF z EXE. API OpenAI zwróciło HTTP 429. VSS, live capture, naprawy i fizyczny
+Android wymagają testów docelowych. Pozostaje końcowe wersjonowanie, przegląd
+specyfikacji i dłuższe próbkowanie GPU.
+
+Poniższa tabela przedstawia historyczny stan MVP 0.2, a nie aktualną listę braków.
+
+## Historyczny stan MVP 0.2
+
 Stan: 2026-09-14. Autor: Dominik Wasilak. Wszystkie 26 projektów ma samodzielną
 wersję MVP na licencji MIT, dokumentację, testy i lokalne repozytorium Git.
 Dashboard i CLI powstały na końcu i uruchamiają istniejące programy.

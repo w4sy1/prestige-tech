@@ -3,3 +3,7 @@ dist/
 __pycache__/
 development/__pycache__/
 .env
+.build-venv/
+build/
+tmp/
+output/

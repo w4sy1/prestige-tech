@@ -1,0 +1,8 @@
+{
+  "passed": true,
+  "gui_projects": 26,
+  "checks": [
+    "schema and window construction for every program",
+    "real graphical form executes hashing and displays correct SHA256"
+  ]
+}
