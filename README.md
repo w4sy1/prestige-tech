@@ -15,6 +15,8 @@ znajduje się w osobnych repozytoriach `w4sy1/prestige-*`; komplet źródeł ze 
 katalogów potrzebną do budowania zawiera załącznik `prestige-tech-0.3.4.zip` w wydaniu.
 Automatyczny przycisk GitHuba „Source code” pobiera tylko zawartość tego repozytorium.
 
+[Lista wszystkich 26 programów: repozytoria i pojedyncze EXE](PROGRAMS.md).
+
 ## Windows: interfejs graficzny
 
 Wersje programów pozostają niezależne: Backup/Integrity 0.3.2, Cleanup/USB 0.3.3,
