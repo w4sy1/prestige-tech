@@ -36,6 +36,10 @@ każdym urządzeniu; raport powinien zachować UNKNOWN/PARTIAL.
 
 ## Poprawki wynikające z bieżącego przeglądu
 
+- 0.3.2: manifest backupu nie jest oznaczany jako kompletny przed końcem eksportów.
+- 0.3.2: dziennik restore i test rzeczywistego przerwania procesu na plikach próbnych.
+- 0.3.2: UNKNOWN ACL/ADS daje INCOMPLETE i nie nadpisuje zaufanego baseline.
+
 - Wielokrotne próbki GPU i korelacja PID zamiast pojedynczego odczytu.
 - CPU mierzone przed hashowaniem, z kontrolą ponownego użycia PID.
 - Korelacja aktywnych połączeń i autostartu z procesem.

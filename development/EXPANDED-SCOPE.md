@@ -1,5 +1,13 @@
 # Rozszerzony zakres zatwierdzony przez użytkownika
 
+## Najnowszy stan 0.3.2
+
+Backup: naprawiony przedwczesny complete, sprawdzanie błędów/rozmiarów manifestu,
+dziennik odtwarzania. Integrity Monitor: walidacja baseline, INCOMPLETE przy UNKNOWN
+ACL/ADS i ochrona baseline przed niekompletną aktualizacją. 434 testy PASS.
+Cztery scenariusze odzyskiwania z prawdziwych EXE PASS (tylko pliki próbne).
+Paczka 0.3.2 zawiera dwie poprawione aplikacje i 24 niezmienione EXE 0.3.1.
+
 ## Najnowszy stan 0.3.1
 
 Zamknięto: pomiar GPU w czasie, korelację z procesem, poprawkę CPU (hashowanie

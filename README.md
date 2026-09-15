@@ -1,19 +1,21 @@
 # PRESTIGE TECH
 by Dominik Wasilak
 
-Zestaw **26 samodzielnych projektów 0.3.1 (wydanie testowe)**: diagnostyka, administracja,
+Zestaw **26 samodzielnych projektów — paczka 0.3.2 (wydanie testowe)**: diagnostyka, administracja,
 monitoring, integralność, Android i raporty. Własny kod na MIT; zależności zachowują swoje licencje.
 
 ## Windows: interfejs graficzny
 
-Rozpakuj `dist/prestige-tech-desktop-0.3.1-windows-x64.zip` i uruchom
+Backup i Integrity Monitor mają wersję 0.3.2; pozostałe programy zachowują 0.3.1.
+Rozpakuj `dist/prestige-tech-desktop-0.3.2-windows-x64.zip` i uruchom
 `prestige-tech-dashboard.exe`. Każdy EXE jest również samodzielnym programem.
 Python jest dołączony. PowerShell 7, ADB, Nmap i środowisko Termux pozostają
 zewnętrznymi zależnościami dla odpowiednich funkcji.
 
 Źródła GUI: `python prestige-tech-dashboard/gui.py`.
 Budowa pojedynczego projektu: jego `docs/BUILD.md` i `build_exe.py`.
-Pełny zestaw: `python development/build_desktop.py --version 0.3.1 --force`.
+Pełną przebudowę obsługuje `development/build_desktop.py`; podaj `--version`
+z nowym numerem paczki, aby zachować istniejące archiwa, oraz `--force`.
 Przegląd wymagań i granic testów: [SPECIFICATION-AUDIT.md](development/SPECIFICATION-AUDIT.md).
 
 ## Szybki start
@@ -51,9 +53,11 @@ Launcher nie dodaje --apply/-Execute ani nie zatwierdza operacji za użytkownika
 To nie jest ukończona implementacja każdego punktu specyfikacji.
 `python development/verify.py` uruchamia testy wszystkich samodzielnych projektów.
 
-Wynik: **421 testów**, 78 kontroli uruchomienia EXE, pięć scenariuszy integracji EXE
+Wynik: **434 testy**, kontrole uruchomienia EXE, pięć scenariuszy integracji EXE
 i osiem testów integracji instalowanej komendy CLI. Dodatkowo sprawdzono GUI
 z dużym wynikiem, UTF-8 i zatrzymaniem/restartem procesu.
+W 0.3.2 dodano cztery testy integracyjne odzyskiwania z EXE, w tym rzeczywiste
+przerwanie backupu na plikach próbnych i weryfikację niekompletnego manifestu.
 Weryfikacja na Windows z Python 3.14 i PowerShell 7. Nie wykonano pełnej
 macierzy wersji Python ani testów fizycznych urządzeń Android/Termux.
 

@@ -1,5 +1,14 @@
 # Prestige Tech — stan realizacji
 
+## Aktualizacja zestawu 0.3.2 — 2026-09-15
+
+Backup i Integrity Monitor podniesiono do 0.3.2; 24 pozostałe narzędzia pozostają
+w 0.3.1. 434 testy przechodzą. Backup zapisuje complete dopiero po wszystkich
+etapach, uwzględnia błędy manifestu i prowadzi dziennik restore. Integrity Monitor
+nie traktuje UNKNOWN ACL/ADS jako sukcesu ani nie zastępuje takim odczytem baseline.
+Nowe EXE przeszły cztery scenariusze odzyskiwania, w tym wymuszone przerwanie
+procesu na plikach próbnych. Paczka ZIP i SHA256 zweryfikowane.
+
 ## Aktualizacja 0.3.1 — 2026-09-15
 
 Wszystkie 26 projektów ma teraz wersję 0.3.1. Dodano pomiar GPU w czasie,

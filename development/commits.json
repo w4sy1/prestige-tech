@@ -13,7 +13,7 @@
   },
   {
     "project": "prestige-backup",
-    "commit": "4452dcda37f217f67e75ef8a973d651a9ef60519"
+    "commit": "feb09936068800622c4bbf5b78e01d73ebe21715"
   },
   {
     "project": "prestige-dns-benchmark",
@@ -33,7 +33,7 @@
   },
   {
     "project": "prestige-integrity-monitor",
-    "commit": "d6047f01bafb204dcf1ddbf40a5963ef673019d4"
+    "commit": "84c1ad6d77a92426dc6918020e9a9565108212ac"
   },
   {
     "project": "prestige-internet-diagnostic",

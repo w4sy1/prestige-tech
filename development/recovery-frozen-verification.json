@@ -1,0 +1,10 @@
+{
+  "version": "0.3.2",
+  "passed": true,
+  "checks": [
+    "real EXE restore journal COMPLETE and verified file",
+    "manifest errors cannot be overridden by complete=true",
+    "unknown baseline ACL/ADS never verifies successfully",
+    "forcibly interrupted fixture backup retains valid incomplete manifest"
+  ]
+}
