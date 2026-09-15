@@ -1,5 +1,21 @@
 # Prestige Tech — stan realizacji
 
+## Aktualizacja 0.3.1 — 2026-09-15
+
+Wszystkie 26 projektów ma teraz wersję 0.3.1. Dodano pomiar GPU w czasie,
+poprawiono okno pomiaru CPU, korelację procesów oraz wykrywanie zmiany MAC
+na dodatkowym IP. GUI ma ograniczoną kolejkę i bufor, obsługuje strumień UTF-8,
+zatrzymanie/restart oraz duże wyniki bez zawieszania zawijaniem długich wierszy.
+Test 1,2 mln znaków, zatrzymania i ponownego uruchomienia przeszedł.
+Przegląd zakresu i granic weryfikacji: `development/SPECIFICATION-AUDIT.md`.
+
+26 EXE 0.3.1 zbudowano i sprawdzono: 78 kontroli uruchamiania oraz pięć
+scenariuszy integracji EXE przeszło. 421 testów backendów i osiem integracji
+CLI przechodzi. Zmiany zapisano w commitach wszystkich 26 repozytoriów.
+Starszy ZIP 0.3.0 pozostaje
+oddzielnym artefaktem. API nadal ma niepotwierdzoną odpowiedź (HTTP 429),
+a testy sprzętowe/administracyjne i rzeczywisty run CI pozostają do wykonania.
+
 ## Aktualizacja desktop — 2026-09-15
 
 Dodano GUI do 26 programów, panel, PDF i formularz serwisowy, opcjonalny OpenAI,

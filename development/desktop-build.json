@@ -1,213 +1,239 @@
 {
-  "version": "0.3.0",
+  "version": "0.3.1",
   "results": [
     {
       "project": "prestige-adb-diagnostic",
-      "executable": "C:\\Users\\01dwa\\Documents\\ChatGPT\\github w4sy1\\dist\\desktop-0.3.0\\prestige-adb-diagnostic.exe",
-      "bytes": 26774419,
-      "sha256": "00a3c78e748fbcb6f204e4b9a0f594c860cb62b6dd0608493ffad5afa3c41ddc",
+      "executable": "C:\\Users\\01dwa\\Documents\\ChatGPT\\github w4sy1\\dist\\desktop-0.3.1\\prestige-adb-diagnostic.exe",
+      "bytes": 26775699,
+      "sha256": "4d669caad75557053361fc02e663e6d8ceb9e33aac7ff96b48eb462f33267958",
       "startup_checks": 3,
-      "passed": true
+      "passed": true,
+      "cached": false
     },
     {
       "project": "prestige-ai-diagnostic-assistant",
-      "executable": "C:\\Users\\01dwa\\Documents\\ChatGPT\\github w4sy1\\dist\\desktop-0.3.0\\prestige-ai-diagnostic-assistant.exe",
-      "bytes": 26780351,
-      "sha256": "58334cec261138ee8061497e3a9c3303ed03526ea1182884a572290ac1cee611",
+      "executable": "C:\\Users\\01dwa\\Documents\\ChatGPT\\github w4sy1\\dist\\desktop-0.3.1\\prestige-ai-diagnostic-assistant.exe",
+      "bytes": 26780419,
+      "sha256": "f3f6ed6c3449feaeb8c6ac302eca6a299534398b31e7e844eebdd8a5cbcad2a3",
       "startup_checks": 3,
-      "passed": true
+      "passed": true,
+      "cached": false
     },
     {
       "project": "prestige-android-inspector",
-      "executable": "C:\\Users\\01dwa\\Documents\\ChatGPT\\github w4sy1\\dist\\desktop-0.3.0\\prestige-android-inspector.exe",
-      "bytes": 26776158,
-      "sha256": "ffcf67b010c9a05556384e6a6ec877613f26c24528f10424f19c71a17817852e",
+      "executable": "C:\\Users\\01dwa\\Documents\\ChatGPT\\github w4sy1\\dist\\desktop-0.3.1\\prestige-android-inspector.exe",
+      "bytes": 26778208,
+      "sha256": "4aec9fc00b888001a138314f8d3f4687168b2e6e957ec9ca933ac95f40e03902",
       "startup_checks": 3,
-      "passed": true
+      "passed": true,
+      "cached": false
     },
     {
       "project": "prestige-backup",
-      "executable": "C:\\Users\\01dwa\\Documents\\ChatGPT\\github w4sy1\\dist\\desktop-0.3.0\\prestige-backup.exe",
-      "bytes": 26789678,
-      "sha256": "419509074df3883a83a856d6c5284245ae5236b2ad8960ccf94bb579937aa336",
+      "executable": "C:\\Users\\01dwa\\Documents\\ChatGPT\\github w4sy1\\dist\\desktop-0.3.1\\prestige-backup.exe",
+      "bytes": 26791435,
+      "sha256": "5a8448c8da6ab90aff7b141e0aa0151b9146707242e9b99077da5b089daee14c",
       "startup_checks": 3,
-      "passed": true
+      "passed": true,
+      "cached": false
     },
     {
       "project": "prestige-dns-benchmark",
-      "executable": "C:\\Users\\01dwa\\Documents\\ChatGPT\\github w4sy1\\dist\\desktop-0.3.0\\prestige-dns-benchmark.exe",
-      "bytes": 26777739,
-      "sha256": "c23804e21ac53ad22ddff6d8989ebb40f8ff15896ddf27fb087766f6ec48bcc8",
+      "executable": "C:\\Users\\01dwa\\Documents\\ChatGPT\\github w4sy1\\dist\\desktop-0.3.1\\prestige-dns-benchmark.exe",
+      "bytes": 26780073,
+      "sha256": "530600d3519e01e372e404e58dc55570d8f08ec1fde75a0cac304138e543d0cd",
       "startup_checks": 3,
-      "passed": true
+      "passed": true,
+      "cached": false
     },
     {
       "project": "prestige-file-inspector",
-      "executable": "C:\\Users\\01dwa\\Documents\\ChatGPT\\github w4sy1\\dist\\desktop-0.3.0\\prestige-file-inspector.exe",
-      "bytes": 26771134,
-      "sha256": "8519bbbc0bf2106f62143ffa26e106df01f3bd38a714ebb0af45dafc4975f601",
+      "executable": "C:\\Users\\01dwa\\Documents\\ChatGPT\\github w4sy1\\dist\\desktop-0.3.1\\prestige-file-inspector.exe",
+      "bytes": 26773660,
+      "sha256": "69a9f7c8e39bbdbfff70c09ccf0e67bc56cf6be792bc7c2bcfe98bb38d89c8f0",
       "startup_checks": 3,
-      "passed": true
+      "passed": true,
+      "cached": false
     },
     {
       "project": "prestige-folder-watch",
-      "executable": "C:\\Users\\01dwa\\Documents\\ChatGPT\\github w4sy1\\dist\\desktop-0.3.0\\prestige-folder-watch.exe",
-      "bytes": 26776492,
-      "sha256": "1ed3a9a9bb66890458386a4e2fc9a7165e852ad7f0c040b97de0c4f0f28f55c0",
+      "executable": "C:\\Users\\01dwa\\Documents\\ChatGPT\\github w4sy1\\dist\\desktop-0.3.1\\prestige-folder-watch.exe",
+      "bytes": 26778278,
+      "sha256": "1913667a64454171a93c3e69cdcdf777a302231bd77c5fa4d675bdb771f405d3",
       "startup_checks": 3,
-      "passed": true
+      "passed": true,
+      "cached": false
     },
     {
       "project": "prestige-hash-checker",
-      "executable": "C:\\Users\\01dwa\\Documents\\ChatGPT\\github w4sy1\\dist\\desktop-0.3.0\\prestige-hash-checker.exe",
-      "bytes": 30552774,
-      "sha256": "e11be263e963ca5c5d9c395fbed3357474e525a15b7ad747638e993f4c542f0c",
+      "executable": "C:\\Users\\01dwa\\Documents\\ChatGPT\\github w4sy1\\dist\\desktop-0.3.1\\prestige-hash-checker.exe",
+      "bytes": 30555231,
+      "sha256": "46addf8ff9cbcc01f19af336ca5ab603f955d686f1b028e573fb3bb80a6fb3c9",
       "startup_checks": 3,
-      "passed": true
+      "passed": true,
+      "cached": false
     },
     {
       "project": "prestige-integrity-monitor",
-      "executable": "C:\\Users\\01dwa\\Documents\\ChatGPT\\github w4sy1\\dist\\desktop-0.3.0\\prestige-integrity-monitor.exe",
-      "bytes": 30553352,
-      "sha256": "4bb67acf7ca570d9cb7e0d392c077fb10b7ff437381cdeff09fc3ba137dd9c69",
+      "executable": "C:\\Users\\01dwa\\Documents\\ChatGPT\\github w4sy1\\dist\\desktop-0.3.1\\prestige-integrity-monitor.exe",
+      "bytes": 30556053,
+      "sha256": "ffcc8cc50e1913c9b3f1a14722c4c51cb085b4269e0201a69b1d2fad5fac9478",
       "startup_checks": 3,
-      "passed": true
+      "passed": true,
+      "cached": false
     },
     {
       "project": "prestige-internet-diagnostic",
-      "executable": "C:\\Users\\01dwa\\Documents\\ChatGPT\\github w4sy1\\dist\\desktop-0.3.0\\prestige-internet-diagnostic.exe",
-      "bytes": 26777337,
-      "sha256": "ed82687ddeee1f266e7c4a8f5866c3b2b1d488db0c739c2890b56cd705851e1e",
+      "executable": "C:\\Users\\01dwa\\Documents\\ChatGPT\\github w4sy1\\dist\\desktop-0.3.1\\prestige-internet-diagnostic.exe",
+      "bytes": 26779498,
+      "sha256": "091a25fefe5f5182b848d5ff8548090504893732a2273872d19c650b11f7b921",
       "startup_checks": 3,
-      "passed": true
+      "passed": true,
+      "cached": false
     },
     {
       "project": "prestige-lan-radar",
-      "executable": "C:\\Users\\01dwa\\Documents\\ChatGPT\\github w4sy1\\dist\\desktop-0.3.0\\prestige-lan-radar.exe",
-      "bytes": 26781203,
-      "sha256": "d6ebe8453cc69926c6f86c781a245de2a9d700b419fa4875c34dac781aa2d3a4",
+      "executable": "C:\\Users\\01dwa\\Documents\\ChatGPT\\github w4sy1\\dist\\desktop-0.3.1\\prestige-lan-radar.exe",
+      "bytes": 26782281,
+      "sha256": "d192ffac4ac87bd6635b4c869fc7f169e06bce41a385c3c7bec38cf141c2f169",
       "startup_checks": 3,
-      "passed": true
+      "passed": true,
+      "cached": false
     },
     {
       "project": "prestige-malware-triage",
-      "executable": "C:\\Users\\01dwa\\Documents\\ChatGPT\\github w4sy1\\dist\\desktop-0.3.0\\prestige-malware-triage.exe",
-      "bytes": 26783635,
-      "sha256": "3f27b79eae6a185862dee03049ab50ae7273e4bdb2b7aa5e164660acfe7023fa",
+      "executable": "C:\\Users\\01dwa\\Documents\\ChatGPT\\github w4sy1\\dist\\desktop-0.3.1\\prestige-malware-triage.exe",
+      "bytes": 26789187,
+      "sha256": "07a2a84cb8b24da6bb2b6d035e7d8583be90cad733455ae495902aa87db9a01e",
       "startup_checks": 3,
-      "passed": true
+      "passed": true,
+      "cached": false
     },
     {
       "project": "prestige-netradar",
-      "executable": "C:\\Users\\01dwa\\Documents\\ChatGPT\\github w4sy1\\dist\\desktop-0.3.0\\prestige-netradar.exe",
-      "bytes": 26782880,
-      "sha256": "0f14d23bec766c958c53eaedd4ff4c720578515878611765bf6b756e7d571f33",
+      "executable": "C:\\Users\\01dwa\\Documents\\ChatGPT\\github w4sy1\\dist\\desktop-0.3.1\\prestige-netradar.exe",
+      "bytes": 26782492,
+      "sha256": "4c6c6e2edf085fc0b6aada81f23f0c4c3ff6d0c604f3cbda6cbe2594403c92a6",
       "startup_checks": 3,
-      "passed": true
+      "passed": true,
+      "cached": false
     },
     {
       "project": "prestige-network-optimizer",
-      "executable": "C:\\Users\\01dwa\\Documents\\ChatGPT\\github w4sy1\\dist\\desktop-0.3.0\\prestige-network-optimizer.exe",
-      "bytes": 26774791,
-      "sha256": "9281d4eea79954cee5306ecb12470735144347792de734ba54c0ca2a33cca914",
+      "executable": "C:\\Users\\01dwa\\Documents\\ChatGPT\\github w4sy1\\dist\\desktop-0.3.1\\prestige-network-optimizer.exe",
+      "bytes": 26777449,
+      "sha256": "4010f031dae29aa1c410bfab15dd39cb7132114171d2e69dcfb21507a45154b8",
       "startup_checks": 3,
-      "passed": true
+      "passed": true,
+      "cached": false
     },
     {
       "project": "prestige-network-snapshot",
-      "executable": "C:\\Users\\01dwa\\Documents\\ChatGPT\\github w4sy1\\dist\\desktop-0.3.0\\prestige-network-snapshot.exe",
-      "bytes": 26777796,
-      "sha256": "f7fc74a4d3b50dcc417705d2930256807fd68a6628de437c8146b9e9f8adf759",
+      "executable": "C:\\Users\\01dwa\\Documents\\ChatGPT\\github w4sy1\\dist\\desktop-0.3.1\\prestige-network-snapshot.exe",
+      "bytes": 26780177,
+      "sha256": "2abf9776f7935af420d234ebce1077b4d856ba49154da453158c4d739850902b",
       "startup_checks": 3,
-      "passed": true
+      "passed": true,
+      "cached": false
     },
     {
       "project": "prestige-nmap-profiles",
-      "executable": "C:\\Users\\01dwa\\Documents\\ChatGPT\\github w4sy1\\dist\\desktop-0.3.0\\prestige-nmap-profiles.exe",
-      "bytes": 26774652,
-      "sha256": "908c4147665b841661e1348d21c7db8a01b4d8b529e8dda43e958c8ad5a19b6c",
+      "executable": "C:\\Users\\01dwa\\Documents\\ChatGPT\\github w4sy1\\dist\\desktop-0.3.1\\prestige-nmap-profiles.exe",
+      "bytes": 26774222,
+      "sha256": "ef46d807d55124ca16b3c430068221e3f40583c756a22ccb12fed596ef0d36f8",
       "startup_checks": 3,
-      "passed": true
+      "passed": true,
+      "cached": false
     },
     {
       "project": "prestige-pc-cleanup",
-      "executable": "C:\\Users\\01dwa\\Documents\\ChatGPT\\github w4sy1\\dist\\desktop-0.3.0\\prestige-pc-cleanup.exe",
-      "bytes": 26776114,
-      "sha256": "f6c0713e7660936dd3760671aadd70dccfa5f029255e047b0bf2d595681a2b2e",
+      "executable": "C:\\Users\\01dwa\\Documents\\ChatGPT\\github w4sy1\\dist\\desktop-0.3.1\\prestige-pc-cleanup.exe",
+      "bytes": 26777534,
+      "sha256": "87fa12ae6195dea492e67565d320212daf5c18e0e281da12e32a068ed839b253",
       "startup_checks": 3,
-      "passed": true
+      "passed": true,
+      "cached": false
     },
     {
       "project": "prestige-repair-report",
-      "executable": "C:\\Users\\01dwa\\Documents\\ChatGPT\\github w4sy1\\dist\\desktop-0.3.0\\prestige-repair-report.exe",
-      "bytes": 26771615,
-      "sha256": "b7c689a83922795c7e81283ec2976d05ebea4117ad79c96c7797768ce6bd8e9d",
+      "executable": "C:\\Users\\01dwa\\Documents\\ChatGPT\\github w4sy1\\dist\\desktop-0.3.1\\prestige-repair-report.exe",
+      "bytes": 26775017,
+      "sha256": "a818841132ec1a7aeb842d2e8cb5364978a37553fc4e1b67b9b3a3ce9052f555",
       "startup_checks": 3,
-      "passed": true
+      "passed": true,
+      "cached": false
     },
     {
       "project": "prestige-security-check",
-      "executable": "C:\\Users\\01dwa\\Documents\\ChatGPT\\github w4sy1\\dist\\desktop-0.3.0\\prestige-security-check.exe",
-      "bytes": 26779712,
-      "sha256": "29c98ea08d2319a953328502e19c1970f2908e2e0814dc0f09b59d9901f19d6a",
+      "executable": "C:\\Users\\01dwa\\Documents\\ChatGPT\\github w4sy1\\dist\\desktop-0.3.1\\prestige-security-check.exe",
+      "bytes": 26782442,
+      "sha256": "10c0f8ae14bb0b43e495a2ea17bc3e5b10daf146f5ca460e7e6390b7e7d1acaa",
       "startup_checks": 3,
-      "passed": true
+      "passed": true,
+      "cached": false
     },
     {
       "project": "prestige-system-snapshot",
-      "executable": "C:\\Users\\01dwa\\Documents\\ChatGPT\\github w4sy1\\dist\\desktop-0.3.0\\prestige-system-snapshot.exe",
-      "bytes": 26774407,
-      "sha256": "c2d16de7cf3bec7fc4a1fecca87991bd66770685aef3ef7c233e6aace9e7c8aa",
+      "executable": "C:\\Users\\01dwa\\Documents\\ChatGPT\\github w4sy1\\dist\\desktop-0.3.1\\prestige-system-snapshot.exe",
+      "bytes": 26775523,
+      "sha256": "d95accf32976292328874d77142816e56140e884ee446423dd7e4de4fa78d973",
       "startup_checks": 3,
-      "passed": true
+      "passed": true,
+      "cached": false
     },
     {
       "project": "prestige-tech-cli",
-      "executable": "C:\\Users\\01dwa\\Documents\\ChatGPT\\github w4sy1\\dist\\desktop-0.3.0\\prestige-tech-cli.exe",
-      "bytes": 25822259,
-      "sha256": "b32e60b4ab6472a98090ea034801d33df988f902fd9b041eb550529873cc6bc4",
+      "executable": "C:\\Users\\01dwa\\Documents\\ChatGPT\\github w4sy1\\dist\\desktop-0.3.1\\prestige-tech-cli.exe",
+      "bytes": 25825712,
+      "sha256": "8271b78828a5ce681bac86422a6fa420dba95008f74b90ad5c5594f9fb5e8548",
       "startup_checks": 3,
-      "passed": true
+      "passed": true,
+      "cached": false
     },
     {
       "project": "prestige-tech-dashboard",
-      "executable": "C:\\Users\\01dwa\\Documents\\ChatGPT\\github w4sy1\\dist\\desktop-0.3.0\\prestige-tech-dashboard.exe",
-      "bytes": 26778198,
-      "sha256": "ab03371fac4bb9fbd0debbabb348e0dc98c5cf87a23d841e6f9268d6c36ca6c6",
+      "executable": "C:\\Users\\01dwa\\Documents\\ChatGPT\\github w4sy1\\dist\\desktop-0.3.1\\prestige-tech-dashboard.exe",
+      "bytes": 26778647,
+      "sha256": "f489575c946a46fe0f8e44f724af6f0bb4b3d95aa3ca77b6e3b5d4bd7c95ad49",
       "startup_checks": 3,
-      "passed": true
+      "passed": true,
+      "cached": false
     },
     {
       "project": "prestige-termux-setup",
-      "executable": "C:\\Users\\01dwa\\Documents\\ChatGPT\\github w4sy1\\dist\\desktop-0.3.0\\prestige-termux-setup.exe",
-      "bytes": 26775213,
-      "sha256": "c10c79b64acb692cea7c4fd55abd6e6a2e50fe46587d817c307d5359f398a813",
+      "executable": "C:\\Users\\01dwa\\Documents\\ChatGPT\\github w4sy1\\dist\\desktop-0.3.1\\prestige-termux-setup.exe",
+      "bytes": 26776909,
+      "sha256": "778e1bc90aabddac6b5bd8cc6f384503b18551d04ec382c7dfab29494a588d62",
       "startup_checks": 3,
-      "passed": true
+      "passed": true,
+      "cached": false
     },
     {
       "project": "prestige-termux-toolkit",
-      "executable": "C:\\Users\\01dwa\\Documents\\ChatGPT\\github w4sy1\\dist\\desktop-0.3.0\\prestige-termux-toolkit.exe",
-      "bytes": 26773748,
-      "sha256": "f88bd20d4295c12266f8f210760c2adc5ed97cd96f1f3cc91bcc6a39fd2750cb",
+      "executable": "C:\\Users\\01dwa\\Documents\\ChatGPT\\github w4sy1\\dist\\desktop-0.3.1\\prestige-termux-toolkit.exe",
+      "bytes": 26774998,
+      "sha256": "5d0de5f76ac6a89adcfe29eff70af7f6fef1841f7078c279cc7691bf4a67dae7",
       "startup_checks": 3,
-      "passed": true
+      "passed": true,
+      "cached": false
     },
     {
       "project": "prestige-usb-toolkit",
-      "executable": "C:\\Users\\01dwa\\Documents\\ChatGPT\\github w4sy1\\dist\\desktop-0.3.0\\prestige-usb-toolkit.exe",
-      "bytes": 26778483,
-      "sha256": "4d37e79f0458e3e2826836a69f6e97269754f33efa34403256b5dcd88167c700",
+      "executable": "C:\\Users\\01dwa\\Documents\\ChatGPT\\github w4sy1\\dist\\desktop-0.3.1\\prestige-usb-toolkit.exe",
+      "bytes": 26778129,
+      "sha256": "1bd8e0c1a9a2f771aea6c12ad6bf1f186e44f3f0a1b63c6ccf8fc015e62bf8db",
       "startup_checks": 3,
-      "passed": true
+      "passed": true,
+      "cached": false
     },
     {
       "project": "prestige-windows-toolkit",
-      "executable": "C:\\Users\\01dwa\\Documents\\ChatGPT\\github w4sy1\\dist\\desktop-0.3.0\\prestige-windows-toolkit.exe",
-      "bytes": 25826417,
-      "sha256": "86ac1a1ec7b40015317fd9aa907ea7ec01642735d48747eb7a024676b4b8e664",
+      "executable": "C:\\Users\\01dwa\\Documents\\ChatGPT\\github w4sy1\\dist\\desktop-0.3.1\\prestige-windows-toolkit.exe",
+      "bytes": 25827608,
+      "sha256": "c5b0a44fe1dfc975d0e55b9f0e75223a6c46ecd7fd77333f418f088b0a5b3523",
       "startup_checks": 3,
-      "passed": true
+      "passed": true,
+      "cached": false
     }
   ]
 }

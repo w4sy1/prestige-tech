@@ -15,7 +15,9 @@ def invoke(command,expected=0):
     return result.stdout
 
 def main():
-    wheel=next((ROOT/'prestige-tech-cli/reports/wheels').glob('*.whl'))
+    version=json.loads((ROOT/'prestige-tech-cli/metadata.json').read_text(encoding='utf-8'))['version']
+    wheel=ROOT/'prestige-tech-cli/reports/wheels'/('prestige_tech_cli-'+version+'-py3-none-any.whl')
+    if not wheel.is_file():raise FileNotFoundError('Build current CLI wheel first: '+str(wheel))
     checks=[]
     with tempfile.TemporaryDirectory(prefix='prestige-integration-') as temp:
         temp=Path(temp);environment=temp/'venv';venv.EnvBuilder(with_pip=True).create(environment)

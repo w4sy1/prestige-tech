@@ -5,11 +5,13 @@ import json
 import os
 import subprocess
 import tempfile
+import argparse
 
 ROOT = Path(__file__).resolve().parents[1]
-DIRECTORY = ROOT / 'dist/desktop-0.3.0'
 
 def main():
+    parser=argparse.ArgumentParser();parser.add_argument('--version',default='0.3.1');args=parser.parse_args()
+    DIRECTORY = ROOT / ('dist/desktop-'+args.version)
     executable = DIRECTORY / 'prestige-hash-checker.exe'
     checks = []
     with tempfile.TemporaryDirectory(prefix='prestige-exe-') as temporary:
@@ -42,6 +44,19 @@ def main():
         output = run('verify-signature', '--manifest', source, '--public-key', public, '--signature', signature, expected=2)
         assert '"ok": false' in output
         checks.append('packaged encrypted Ed25519 keys, signatures and tamper rejection')
+        executable=DIRECTORY/'prestige-lan-radar.exe'
+        observation=folder/'hosts.json';database=folder/'hosts.sqlite'
+        observation.write_text(json.dumps([{'mac':'02:00:00:00:00:01','ips':['192.168.1.2','192.168.1.20']}]))
+        run('observe','--database',database,'--input',observation)
+        observation.write_text(json.dumps([{'mac':'02:00:00:00:00:02','ip':'192.168.1.20'}]))
+        assert 'POSSIBLE_MAC_CHANGE' in run('observe','--database',database,'--input',observation)
+        checks.append('packaged LAN change detection on secondary address')
+        executable=DIRECTORY/'prestige-malware-triage.exe'
+        evidence=folder/'evidence.json'
+        evidence.write_text(json.dumps({'processes':{'status':'OK','data':[{'pid':42,'signature':'NotSigned'}]},
+            'gpu':{'status':'OK','data':[{'pid':42,'sample_count':16,'sample_seconds':30,'mean_percent':90,'high_fraction':1}]}}))
+        assert 'Utrzymujące' in run('--input',evidence)
+        checks.append('packaged sustained GPU rule on synthetic evidence')
         dashboard = DIRECTORY / 'prestige-tech-dashboard.exe'
         if dashboard.exists():
             process = subprocess.run([str(dashboard), '--backend', '--list'],
@@ -50,7 +65,7 @@ def main():
             assert process.returncode == 0, process.stderr
             assert '"available": false' not in process.stdout, process.stdout
             checks.append('packaged dashboard discovers adjacent tools from unrelated cwd')
-    report = {'passed': True, 'checks': checks}
+    report = {'passed': True, 'version': args.version, 'checks': checks}
     (ROOT / 'development/frozen-verification.json').write_text(json.dumps(report, indent=2), encoding='utf-8')
     print(json.dumps(report, indent=2))
 

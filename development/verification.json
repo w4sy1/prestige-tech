@@ -1,6 +1,6 @@
 {
   "projects": 26,
-  "tests": 416,
+  "tests": 421,
   "passed": true,
   "results": [
     {
@@ -66,13 +66,13 @@
     {
       "project": "prestige-lan-radar",
       "passed": true,
-      "tests": 16,
+      "tests": 17,
       "missing": []
     },
     {
       "project": "prestige-malware-triage",
       "passed": true,
-      "tests": 19,
+      "tests": 23,
       "missing": []
     },
     {

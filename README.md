@@ -1,8 +1,20 @@
 # PRESTIGE TECH
 by Dominik Wasilak
 
-Zestaw **26 samodzielnych projektów (0.1.0 / 0.2.0)**: diagnostyka, administracja,
-monitoring, integralność, Android i raporty. Wszystkie na licencji MIT.
+Zestaw **26 samodzielnych projektów 0.3.1 (wydanie testowe)**: diagnostyka, administracja,
+monitoring, integralność, Android i raporty. Własny kod na MIT; zależności zachowują swoje licencje.
+
+## Windows: interfejs graficzny
+
+Rozpakuj `dist/prestige-tech-desktop-0.3.1-windows-x64.zip` i uruchom
+`prestige-tech-dashboard.exe`. Każdy EXE jest również samodzielnym programem.
+Python jest dołączony. PowerShell 7, ADB, Nmap i środowisko Termux pozostają
+zewnętrznymi zależnościami dla odpowiednich funkcji.
+
+Źródła GUI: `python prestige-tech-dashboard/gui.py`.
+Budowa pojedynczego projektu: jego `docs/BUILD.md` i `build_exe.py`.
+Pełny zestaw: `python development/build_desktop.py --version 0.3.1 --force`.
+Przegląd wymagań i granic testów: [SPECIFICATION-AUDIT.md](development/SPECIFICATION-AUDIT.md).
 
 ## Szybki start
 
@@ -17,7 +29,9 @@ pwsh -NoProfile -File ./prestige-windows-toolkit/prestige.ps1 -Command collect -
 ```
 
 Każdy program ma README i docs/USAGE.md (Windows Toolkit: README).
-Programy Python nie wymagają pakietów pip. Wybrane funkcje wymagają backendów:
+Podstawowe backendy Python używają biblioteki standardowej. PDF wymaga
+`requirements-gui.txt`, a podpisy `requirements-signing.txt`. EXE zawierają te zależności.
+Wybrane funkcje wymagają backendów:
 ADB, Nmap, ping, PowerShell, ip lub pakietów Termuxa.
 
 ## Komenda prestige
@@ -37,14 +51,18 @@ Launcher nie dodaje --apply/-Execute ani nie zatwierdza operacji za użytkownika
 To nie jest ukończona implementacja każdego punktu specyfikacji.
 `python development/verify.py` uruchamia testy wszystkich samodzielnych projektów.
 
-Wynik: **391 testów**, 26 testów uruchomienia i 8 testów integracji instalowanej
-komendy CLI. Weryfikacja na Windows z Python 3.14 i PowerShell 7. Nie wykonano pełnej
+Wynik: **421 testów**, 78 kontroli uruchomienia EXE, pięć scenariuszy integracji EXE
+i osiem testów integracji instalowanej komendy CLI. Dodatkowo sprawdzono GUI
+z dużym wynikiem, UTF-8 i zatrzymaniem/restartem procesu.
+Weryfikacja na Windows z Python 3.14 i PowerShell 7. Nie wykonano pełnej
 macierzy wersji Python ani testów fizycznych urządzeń Android/Termux.
 
 ## Prywatność i bezpieczeństwo
 
 Raporty/logi pozostają lokalne. Ping, DNS i Nmap wykonują ruch po świadomym wywołaniu.
-Nie ma zewnętrznego providera AI ani telemetrii. Raporty mogą zawierać prywatne dane.
+AI domyślnie działa lokalnie. Opcjonalny provider OpenAI wysyła wybrane metryki
+po jego wybraniu; GUI wymaga potwierdzenia wysłania. Klucz pochodzi ze środowiska
+lub pamięci sesji. Nie ma telemetrii. Raporty mogą zawierać prywatne dane.
 Czyszczenie TEMP używa kwarantanny. SFC/DISM/Winsock nie mają gwarantowanego rollbacku;
 snapshot diagnostyczny nie jest kopią systemu. Heurystyki nie są werdyktem malware.
 
