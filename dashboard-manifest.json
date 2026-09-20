@@ -1,11 +1,11 @@
 ﻿{
     "schema":  1,
-    "generated_at":  "2026-09-20T15:14:42.9870325+00:00",
+    "generated_at":  "2026-09-20T15:28:52.3792561+00:00",
     "stable":  {
-                   "version":  "1.0.1",
-                   "installer_url":  "https://github.com/w4sy1/prestige-tech/releases/download/dashboard-v1.0.1/Prestige-Tech-Setup.exe",
-                   "sha256":  "7b62f9b379a26c762327e31b8d8a2f8fcdffe2e94f6fc45bf39b531079249d4a",
-                   "size":  49765500,
-                   "changelog":  "Dodano automatyczny Self Update Launcher dla Prestige Tech Dashboard."
+                   "version":  "1.0.2",
+                   "installer_url":  "https://github.com/w4sy1/prestige-tech/releases/download/dashboard-v1.0.2/Prestige-Tech-Setup.exe",
+                   "sha256":  "013f7754b426db96c82259ab43fa586f1de272914536f1203b9b1e0cc25825c8",
+                   "size":  49765227,
+                   "changelog":  "Test automatycznej aktualizacji Self Update Launcher v1.0.1 -\u003e v1.0.2."
                }
 }
