@@ -1,0 +1,21 @@
+PRESTIGE TECH - THIRD-PARTY NOTICES
+
+Prestige Tech original code is governed by the Prestige Tech Free Use License.
+
+This repository is a distribution and release repository for Prestige Tech
+software. It contains manifests, documentation, release metadata and published
+release artifacts.
+
+Prestige Tech binaries may include third-party software, libraries, frameworks,
+fonts or other components.
+
+Those third-party components remain subject to their respective licenses,
+copyright notices and applicable terms.
+
+Detailed third-party notices for individual Prestige Tech applications and
+modules are maintained with those applications and modules.
+
+Prestige Tech Dashboard third-party notices:
+https://github.com/w4sy1/prestige-tech-dashboard/blob/dashboard-v1/THIRD_PARTY_NOTICES.txt
+
+Copyright (c) 2026 Dominik Wasilak / Prestige Tech
