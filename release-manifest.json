@@ -1,0 +1,271 @@
+{
+  "schema": 1,
+  "repository": "w4sy1/prestige-tech",
+  "generated_at": "2026-09-20T13:12:22.326399+00:00",
+  "modules": {
+    "prestige-windows-toolkit": {
+      "name": "Diagnostyka Windows",
+      "stable": {
+        "version": "0.3.1",
+        "asset_url": "https://github.com/w4sy1/prestige-tech/releases/download/modules-v0.3.1/prestige-windows-toolkit.exe",
+        "sha256": "c032a7eec7f501b8fd94f5fb48bff80a74485bc64949848a740d53386d408ad6",
+        "size": 13194789,
+        "changelog": ""
+      },
+      "beta": null
+    },
+    "prestige-system-snapshot": {
+      "name": "Migawka systemu",
+      "stable": {
+        "version": "0.3.1",
+        "asset_url": "https://github.com/w4sy1/prestige-tech/releases/download/modules-v0.3.1/prestige-system-snapshot.exe",
+        "sha256": "c809b57f9657e7d16252a97f104fb58e997392c050fd74fbc06a37ef4e448ff8",
+        "size": 14266872,
+        "changelog": ""
+      },
+      "beta": null
+    },
+    "prestige-pc-cleanup": {
+      "name": "Czyszczenie komputera",
+      "stable": {
+        "version": "0.3.1",
+        "asset_url": "https://github.com/w4sy1/prestige-tech/releases/download/modules-v0.3.1/prestige-pc-cleanup.exe",
+        "sha256": "88dadfe09454891c76f59754c64ee4f07e424598d5d0deb2c1c87f95191e0907",
+        "size": 14269877,
+        "changelog": ""
+      },
+      "beta": null
+    },
+    "prestige-internet-diagnostic": {
+      "name": "Diagnostyka Internetu",
+      "stable": {
+        "version": "0.3.1",
+        "asset_url": "https://github.com/w4sy1/prestige-tech/releases/download/modules-v0.3.1/prestige-internet-diagnostic.exe",
+        "sha256": "e282170523fbdc0a44a2a87ab1f4ce75cd0af59d196c718921bd8ee8030ab5c7",
+        "size": 14270680,
+        "changelog": ""
+      },
+      "beta": null
+    },
+    "prestige-dns-benchmark": {
+      "name": "Test serwerów DNS",
+      "stable": {
+        "version": "0.3.1",
+        "asset_url": "https://github.com/w4sy1/prestige-tech/releases/download/modules-v0.3.1/prestige-dns-benchmark.exe",
+        "sha256": "9eeddbe8b32f2bd69940c1998feab20c63e6d10fc66b312925a95ac43e1ead2c",
+        "size": 14277118,
+        "changelog": ""
+      },
+      "beta": null
+    },
+    "prestige-network-optimizer": {
+      "name": "Optymalizacja sieci",
+      "stable": {
+        "version": "0.3.1",
+        "asset_url": "https://github.com/w4sy1/prestige-tech/releases/download/modules-v0.3.1/prestige-network-optimizer.exe",
+        "sha256": "f7c7d4e122b821afeb6756d1051f361b4a209094556f3d8b970e6095a57ee051",
+        "size": 14267978,
+        "changelog": ""
+      },
+      "beta": null
+    },
+    "prestige-nmap-profiles": {
+      "name": "Profile Nmap",
+      "stable": {
+        "version": "0.3.1",
+        "asset_url": "https://github.com/w4sy1/prestige-tech/releases/download/modules-v0.3.1/prestige-nmap-profiles.exe",
+        "sha256": "d4dae58d0bc47e887c37ad6b8b87cac0fdac0edbdb3fcd69eb875ebb04a9b6cc",
+        "size": 14374701,
+        "changelog": ""
+      },
+      "beta": null
+    },
+    "prestige-netradar": {
+      "name": "NetRadar",
+      "stable": {
+        "version": "0.3.1",
+        "asset_url": "https://github.com/w4sy1/prestige-tech/releases/download/modules-v0.3.1/prestige-netradar.exe",
+        "sha256": "e4f9383c0d81a9e4117679ea3d1dbff0cffc1ea23c10e614605534fac95e96bd",
+        "size": 14272427,
+        "changelog": ""
+      },
+      "beta": null
+    },
+    "prestige-lan-radar": {
+      "name": "Radar LAN",
+      "stable": {
+        "version": "0.3.1",
+        "asset_url": "https://github.com/w4sy1/prestige-tech/releases/download/modules-v0.3.1/prestige-lan-radar.exe",
+        "sha256": "60329e5f58cc1878d06f084acfb941832bb9cf37c0fdfc58f96e3b5f4ad1a796",
+        "size": 14566012,
+        "changelog": ""
+      },
+      "beta": null
+    },
+    "prestige-network-snapshot": {
+      "name": "Migawka sieci",
+      "stable": {
+        "version": "0.3.1",
+        "asset_url": "https://github.com/w4sy1/prestige-tech/releases/download/modules-v0.3.1/prestige-network-snapshot.exe",
+        "sha256": "865ee706a78d25a0c120c8dfc5dc13db153017988285f9ccb349f2cf242f136c",
+        "size": 14565581,
+        "changelog": ""
+      },
+      "beta": null
+    },
+    "prestige-adb-diagnostic": {
+      "name": "Diagnostyka ADB",
+      "stable": {
+        "version": "0.3.1",
+        "asset_url": "https://github.com/w4sy1/prestige-tech/releases/download/modules-v0.3.1/prestige-adb-diagnostic.exe",
+        "sha256": "2ad070354f0c9e5d750b988072b65596887a1ebce020128c5982cec628bb360a",
+        "size": 14267531,
+        "changelog": ""
+      },
+      "beta": null
+    },
+    "prestige-android-inspector": {
+      "name": "Inspektor Androida",
+      "stable": {
+        "version": "0.3.1",
+        "asset_url": "https://github.com/w4sy1/prestige-tech/releases/download/modules-v0.3.1/prestige-android-inspector.exe",
+        "sha256": "e663656224d1a1ea16d7742c4e1927a771410569d80b2d1e19e0d6a0225d38a2",
+        "size": 14267772,
+        "changelog": ""
+      },
+      "beta": null
+    },
+    "prestige-security-check": {
+      "name": "Kontrola bezpieczeństwa",
+      "stable": {
+        "version": "0.3.1",
+        "asset_url": "https://github.com/w4sy1/prestige-tech/releases/download/modules-v0.3.1/prestige-security-check.exe",
+        "sha256": "69dc20da70f1ab1baa33fb3da54b3a7c48c4f9531d96013049821b27f796e9ae",
+        "size": 14270286,
+        "changelog": ""
+      },
+      "beta": null
+    },
+    "prestige-malware-triage": {
+      "name": "Wstępna analiza malware",
+      "stable": {
+        "version": "0.3.1",
+        "asset_url": "https://github.com/w4sy1/prestige-tech/releases/download/modules-v0.3.1/prestige-malware-triage.exe",
+        "sha256": "d3ec5e2f9e94c01a514b909867ef48039d786e645c46041c68feb76447edbcf9",
+        "size": 14278851,
+        "changelog": ""
+      },
+      "beta": null
+    },
+    "prestige-file-inspector": {
+      "name": "Inspektor plików",
+      "stable": {
+        "version": "0.3.1",
+        "asset_url": "https://github.com/w4sy1/prestige-tech/releases/download/modules-v0.3.1/prestige-file-inspector.exe",
+        "sha256": "8bc699bcebb448b9d64d62373146cf5a3aed412fdb5e202c404f15653972bfb5",
+        "size": 14264905,
+        "changelog": ""
+      },
+      "beta": null
+    },
+    "prestige-hash-checker": {
+      "name": "Sprawdzanie sum kontrolnych",
+      "stable": {
+        "version": "0.3.1",
+        "asset_url": "https://github.com/w4sy1/prestige-tech/releases/download/modules-v0.3.1/prestige-hash-checker.exe",
+        "sha256": "aed35c1265052ce5decffe1af32a4d32e093bf72c2369596ac6dc6b856d84ac0",
+        "size": 14267444,
+        "changelog": ""
+      },
+      "beta": null
+    },
+    "prestige-integrity-monitor": {
+      "name": "Monitor integralności",
+      "stable": {
+        "version": "0.3.1",
+        "asset_url": "https://github.com/w4sy1/prestige-tech/releases/download/modules-v0.3.1/prestige-integrity-monitor.exe",
+        "sha256": "8a0b14792a2d3459470884fdbd1ec49b9eddcb85461591d1614fdad72e40c01a",
+        "size": 14272852,
+        "changelog": ""
+      },
+      "beta": null
+    },
+    "prestige-folder-watch": {
+      "name": "Obserwacja folderu",
+      "stable": {
+        "version": "0.3.1",
+        "asset_url": "https://github.com/w4sy1/prestige-tech/releases/download/modules-v0.3.1/prestige-folder-watch.exe",
+        "sha256": "d5f573996effa8934040ffbb5d8809209834864acf4f2ad5886510180f4670b4",
+        "size": 14268158,
+        "changelog": ""
+      },
+      "beta": null
+    },
+    "prestige-backup": {
+      "name": "Kopie zapasowe",
+      "stable": {
+        "version": "0.3.1",
+        "asset_url": "https://github.com/w4sy1/prestige-tech/releases/download/modules-v0.3.1/prestige-backup.exe",
+        "sha256": "361c4b0224c09d5ce0b603f8a56f696527fa3853ed6810ef8b133666cd42edb5",
+        "size": 14279865,
+        "changelog": ""
+      },
+      "beta": null
+    },
+    "prestige-repair-report": {
+      "name": "Raport serwisowy",
+      "stable": {
+        "version": "0.3.1",
+        "asset_url": "https://github.com/w4sy1/prestige-tech/releases/download/modules-v0.3.1/prestige-repair-report.exe",
+        "sha256": "c6dcb20fbec3bb3431c5436f6278c32cb421ab21efa976516c4a4b5d4477fbab",
+        "size": 14264838,
+        "changelog": ""
+      },
+      "beta": null
+    },
+    "prestige-usb-toolkit": {
+      "name": "Narzędzia USB",
+      "stable": {
+        "version": "0.3.1",
+        "asset_url": "https://github.com/w4sy1/prestige-tech/releases/download/modules-v0.3.1/prestige-usb-toolkit.exe",
+        "sha256": "f06885943dde93783a2f24b1a8062dbd063fac9ed213afa3073f58c626658a0c",
+        "size": 14271144,
+        "changelog": ""
+      },
+      "beta": null
+    },
+    "prestige-termux-setup": {
+      "name": "Konfiguracja Termux",
+      "stable": {
+        "version": "0.3.1",
+        "asset_url": "https://github.com/w4sy1/prestige-tech/releases/download/modules-v0.3.1/prestige-termux-setup.exe",
+        "sha256": "80f54f63537a9f32401434596af686f3400505a13b51d7d6be51c3b2e066dc2b",
+        "size": 14268662,
+        "changelog": ""
+      },
+      "beta": null
+    },
+    "prestige-termux-toolkit": {
+      "name": "Termux Toolkit",
+      "stable": {
+        "version": "0.3.1",
+        "asset_url": "https://github.com/w4sy1/prestige-tech/releases/download/modules-v0.3.1/prestige-termux-toolkit.exe",
+        "sha256": "ea7077a1ced3960edf5e04f15df71d5caed8c1617ad4f9928d8644b231d00c3d",
+        "size": 14265757,
+        "changelog": ""
+      },
+      "beta": null
+    },
+    "prestige-ai-diagnostic-assistant": {
+      "name": "AI Diagnostic Assistant",
+      "stable": {
+        "version": "0.3.1",
+        "asset_url": "https://github.com/w4sy1/prestige-tech/releases/download/modules-v0.3.1/prestige-ai-diagnostic-assistant.exe",
+        "sha256": "c72fcb362433af46ee7679883196f919c1a6b635c0a93f011ead34fdf61ed3be",
+        "size": 14272206,
+        "changelog": ""
+      },
+      "beta": null
+    }
+  }
+}
