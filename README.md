@@ -2,7 +2,7 @@
 by Dominik Wasilak
 
 Zestaw **26 samodzielnych projektów — paczka 0.3.4 (wydanie testowe)**: diagnostyka, administracja,
-monitoring, integralność, Android i raporty. Własny kod na MIT; zależności zachowują swoje licencje.
+monitoring, integralność, Android i raporty. Własny kod jest objęty Prestige Tech Free Use License; zależności zachowują swoje licencje.
 
 ## Pobieranie z GitHuba
 
@@ -89,6 +89,6 @@ snapshot diagnostyczny nie jest kopią systemu. Heurystyki nie są werdyktem mal
 
 ## Autor, licencja i wsparcie
 
-Dominik Wasilak — Prestige Tech — prestigetech@gmail.com. Licencja MIT.
+Dominik Wasilak — Prestige Tech — prestigetech@gmail.com. Licencja: Prestige Tech Free Use License.
 Opcja wsparcia autora zostanie udostępniona w przyszłości.
 Każdy samodzielny projekt zawiera config/author.json.
