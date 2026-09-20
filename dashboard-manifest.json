@@ -1,11 +1,11 @@
 ﻿{
     "schema":  1,
-    "generated_at":  "2026-09-20T16:16:25.1280860+00:00",
+    "generated_at":  "2026-09-20T16:41:10.9420668+00:00",
     "stable":  {
-                   "version":  "1.0.3",
-                   "installer_url":  "https://github.com/w4sy1/prestige-tech/releases/download/dashboard-v1.0.3/Prestige-Tech-Setup.exe",
-                   "sha256":  "e5c4cb305ff9a4b9a581c826955b720a7bfd3daa05c5f5d7d49a52f6440105b3",
-                   "size":  53194166,
-                   "changelog":  "Kontrolowany test automatycznej aktualizacji Prestige Tech Dashboard v1.0.2 -\u003e v1.0.3."
+                   "version":  "1.1.0",
+                   "installer_url":  "https://github.com/w4sy1/prestige-tech/releases/download/dashboard-v1.1.0/Prestige-Tech-Setup.exe",
+                   "sha256":  "1cd342926f78dc250d27f8aa563c738b78f685fee63dba408c8f178d1771991d",
+                   "size":  53194109,
+                   "changelog":  "Ujednolicone wersjonowanie: Dashboard, O programie, Windows FileVersion, Launcher, instalator i manifest = v1.1.0."
                }
 }
