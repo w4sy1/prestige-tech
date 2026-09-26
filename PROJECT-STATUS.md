@@ -1,5 +1,22 @@
 # Prestige Tech — stan realizacji
 
+## Konsolidacja centrów — rozpoczęta 2026-09-26
+
+Plan migracji 26 programów do większych centrów i wykryte duplikaty opisano w
+`development/CONSOLIDATION-MAP.md`. Audyt wykazał identyczne pliki wykrywania
+LAN w LAN Radar i Network Snapshot oraz wiele kopii `runtime.py` i eksportu PDF.
+Istniejące aplikacje i wydania nie zostały usunięte. Dashboard ma już własny
+system komponentów PySide6, ale nadal wskazuje 26 modułów i stare nazwy EXE.
+
+Pierwszy kod wspólnego Core to `prestige_core.FileHashService`: jeden odczyt
+pliku może wyliczyć kilka hashy i wykrywa zmianę pliku podczas odczytu.
+Jest spakowany jako lokalny pakiet Python `prestige-core`, z osobnymi testami.
+Żadne z dotychczasowych narzędzi ani GUI nie korzysta jeszcze z tego pakietu;
+nie ma nowych Center, EXE ani integracji z Dashboardem. Do dalszych etapów
+pozostają Network Center, Monitor, kolejne centra, migracja funkcji, testy
+sprzętowe, aktualizacja Dashboardu i pełny build. Prestige Distant,
+iDiagnostics oraz Registry Tool wymagają ustalenia lokalizacji kodu.
+
 ## Publikacja GitHub — 2026-09-15
 
 Opublikowano 26 samodzielnych repozytoriów i główne `w4sy1/prestige-tech`, wszystkie publiczne na MIT. Każde ma wydanie Pre-release; główne wydanie 0.3.4 zawiera pełną paczkę Windows i źródła. Linki: [PROGRAMS.md](PROGRAMS.md).
