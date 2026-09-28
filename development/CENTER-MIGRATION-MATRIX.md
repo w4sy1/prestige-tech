@@ -3,8 +3,10 @@
 `Częściowy` oznacza tylko wymieniony, przetestowany wycinek. Żaden Center nie
 zastępuje jeszcze starego programu. `Nie` w kolumnie EXE oznacza brak
 **zweryfikowanego EXE nowego Center**, nie stan opublikowanego starego EXE.
-Dashboard nadal pokazuje stare moduły; jego wygląd i manifest nie zostały
-zmienione w tej gałęzi.
+Dashboard nadal pokazuje stare moduły. Jego manifest zawiera także 10 nowych
+Centrów uruchamianych z sąsiedniego repozytorium `prestige-tech`; wygląd
+Dashboardu pozostał bez zmian. Kolumna `Legacy` poniżej oznacza, że stary
+program nadal ma własną pozycję, a nie brak pozycji nowego Center.
 
 | Stary moduł | Center / sekcja | Status nowego odpowiednika | Test nowego odpowiednika | EXE Center | Dashboard |
 |---|---|---|---|---|---|
@@ -34,7 +36,7 @@ zmienione w tej gałęzi.
 | Termux Toolkit | Termux Center / Toolkit | Wspólny CLI i GUI z ośmioma kategoriami i operacjami, SHA-256 pliku, archiwum tar z wykluczeniem znanych sekretów i manifestem SHA-256 | Fixture poleceń, archiwum i verify PASS; polecenia Android/Termux:API na urządzeniu niesprawdzone | Nie | Legacy |
 | AI Diagnostic Assistant | Wspólna analiza | Core ma normalizację raportów Centrów, lokalne reguły, punktację i opcjonalny provider OpenAI z podglądem metryk bez alertów opisowych; wspólny ekran w System i Security Center z potwierdzeniem wysyłki oraz eksportem JSON/PDF | 3 testy Core/GUI PASS; zewnętrzny provider i koszty API niezweryfikowane na rzeczywistym koncie | Nie | Legacy |
 | Tech CLI | Wspólny CLI | Instalowalna komenda `prestige` uruchamia 10 nowych Centrów, przekazuje argumenty i kody wyjścia; `legacy` zachowuje katalog 26 samodzielnych narzędzi; `ai` daje lokalną analizę, podgląd i jawne `--send` | Testy dry-run/forwarding i zainstalowany wheel: smoke System/AI/Report PASS; brak pełnego testu EXE i wszystkich 26 legacy backendów | Nie | Legacy |
-| Tech Dashboard | Launcher | Bez zmian | Nie dotyczy tej gałęzi | Nie dotyczy | Legacy |
+| Tech Dashboard | Launcher | Dodano pozycje 10 nowych Centrów obok programów legacy; wygląd bez zmian | Testy integracji Dashboardu PASS; EXE Centrów niezweryfikowane | Nie dotyczy | Legacy + Centra |
 
 Nowe zakresy bez starego odpowiednika: Registry Manager ma 29 ręcznych
 odczytów oraz 471 odrębnych odczytów z lokalnych ADMX na tym komputerze;
@@ -45,5 +47,5 @@ Historyczny opis wcześniejszego etapu: 25 zweryfikowanych
 odczytów i jedną operację zapisu sprawdzoną tylko na fixture; szczegóły są
 w `REGISTRY-OPERATIONS.md`. Storage & Recovery ma inwentaryzację dysków,
 testowy silnik RAW dla plików i backend obrazu PhysicalDrive sprawdzony tylko
-na fixture. Żaden z
-tych zakresów nie jest jeszcze dostępny z Dashboardu.
+na fixture. Registry Manager i Storage & Recovery są dostępne jako pozycje
+źródłowe w Dashboardzie, lecz ich nowe EXE nie zostały zweryfikowane.
