@@ -55,10 +55,11 @@ i `prestige_monitor/gui.py`.
 | Klucze, podpis i weryfikacja podpisu | Tak | Fixture; tożsamość właściciela klucza pozostaje poza zakresem |
 
 Manifesty i podpisy przeszły test zgodności w obie strony: stary plik
-weryfikuje nowe Centrum i odwrotnie. Stare repozytorium jest publicznie
-zarchiwizowane, więc kod i prerelease można nadal odczytać. Dashboard nadal
-potrafi uruchomić lokalnie zainstalowany stary EXE; nowy EXE Monitora nie
-został jeszcze przetestowany.
+weryfikuje nowe Centrum i odwrotnie. Stare osobne repozytorium usunięto z
+GitHuba; pełna historia Git ma lokalny bundle, a stary EXE pozostał w
+wydaniu głównego repo. Dashboard nadal pokazuje Hash Checker i potrafi
+uruchomić lokalnie zainstalowany stary EXE. Nowy EXE Monitora nie został
+jeszcze przetestowany.
 
 ## Integrity Monitor → Monitor
 
@@ -113,6 +114,21 @@ odkrywania LAN i `prestige_network_center/gui.py`.
 Nowe porównanie normalizuje IP i MAC bez zmiany zapisanych migawek. Nie
 potwierdzono jeszcze parytetu danych `discovery` ze starej migawki ani
 wszystkich parametrów starego CLI.
+
+## System Snapshot, Security Check, Repair Report i PC Cleanup → Centra
+
+| Stare repozytorium i funkcje | Odpowiednik w Center | Potwierdzenie |
+|---|---|---|
+| System Snapshot: 12 sekcji Windows, zapis i porównanie offline z identyfikacją zmian | `prestige_core/system_snapshot.py`, System Center | 14 testów starego repo i testy Center PASS; lokalny odczyt 12/12 sekcji |
+| Security Check: 21 kontroli, analiza reguł i odczyt pliku JSON | `prestige_core/security_check.py`, `security_rules.py`, Security Center | 19 testów starego repo i testy Center PASS; lokalnie 4 sekcje UNKNOWN |
+| Repair Report: szablon, walidacja, HTML/JSON/TXT | `prestige_core/report_service.py`, Report Center | 11 testów starego repo i testy Center PASS; dodatkowo PDF |
+| PC Cleanup: profile, skan, plan, kwarantanna i przywrócenie | `prestige_core/pc_cleanup.py`, System Center | 17 testów starego repo i fixture Center PASS; prawdziwego czyszczenia nie wykonano |
+
+Po potwierdzeniu odpowiedników kodowych usunięto cztery osobne repozytoria
+z GitHuba. Każde ma zweryfikowany pełny bundle historii Git w lokalnym
+`C:\Users\01dwa\.codex\backups\prestige-tech-legacy`. Ich stare EXE pozostają
+w wydaniu zbiorczym i w katalogu Dashboardu obok Centrów. Nowe EXE Centrów
+oraz integracja Repair Report ze wszystkimi Centrami nie są zweryfikowane.
 
 Pozostałe programy są nadal opisane na poziomie modułów w
 `CENTER-MIGRATION-MATRIX.md`; wymagają audytu komend i zachowań w tym samym

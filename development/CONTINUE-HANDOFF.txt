@@ -1,15 +1,30 @@
 PRESTIGE TECH — PLIK PRZEKAZANIA PRACY I TESTÓW
 Stan: 2026-09-28. Aktualizuj ten plik po każdym istotnym etapie.
 
-NAJNOWSZY ETAP — ARCHIWIZACJA HASH CHECKER
-`w4sy1/prestige-hash-checker` jest zarchiwizowane (publiczne, read-only),
-nie usunięte. Wszystkie stare funkcje mają odpowiedniki w Monitorze;
-stare/nowe manifesty i podpisy zweryfikowano w obie strony. Dashboard ma
-`download_url: null` dla starego modułu i uruchamia lokalnie instalowany EXE;
-jego 16 testów PASS po archiwizacji. `prestige-tech`: 213 PASS, 2 skip.
-Nowe EXE Monitora, duże drzewa i końcowy test użytkownika pozostają otwarte.
-W Dashboardzie są dwa zastane nieśledzone pliki `ui/main_window.py.*backup*`
-oraz `ui/main_window.py.before-encoding-fix`; nie zmieniano ich.
+NAJNOWSZY ETAP — CZTERY ZDUBLOWANE REPOZYTORIA
+Usunięto z GitHuba stare osobne repozytoria System Snapshot, Security Check,
+Repair Report i PC Cleanup. Każde ma zweryfikowany pełny bundle historii Git
+w `C:\Users\01dwa\.codex\backups\prestige-tech-legacy`; lokalne checkouty
+pozostały. Ich funkcje kodowe są w System/Security/Report Center. Stare EXE
+pozostają w wydaniu `w4sy1/prestige-tech` i w katalogu Dashboardu obok Centrów.
+Testy starych repo 14/19/11/17 PASS, `prestige-tech` 213 PASS/2 skip,
+Dashboard 16 PASS. Nowych EXE oraz realnego czyszczenia nie sprawdzano.
+Na GitHubie pozostaje 21 repozytoriów z prefiksem `prestige-`, w tym główne
+repo i Dashboard. Dalszych nie
+usuwaj bez audytu pełnego parytetu. `PROGRAMS.md` nie zawiera martwych linków.
+
+NAJNOWSZY ETAP — USUNIĘCIE ZDUBLOWANEGO REPO HASH CHECKER
+Stare osobne repo `w4sy1/prestige-hash-checker` usunięto z GitHuba po
+potwierdzeniu odpowiedników wszystkich funkcji w Monitorze i zgodności
+manifestów/podpisów w obie strony. GitHub API zwraca 404. Lokalny checkout
+pozostał; zweryfikowany pełny bundle historii jest pod
+`C:\Users\01dwa\.codex\backups\prestige-tech-legacy\prestige-hash-checker-2026-09-28.bundle`.
+Stary EXE jest nadal w wydaniu głównego `prestige-tech`. Dashboard bez zmian
+zawiera obie pozycje: Hash Checker i Monitor; `download_url` starego modułu
+jest null. 16 testów Dashboardu PASS po usunięciu repo. Dwa zastane
+nieśledzone pliki `ui/main_window.py.before-encoding-fix` oraz
+`ui/main_window.py.encoding-backup` pozostawiono. Nowy EXE Monitora, duże
+drzewa i końcowy test użytkownika pozostają otwarte.
 
 NAJNOWSZY ETAP — NETWORK SNAPSHOT
 Porównanie migawek scala IP powtarzającego się MAC i normalizuje zapis
@@ -50,8 +65,9 @@ PUBLIKACJA GITHUB 2026-09-28
 Kod 10 Centrów jest w master w4sy1/prestige-tech (PR #1), a katalog oraz
 źródłowe uruchamianie Centrów w master w4sy1/prestige-tech-dashboard (PR #1).
 CI Dashboardu na Pythonie 3.11 i 3.14 jest zielone także po scaleniu.
-Wszystkie 26 repozytoriów Prestige Tech pozostają aktywne; ich opisy wskazują
-Prestige Tech Free Use License. Nie powstało nowe wydanie EXE ani release.
+Pierwotnie 26 repozytoriów z prefiksem `prestige-` było aktywnych;
+po usunięciu pięciu starych repozytoriów pozostało 21. Ich opisy wskazują Prestige
+Tech Free Use License. Nie powstało nowe wydanie EXE Centrów ani release.
 Ręczne testy użytkownika i naprawa bundlera PySide6 pozostają otwarte.
 
 CEL I ZASADY

@@ -1,6 +1,10 @@
 # Programy PRESTIGE TECH
 
-Każdy starszy program ma samodzielne repozytorium i historyczne wydanie testowe z EXE.
+Ta lista obejmuje starsze programy z nadal dostępnymi osobnymi repozytoriami.
+Kod Hash Checker, PC Cleanup, Repair Report, Security Check i System Snapshot
+jest w Centrach tego repozytorium; ich osobne repozytoria usunięto. Pozycje
+starych EXE pozostają w Dashboardzie, a historyczne pliki EXE są w
+[wydaniu zbiorczym](https://github.com/w4sy1/prestige-tech/releases/tag/modules-v0.3.1).
 Aktualną licencję własnego kodu określa plik `LICENSE` danego repozytorium;
 nie należy mylić jej z licencjami zależności ani starszymi tagami wydań.
 
@@ -13,7 +17,6 @@ nie należy mylić jej z licencjami zależności ani starszymi tagami wydań.
 | [Prestige DNS Benchmark](https://github.com/w4sy1/prestige-dns-benchmark) | 0.3.1 | [EXE i licencje](https://github.com/w4sy1/prestige-dns-benchmark/releases/tag/v0.3.1) |
 | [Prestige File Inspector](https://github.com/w4sy1/prestige-file-inspector) | 0.3.1 | [EXE i licencje](https://github.com/w4sy1/prestige-file-inspector/releases/tag/v0.3.1) |
 | [Prestige Folder Watch](https://github.com/w4sy1/prestige-folder-watch) | 0.3.1 | [EXE i licencje](https://github.com/w4sy1/prestige-folder-watch/releases/tag/v0.3.1) |
-| [Prestige Hash Checker](https://github.com/w4sy1/prestige-hash-checker) | 0.3.1 | [EXE i licencje](https://github.com/w4sy1/prestige-hash-checker/releases/tag/v0.3.1) |
 | [Prestige Integrity Monitor](https://github.com/w4sy1/prestige-integrity-monitor) | 0.3.2 | [EXE i licencje](https://github.com/w4sy1/prestige-integrity-monitor/releases/tag/v0.3.2) |
 | [Prestige Internet Diagnostic](https://github.com/w4sy1/prestige-internet-diagnostic) | 0.3.1 | [EXE i licencje](https://github.com/w4sy1/prestige-internet-diagnostic/releases/tag/v0.3.1) |
 | [Prestige LAN Radar](https://github.com/w4sy1/prestige-lan-radar) | 0.3.1 | [EXE i licencje](https://github.com/w4sy1/prestige-lan-radar/releases/tag/v0.3.1) |
@@ -22,10 +25,6 @@ nie należy mylić jej z licencjami zależności ani starszymi tagami wydań.
 | [Prestige Network Optimizer](https://github.com/w4sy1/prestige-network-optimizer) | 0.3.4 | [EXE i licencje](https://github.com/w4sy1/prestige-network-optimizer/releases/tag/v0.3.4) |
 | [Prestige Network Snapshot](https://github.com/w4sy1/prestige-network-snapshot) | 0.3.1 | [EXE i licencje](https://github.com/w4sy1/prestige-network-snapshot/releases/tag/v0.3.1) |
 | [Prestige Nmap Profiles](https://github.com/w4sy1/prestige-nmap-profiles) | 0.3.1 | [EXE i licencje](https://github.com/w4sy1/prestige-nmap-profiles/releases/tag/v0.3.1) |
-| [Prestige PC Cleanup](https://github.com/w4sy1/prestige-pc-cleanup) | 0.3.3 | [EXE i licencje](https://github.com/w4sy1/prestige-pc-cleanup/releases/tag/v0.3.3) |
-| [Prestige Repair Report](https://github.com/w4sy1/prestige-repair-report) | 0.3.1 | [EXE i licencje](https://github.com/w4sy1/prestige-repair-report/releases/tag/v0.3.1) |
-| [Prestige Security Check](https://github.com/w4sy1/prestige-security-check) | 0.3.1 | [EXE i licencje](https://github.com/w4sy1/prestige-security-check/releases/tag/v0.3.1) |
-| [Prestige System Snapshot](https://github.com/w4sy1/prestige-system-snapshot) | 0.3.1 | [EXE i licencje](https://github.com/w4sy1/prestige-system-snapshot/releases/tag/v0.3.1) |
 | [Prestige Tech CLI](https://github.com/w4sy1/prestige-tech-cli) | 0.3.1 | [EXE i licencje](https://github.com/w4sy1/prestige-tech-cli/releases/tag/v0.3.1) |
 | [Prestige Tech Dashboard](https://github.com/w4sy1/prestige-tech-dashboard) | 0.3.1 | [EXE i licencje](https://github.com/w4sy1/prestige-tech-dashboard/releases/tag/v0.3.1) |
 | [Prestige Termux Setup](https://github.com/w4sy1/prestige-termux-setup) | 0.3.4 | [EXE i licencje](https://github.com/w4sy1/prestige-termux-setup/releases/tag/v0.3.4) |

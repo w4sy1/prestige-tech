@@ -13,21 +13,33 @@ Dziesięć Centrów i dokumentacja wersji testowej są na domyślnej gałęzi
 Połączenie źródłowych Centrów z Dashboardem jest na domyślnej gałęzi
 `w4sy1/prestige-tech-dashboard`
 ([PR #1](https://github.com/w4sy1/prestige-tech-dashboard/pull/1)); jego GitHub
-Actions przeszedł na Pythonie 3.11 i 3.14 także po scaleniu. Wszystkie 26
-repozytoriów Prestige Tech pozostaje aktywnych; opisy wskazują bieżącą
-Prestige Tech Free Use License. Nie opublikowano nowych EXE ani release.
+Actions przeszedł na Pythonie 3.11 i 3.14 także po scaleniu. Historycznie
+opublikowano 26 repozytoriów z prefiksem `prestige-`; po usunięciu pięciu
+zdublowanych pozostało 21, w tym główne repo i Dashboard. Opisy wskazują Prestige Tech Free Use
+License. Nie opublikowano nowych EXE ani release Centrów.
 Ręczne testy urządzeń, VM, skalowania GUI i działania instalacyjnych EXE
 pozostają do wykonania przez użytkownika na końcu.
 
 ## Aktualny etap — 2026-09-28
 
-Stare repozytorium `w4sy1/prestige-hash-checker` zarchiwizowano na GitHubie
-po audycie funkcji oraz dwukierunkowym sprawdzeniu zgodności manifestów i
-podpisów z Monitorem. Kod i stary prerelease pozostały publicznie dostępne;
-Dashboard nie ma URL pobrania tego modułu i nadal uruchamia lokalny EXE.
-Testy repozytoriów: 213 zaliczonych + 2 pominięte w `prestige-tech`,
-16 zaliczonych w Dashboardzie. Jego dwa lokalne pliki nieśledzone pozostawiono.
-To archiwizacja kodu legacy, nie potwierdzenie nowego EXE Monitora.
+Osobne repozytoria `prestige-system-snapshot`, `prestige-security-check`,
+`prestige-repair-report` i `prestige-pc-cleanup` usunięto z GitHuba po
+sprawdzeniu odpowiedników w Centrach i testów. Ich pełne historie Git mają
+zweryfikowane bundle w `C:\Users\01dwa\.codex\backups\prestige-tech-legacy`;
+lokalne checkouty zachowano. Stare EXE nadal są w wydaniu zbiorczym.
+Dashboard nadal zawiera zarówno te cztery stare EXE, jak i Centra; niczego
+z jego katalogu nie usunięto. Testy: cztery stare suity 14/19/11/17 PASS,
+`prestige-tech` 213 PASS i 2 skip, Dashboard 16 PASS. Testy nowych EXE
+Centrów oraz rzeczywiste operacje czyszczenia pozostają otwarte.
+
+Po audycie funkcji i dwukierunkowym sprawdzeniu manifestów/podpisów stare
+repozytorium `w4sy1/prestige-hash-checker` usunięto z GitHuba (API: 404).
+Pełna historia Git ma zweryfikowany lokalny bundle w
+`C:\Users\01dwa\.codex\backups\prestige-tech-legacy\prestige-hash-checker-2026-09-28.bundle`;
+lokalny checkout także pozostał. Stary EXE jest w wydaniu głównego repo.
+Dashboard nadal zawiera Hash Checker oraz Monitor i nie pobiera starego
+modułu z osobnego repo; jego 16 testów PASS. Dwa zastane pliki nieśledzone
+Dashboardu pozostały bez zmian. Nowe EXE Monitora pozostaje niezweryfikowane.
 
 Network Snapshot scala teraz wiele IP tego samego MAC przy porównaniu oraz
 normalizuje zapis MAC z myślnikami i dwukropkami. Fixture starego formatu
