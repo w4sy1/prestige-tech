@@ -16,7 +16,7 @@ Odpowiednik: `prestige_core/backup/` i `prestige_storage/gui.py`.
 | Kopia wielu folderów z manifestem i SHA-256 | Tak | Tak | Fixture; duża kopia niezweryfikowana |
 | Weryfikacja kopii i odmowa restore przy uszkodzeniu | Tak | Tak | Fixture |
 | Restore do nowego katalogu i dziennik | Tak | Tak | Fixture; przerwanie sprawdzone testem legacy |
-| Foldery standardowe Windows | `known_folders()` | Wybór katalogu przez okno systemowe, bez listy automatycznej | Backend tylko fixture |
+| Foldery standardowe Windows | `known_folders()` | Pola wyboru Pulpit/Dokumenty/Obrazy/Pobrane, łączone z ręcznym wyborem bez duplikatów | Fixture GUI; lokalny odczyt 4/4 katalogów PASS |
 | Eksport systemu, sterowników i zakładek wielu przeglądarek | Tak | Opcje i wybór wielu plików zakładek; eksport może być jedyną zawartością kopii | Fixture zakładek z weryfikacją manifestu; prawdziwy eksport Windows niezweryfikowany |
 | ACL przy kopii i restore | Tak | Opcja ACL | Fixture; zapis ACL Windows niezweryfikowany |
 | VSS i usuwanie pozostałych migawek z dziennika | Tak | Opcja VSS i wybór dziennika | Fixture; realny VSS/admin niezweryfikowany |

@@ -21,6 +21,13 @@ pozostają do wykonania przez użytkownika na końcu.
 
 ## Aktualny etap — 2026-09-28
 
+GUI Storage & Recovery ma wybór czterech standardowych folderów użytkownika
+przez pola wyboru. Ścieżki są wykrywane na bieżąco; niedostępny katalog
+blokuje plan. Testy GUI łączenia z ręcznym wyborem i błędu PASS; lokalny
+odczyt Windows wskazał 4/4 istniejące foldery. Rzeczywistej kopii tych
+folderów nie wykonano.
+Pełna suita: 211 uruchomionych, 209 zaliczonych, 2 pominięte.
+
 GUI Storage & Recovery pozwala utworzyć kopię zawierającą tylko eksport
 systemu, sterowników lub zakładek, bez wybierania folderu źródłowego. VSS
 nadal wymaga folderu. Fixture kopii samych zakładek, manifestu i GUI PASS;

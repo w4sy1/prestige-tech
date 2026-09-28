@@ -13,7 +13,7 @@ from PySide6.QtWidgets import (
 
 from prestige_core.storage_inventory import read_disks
 from prestige_core.physical_imaging import image_readonly_disk
-from prestige_core.backup import backup, plan, restore, verify
+from prestige_core.backup import backup, known_folders, plan, restore, verify
 from prestige_core.backup.vss import backup as vss_backup
 from prestige_core.backup.vss import recover as recover_vss
 from prestige_core.usb import prepare as prepare_usb, verify as verify_usb
@@ -196,6 +196,15 @@ class StorageWindow(QMainWindow):
         self.restore_button.clicked.connect(self.start_restore)
         backup_actions.addWidget(self.restore_button)
         backup_layout.addLayout(backup_actions)
+        standard = QHBoxLayout()
+        standard.addWidget(QLabel("Foldery standardowe (wybierz; ręczny wybór można anulować):"))
+        self.standard_folder_checks = {}
+        for name, label in (("Desktop", "Pulpit"), ("Documents", "Dokumenty"),
+                            ("Pictures", "Obrazy"), ("Downloads", "Pobrane")):
+            checkbox = QCheckBox(label)
+            self.standard_folder_checks[name] = checkbox
+            standard.addWidget(checkbox)
+        backup_layout.addLayout(standard)
         self.acl_checkbox = QCheckBox("Zachowaj ACL (Windows) / tryb plików")
         backup_layout.addWidget(self.acl_checkbox)
         options = QHBoxLayout()
@@ -282,6 +291,22 @@ class StorageWindow(QMainWindow):
 
     def start_backup(self):
         sources = self.select_directories("Wybierz folder źródłowy kopii")
+        chosen = [name for name, checkbox in self.standard_folder_checks.items()
+                  if checkbox.isChecked()]
+        if chosen:
+            try:
+                available = known_folders()
+                if not isinstance(available, dict):
+                    raise ValueError("Nie udało się odczytać standardowych folderów.")
+                for name in chosen:
+                    path = available.get(name)
+                    if not isinstance(path, str) or not Path(path).is_dir():
+                        raise ValueError(f"Folder {name} jest niedostępny.")
+                    if Path(path).resolve() not in {Path(source).resolve() for source in sources}:
+                        sources.append(path)
+            except (OSError, ValueError, RuntimeError) as error:
+                self.show_backup_error(str(error))
+                return
         has_export = (self.system_export_checkbox.isChecked()
                       or self.drivers_checkbox.isChecked() or bool(self.bookmark_paths))
         if not sources and not has_export:
@@ -539,7 +564,8 @@ class StorageWindow(QMainWindow):
             "Opcja ACL dotyczy kopii i odtwarzania. VSS tworzy migawki Windows i wymaga "
             "administratora; po przerwaniu sprawdź dziennik VSS. Eksport systemu, "
             "sterowników i zakładek jest opcjonalny. Można wybrać kilka folderów "
-            "źródłowych i plików zakładek. PrestigeUSB tworzy katalog "
+            "źródłowych i plików zakładek; foldery standardowe można dodać polami wyboru. "
+            "PrestigeUSB tworzy katalog "
             "z narzędziami, sprawdza manifest, aktualizuje wersję z kopią i pozwala ją cofnąć; "
             "nie formatuje nośnika."
         )

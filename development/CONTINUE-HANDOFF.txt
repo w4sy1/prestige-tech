@@ -1,6 +1,13 @@
 PRESTIGE TECH — PLIK PRZEKAZANIA PRACY I TESTÓW
 Stan: 2026-09-28. Aktualizuj ten plik po każdym istotnym etapie.
 
+NAJNOWSZY ETAP — STANDARDOWE FOLDERY BACKUP
+GUI Storage & Recovery dodaje wybór Pulpitu, Dokumentów, Obrazów i Pobranych.
+Wykrywa ścieżki przy planowaniu kopii, łączy je z ręcznymi folderami bez
+duplikatów i odmawia przy niedostępnym katalogu. GUI fixture PASS, lokalny
+odczyt Windows 4/4 istniejących katalogów PASS. Nie kopiowano danych
+użytkownika; prawdziwy VSS/ACL nadal niesprawdzony.
+
 NAJNOWSZY ETAP — BACKUP EXPORT-ONLY
 GUI Storage & Recovery dopuszcza kopię wyłącznie eksportu systemu,
 sterowników albo zakładek bez folderu źródłowego, zgodnie ze starym CLI.

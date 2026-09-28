@@ -1,9 +1,50 @@
 import os
+from pathlib import Path
+from tempfile import TemporaryDirectory
 import unittest
 from unittest.mock import patch
 
 
 class StorageGuiTests(unittest.TestCase):
+    def test_standard_folders_merge_with_manual_without_duplicates(self):
+        os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+        from PySide6.QtWidgets import QApplication, QMessageBox
+        from prestige_storage.gui import StorageWindow
+        application = QApplication.instance() or QApplication([])
+        with TemporaryDirectory() as directory:
+            root = Path(directory)
+            desktop = root / "Desktop"
+            documents = root / "Documents"
+            desktop.mkdir()
+            documents.mkdir()
+            window = StorageWindow(autoload=False)
+            window.standard_folder_checks["Desktop"].setChecked(True)
+            window.standard_folder_checks["Documents"].setChecked(True)
+            with patch.object(window, "select_directories", return_value=[str(desktop)]), patch(
+                    "prestige_storage.gui.known_folders", return_value={
+                        "Desktop": str(desktop), "Documents": str(documents)}), patch(
+                    "prestige_storage.gui.QFileDialog.getExistingDirectory", return_value=str(root)), patch(
+                    "prestige_storage.gui.QMessageBox.question", return_value=QMessageBox.Yes), patch.object(
+                    window, "_run_backup_operation") as start:
+                window.start_backup()
+                self.assertEqual(start.call_args.args[1], [str(desktop), str(documents)])
+            window.close()
+
+    def test_unavailable_standard_folder_does_not_start_backup(self):
+        os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+        from PySide6.QtWidgets import QApplication
+        from prestige_storage.gui import StorageWindow
+        application = QApplication.instance() or QApplication([])
+        window = StorageWindow(autoload=False)
+        window.standard_folder_checks["Downloads"].setChecked(True)
+        with patch.object(window, "select_directories", return_value=[]), patch(
+                "prestige_storage.gui.known_folders", return_value={}), patch.object(
+                window, "_run_backup_operation") as start:
+            window.start_backup()
+            start.assert_not_called()
+            self.assertIn("Downloads", window.status.text())
+        window.close()
+
     def test_multiple_source_selection_preserves_all_choices(self):
         os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
         from PySide6.QtWidgets import QApplication, QMessageBox
