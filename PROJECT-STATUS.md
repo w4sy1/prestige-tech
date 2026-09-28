@@ -29,7 +29,7 @@ VSS, eksportem systemu/sterowników/zakładek i odzyskaniem migawek z dziennika.
 W jednym przebiegu GUI wybiera jeden folder i jeden plik zakładek. 29 testów
 starego Backup zaadaptowanych do nowej ścieżki przeszło, podobnie dwa nowe
 testy migracji i smoke GUI. Cała suita nowego repo po migracji Backup i USB:
-198 testów PASS, 2 pominięte.
+198 testów uruchomiono: 196 przeszło, 2 pominięte.
 Rzeczywistego VSS/ACL Windows, dużej kopii ani pełnego parytetu GUI nie
 zweryfikowano. USB Toolkit ma teraz w Storage & Recovery backend i GUI
 przygotowania, weryfikacji, aktualizacji i rollbacku wersji narzędzia.
