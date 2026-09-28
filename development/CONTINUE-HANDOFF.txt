@@ -84,6 +84,12 @@ pozostają na końcowym etapie. Oryginalnych obrazów referencyjnych nie ma
 w repo; wykorzystano dostarczony opis stylu.
 
 DO ZROBIENIA W KODZIE
+Aktualizacja 2026-09-28: Monitor importuje baseline starego Integrity Monitor
+do nowego pliku (oryginał bez zmian), waliduje ścieżki/hash/ACL/ADS i nie
+uznaje niepełnych danych za COMPLETE. Dwa testy fixture i smoke GUI PASS;
+pełna suita 205 uruchomionych (203 PASS / 2 skip); test GUI potwierdza
+nowy plik baseline i niezmieniony oryginał.
+Pełny audyt parytetu Folder Watch oraz pozostałych Centrów trwa.
 Aktualizacja 2026-09-28: `FUNCTION-PARITY-AUDIT.md` zawiera mapę komend
 Backup, USB Toolkit i Hash Checker. GUI Storage pozwala teraz wybrać wiele
 folderów źródłowych, plików zakładek i narzędzi PrestigeUSB; testy wielu

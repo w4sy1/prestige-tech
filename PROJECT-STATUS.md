@@ -21,6 +21,12 @@ pozostają do wykonania przez użytkownika na końcu.
 
 ## Aktualny etap — 2026-09-28
 
+Monitor importuje teraz baseline starego Integrity Monitor do nowego pliku,
+po walidacji ścieżek, hashy i kompletności ACL/ADS. Oryginał pozostaje bez
+zmian; niepełne dane pozostają UNKNOWN. Dwa testy importu i smoke GUI PASS.
+Najnowsza suita: 205 uruchomionych, 203 zaliczone, 2 pominięte.
+Szczegóły w `development/FUNCTION-PARITY-AUDIT.md`.
+
 Audyt funkcja po funkcji rozpoczęto w `development/FUNCTION-PARITY-AUDIT.md`.
 GUI Storage wybiera teraz wiele folderów źródłowych i plików zakładek oraz
 wiele narzędzi dla przygotowania/aktualizacji PrestigeUSB, zgodnie z backendami

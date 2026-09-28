@@ -3,9 +3,38 @@ import tempfile
 from pathlib import Path
 import time
 import unittest
+from unittest.mock import patch
+import json
 
 
 class MonitorGuiTests(unittest.TestCase):
+    def test_import_old_integrity_baseline_creates_new_file(self):
+        os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+        from PySide6.QtWidgets import QApplication
+        from prestige_monitor.gui import MonitorWindow
+        application = QApplication.instance() or QApplication([])
+        window = MonitorWindow()
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory) / "source"
+            root.mkdir()
+            old_file = Path(directory) / "old.json"
+            new_file = Path(directory) / "new.json"
+            old = {"schema_version": 1, "root": str(root.resolve()),
+                   "files": {"file.txt": {"sha256": "0" * 64,
+                                          "size": 1, "mtime_ns": 1}},
+                   "options": {"extended": False},
+                   "incomplete_files": [], "ok": True}
+            old_file.write_text(json.dumps(old), encoding="utf-8")
+            with patch("prestige_monitor.gui.QFileDialog.getOpenFileName",
+                       return_value=(str(old_file), "")), patch(
+                       "prestige_monitor.gui.QFileDialog.getSaveFileName",
+                       return_value=(str(new_file), "")):
+                window.load_baseline()
+            self.assertEqual(window.baseline_path, str(new_file.resolve()))
+            self.assertIsInstance(json.loads(new_file.read_text())["files"], list)
+            self.assertEqual(json.loads(old_file.read_text()), old)
+        window.close()
+
     def test_scan_result_and_error_clear_stale_rows(self):
         os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
         from PySide6.QtWidgets import QApplication

@@ -16,6 +16,7 @@ from PySide6.QtWidgets import (
 
 from prestige_core.event_history import EventJournal, append_comparison, load_history, load_journal, new_history, save_history
 from prestige_core.baseline_update import update_baseline
+from prestige_core.legacy_integrity import convert_baseline
 from prestige_core.file_snapshot import classify_file_events, compare_files, scan_files
 from prestige_core.network_snapshot import save_snapshot
 from prestige_core.native_events import NativeEventStream, collect_native_events
@@ -891,6 +892,18 @@ class MonitorWindow(QMainWindow):
             return
         try:
             baseline = json.loads(Path(path).read_text(encoding="utf-8"))
+            if isinstance(baseline, dict) and isinstance(baseline.get("files"), dict):
+                converted = convert_baseline(baseline)
+                new_path, _ = QFileDialog.getSaveFileName(
+                    self, "Nowa kopia baseline dla Monitora (oryginał pozostanie)",
+                    path + ".center.json", "JSON (*.json)")
+                if not new_path:
+                    return
+                if Path(new_path).resolve().is_relative_to(Path(converted["root"]).resolve()):
+                    raise ValueError("Nowy baseline musi być poza badanym katalogiem.")
+                save_snapshot(converted, new_path)
+                baseline = converted
+                path = new_path
             if (not isinstance(baseline, dict) or baseline.get("schema_version") != 1
                     or not isinstance(baseline.get("root"), str)
                     or not isinstance(baseline.get("complete"), bool)

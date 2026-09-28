@@ -53,6 +53,23 @@ i `prestige_monitor/gui.py`.
 | Porównanie dwóch folderów | Tak | Fixture; GUI smoke |
 | Klucze, podpis i weryfikacja podpisu | Tak | Fixture; tożsamość właściciela klucza pozostaje poza zakresem |
 
+## Integrity Monitor → Monitor
+
+Źródło: `w4sy1/prestige-integrity-monitor` (`app.py`, `extended.py`).
+Odpowiednik: `prestige_core/file_snapshot.py`, `prestige_core/baseline_update.py`,
+`prestige_core/legacy_integrity.py`, `prestige_monitor/gui.py`.
+
+| Funkcja starego programu | Kod/GUI Center | Potwierdzenie |
+|---|---|---|
+| Baseline SHA-256 i porównanie zmian | Tak | Fixture; niepełny skan oznaczany UNKNOWN |
+| ACL/ADS i tryb POSIX | Tak, z kontrolą kompletności | Fixture; prawdziwe ograniczone konto Windows niezweryfikowane |
+| Aktualizacja baseline z kopią poprzedniej wersji | Tak | Fixture; stary plik nie jest nadpisywany przy imporcie |
+| Odczyt starego formatu baseline | Nowa kopia w formacie Center po walidacji | Fixture zgodności i odmowy dla `../` |
+| Klucze, podpis i weryfikacja podpisu | Tak | Fixture; zaufanie do właściciela klucza poza zakresem |
+
+Import nie podnosi niepełnego starego baseline do stanu `complete`. Nie
+sprawdzono jeszcze dużych drzew i metadanych ACL/ADS na ograniczonym koncie.
+
 Pozostałe programy są nadal opisane na poziomie modułów w
 `CENTER-MIGRATION-MATRIX.md`; wymagają audytu komend i zachowań w tym samym
 formacie przed decyzją o usunięciu starych repozytoriów.
