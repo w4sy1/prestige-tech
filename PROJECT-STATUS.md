@@ -21,15 +21,22 @@ pozostają do wykonania przez użytkownika na końcu.
 
 ## Aktualny etap — 2026-09-28
 
+Audyt funkcja po funkcji rozpoczęto w `development/FUNCTION-PARITY-AUDIT.md`.
+GUI Storage wybiera teraz wiele folderów źródłowych i plików zakładek oraz
+wiele narzędzi dla przygotowania/aktualizacji PrestigeUSB, zgodnie z backendami
+starych programów. Najnowsza suita: 202 uruchomione, 200 zaliczonych,
+2 pominięte; smoke Storage i Monitor PASS. Pełne potwierdzenie
+parytetu nadal wymaga testów rzeczywistego VSS/ACL/USB i pozostałych modułów.
+
 Storage & Recovery: przeniesiono backend Backup do `prestige_core.backup` bez
 zależności od starego repozytorium: plan, kopia folderu, manifest SHA-256,
 weryfikacja, odtwarzanie do nowego katalogu, eksporty serwisowe, ACL i VSS.
 GUI ma wybór folderów oraz tworzenie/sprawdzenie/odtworzenie kopii z opcją ACL,
 VSS, eksportem systemu/sterowników/zakładek i odzyskaniem migawek z dziennika.
-W jednym przebiegu GUI wybiera jeden folder i jeden plik zakładek. 29 testów
+W jednym przebiegu GUI może wybrać wiele folderów i plików zakładek. 29 testów
 starego Backup zaadaptowanych do nowej ścieżki przeszło, podobnie dwa nowe
 testy migracji i smoke GUI. Cała suita nowego repo po migracji Backup i USB:
-198 testów uruchomiono: 196 przeszło, 2 pominięte.
+W poprzednim etapie 198 testów uruchomiono: 196 przeszło, 2 pominięte.
 Rzeczywistego VSS/ACL Windows, dużej kopii ani pełnego parytetu GUI nie
 zweryfikowano. USB Toolkit ma teraz w Storage & Recovery backend i GUI
 przygotowania, weryfikacji, aktualizacji i rollbacku wersji narzędzia.

@@ -7,6 +7,19 @@ from prestige_core.baseline_signing import new_key, sign, verify
 
 
 class HashManifestTests(unittest.TestCase):
+    def test_two_folder_comparison_reports_changes(self):
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory)
+            left, right = base / "left", base / "right"
+            left.mkdir()
+            right.mkdir()
+            (left / "same.txt").write_text("before", encoding="utf-8")
+            (right / "same.txt").write_text("after", encoding="utf-8")
+            (right / "new.txt").write_text("new", encoding="utf-8")
+            result = compare_manifests(make_manifest(left), make_manifest(right))
+            self.assertEqual(result["changed"], ["same.txt"])
+            self.assertEqual(result["new"], ["new.txt"])
+
     def test_old_hash_checker_manifest_can_be_compared(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

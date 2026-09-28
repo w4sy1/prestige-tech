@@ -84,14 +84,20 @@ pozostają na końcowym etapie. Oryginalnych obrazów referencyjnych nie ma
 w repo; wykorzystano dostarczony opis stylu.
 
 DO ZROBIENIA W KODZIE
+Aktualizacja 2026-09-28: `FUNCTION-PARITY-AUDIT.md` zawiera mapę komend
+Backup, USB Toolkit i Hash Checker. GUI Storage pozwala teraz wybrać wiele
+folderów źródłowych, plików zakładek i narzędzi PrestigeUSB; testy wielu
+źródeł i smoke GUI PASS; pełna suita 202 uruchomione (200 PASS / 2 skip).
+Wciąż nie ma testu VSS/ACL/USB na sprzęcie ani
+audytu funkcja po funkcji pozostałych programów. Nie usuwać starych repo.
 Aktualizacja 2026-09-28: Storage & Recovery ma nowy pakiet `prestige_core.backup`
 z backendem przeniesionym ze starego Backup (plan, backup, verify, restore,
 eksporty serwisowe, ACL, VSS) i GUI do kopii folderu, sprawdzenia,
 odtworzenia, eksportów serwisowych, ACL, VSS i odzyskania migawek z dziennika.
 Zaadaptowane 29 testów legacy PASS, 2 nowe
 testy PASS, pełna suita 198 uruchomionych (196 PASS / 2 skip), smoke Storage GUI i Monitor GUI PASS. Rzeczywistych
-operacji VSS/ACL Windows nie uruchamiano. GUI wybiera jeden folder i jeden plik zakładek
-na przebieg. USB Toolkit ma teraz w `prestige_core.usb`
+operacji VSS/ACL Windows nie uruchamiano. GUI wybiera wiele folderów i plików
+zakładek na przebieg. USB Toolkit ma teraz w `prestige_core.usb`
 prepare/verify/update/rollback i cztery akcje w GUI Storage. 16 zaadaptowanych
 testów legacy oraz nowy test migracji PASS; fizycznego USB nie testowano.
 Następny etap: pełne porównanie Backup/USB funkcja po funkcji, potem pozostałe

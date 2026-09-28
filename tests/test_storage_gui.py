@@ -1,8 +1,22 @@
 import os
 import unittest
+from unittest.mock import patch
 
 
 class StorageGuiTests(unittest.TestCase):
+    def test_multiple_source_selection_preserves_all_choices(self):
+        os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+        from PySide6.QtWidgets import QApplication, QMessageBox
+        from prestige_storage.gui import StorageWindow
+        application = QApplication.instance() or QApplication([])
+        window = StorageWindow(autoload=False)
+        with patch("prestige_storage.gui.QFileDialog.getExistingDirectory",
+                   side_effect=["C:/one", "C:/two"]), patch(
+                   "prestige_storage.gui.QMessageBox.question",
+                   side_effect=[QMessageBox.Yes, QMessageBox.No]):
+            self.assertEqual(window.select_directories("fixture"), ["C:/one", "C:/two"])
+        window.close()
+
     def test_image_button_only_for_readonly_nonsystem_disk(self):
         os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
         from PySide6.QtWidgets import QApplication

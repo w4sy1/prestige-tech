@@ -9,6 +9,20 @@ from prestige_core.usb import prepare, rollback, update, verify
 
 
 class UsbMigrationTests(unittest.TestCase):
+    def test_prepare_multiple_tools(self):
+        with TemporaryDirectory() as folder:
+            base = Path(folder)
+            tools = []
+            for name in ("prestige-one", "prestige-two"):
+                tool = base / name
+                tool.mkdir()
+                (tool / "metadata.json").write_text(json.dumps({"version": "0.1.0"}))
+                (tool / "app.py").write_text(name)
+                tools.append(tool)
+            usb = Path(prepare(base / "stick", tools)["root"])
+            self.assertTrue(verify(usb)["ok"])
+            self.assertEqual((usb / "Tools/prestige-two/app.py").read_text(), "prestige-two")
+
     def test_prepare_update_verify_and_rollback(self):
         with TemporaryDirectory() as folder:
             base = Path(folder)

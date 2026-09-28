@@ -70,12 +70,12 @@ class BackupWorker(QThread):
         try:
             if self.operation == "backup":
                 options = dict(system=self.system_export, drivers=self.drivers,
-                               bookmarks=[self.bookmarks] if self.bookmarks else None,
+                               bookmarks=self.bookmarks or None,
                                preserve_acl=self.preserve_acl)
                 if self.vss:
-                    result = vss_backup([self.source], self.destination, backup, **options)
+                    result = vss_backup(self.source, self.destination, backup, **options)
                 else:
-                    result = backup([self.source], self.destination, **options)
+                    result = backup(self.source, self.destination, **options)
             elif self.operation == "verify":
                 result = verify(self.source)
             elif self.operation == "vss-recover":
@@ -101,11 +101,11 @@ class UsbWorker(QThread):
     def run(self):
         try:
             if self.operation == "prepare":
-                result = prepare_usb(self.path, [self.tool])
+                result = prepare_usb(self.path, self.tool)
             elif self.operation == "verify":
                 result = verify_usb(self.path)
             elif self.operation == "update":
-                result = update_usb(self.path, [self.tool], prepare_usb, True)
+                result = update_usb(self.path, self.tool, prepare_usb, True)
             else:
                 result = rollback_usb(self.path, True)
             self.loaded.emit(result)
@@ -206,7 +206,7 @@ class StorageWindow(QMainWindow):
         self.drivers_checkbox = QCheckBox("Eksport sterowników")
         options.addWidget(self.drivers_checkbox)
         backup_layout.addLayout(options)
-        self.bookmark_path = None
+        self.bookmark_paths = []
         bookmark_actions = QHBoxLayout()
         self.bookmark_button = QPushButton("Wybierz zakładki Chromium/Firefox")
         self.bookmark_button.clicked.connect(self.choose_bookmarks)
@@ -247,7 +247,7 @@ class StorageWindow(QMainWindow):
         self.backup_worker = BackupWorker(
             operation, source, destination, self.acl_checkbox.isChecked(),
             self.system_export_checkbox.isChecked(), self.drivers_checkbox.isChecked(),
-            self.bookmark_path, self.vss_checkbox.isChecked(), self)
+            list(self.bookmark_paths), self.vss_checkbox.isChecked(), self)
         for button in (self.backup_button, self.verify_button, self.restore_button,
                        self.vss_recover_button):
             button.setEnabled(False)
@@ -258,39 +258,55 @@ class StorageWindow(QMainWindow):
         self.backup_worker.start()
 
     def choose_bookmarks(self):
-        path, _ = QFileDialog.getOpenFileName(
-            self, "Wybierz plik Bookmarks Chromium lub places.sqlite Firefox", "",
+        paths, _ = QFileDialog.getOpenFileNames(
+            self, "Wybierz pliki Bookmarks Chromium lub places.sqlite Firefox", "",
             "Zakładki (Bookmarks places.sqlite *.sqlite *.db);;Wszystkie pliki (*)")
-        if path:
-            self.bookmark_path = path
-            self.bookmark_label.setText(f"Zakładki: {Path(path).name}")
+        if paths:
+            self.bookmark_paths = paths
+            self.bookmark_label.setText(f"Zakładki: {len(paths)} plik(ów)")
+
+    def select_directories(self, title):
+        selected = []
+        while True:
+            directory = QFileDialog.getExistingDirectory(self, title)
+            if not directory:
+                break
+            if directory in selected:
+                self.show_backup_error("Ten folder już wybrano.")
+                continue
+            selected.append(directory)
+            if QMessageBox.question(self, "Kolejny folder",
+                                    "Dodać kolejny folder do tej operacji?") != QMessageBox.Yes:
+                break
+        return selected
 
     def start_backup(self):
-        source = QFileDialog.getExistingDirectory(self, "Folder źródłowy kopii")
-        if not source:
+        sources = self.select_directories("Wybierz folder źródłowy kopii")
+        if not sources:
             return
         parent = QFileDialog.getExistingDirectory(self, "Folder docelowy na nową kopię")
         if not parent:
             return
         destination = str(Path(parent) / f"PrestigeBackup-{uuid4().hex[:12]}")
         try:
-            summary = plan([source])
-            if Path(destination).is_relative_to(Path(source).resolve()):
+            summary = plan(sources)
+            if any(Path(destination).is_relative_to(Path(source).resolve()) for source in sources):
                 raise ValueError("Cel znajduje się wewnątrz źródła.")
         except (OSError, ValueError) as error:
             self.show_backup_error(str(error))
             return
         answer = QMessageBox.question(
             self, "Utwórz kopię",
-            f"Skopiować {len(summary['files'])} plików ({summary['total_bytes']} bajtów) "
+            f"Skopiować {len(summary['files'])} plików z {len(sources)} folderów "
+            f"({summary['total_bytes']} bajtów) "
             f"do nowego katalogu {destination}? Pominięte znane magazyny sekretów: "
             f"{summary['excluded_count']}. "
             f"VSS: {'TAK' if self.vss_checkbox.isChecked() else 'NIE'}; "
             f"eksport systemu: {'TAK' if self.system_export_checkbox.isChecked() else 'NIE'}; "
             f"sterowniki: {'TAK' if self.drivers_checkbox.isChecked() else 'NIE'}; "
-            f"zakładki: {'TAK' if self.bookmark_path else 'NIE'}.")
+            f"pliki zakładek: {len(self.bookmark_paths)}.")
         if answer == QMessageBox.Yes:
-            self._run_backup_operation("backup", source, destination)
+            self._run_backup_operation("backup", sources, destination)
 
     def start_verify(self):
         source = QFileDialog.getExistingDirectory(self, "Wybierz katalog kopii do sprawdzenia")
@@ -364,16 +380,17 @@ class StorageWindow(QMainWindow):
             button.setEnabled(True)
 
     def start_usb_prepare(self):
-        tool = QFileDialog.getExistingDirectory(self, "Wybierz katalog narzędzia prestige-*")
-        if not tool:
+        tools = self.select_directories("Wybierz katalog narzędzia prestige-*")
+        if not tools:
             return
         parent = QFileDialog.getExistingDirectory(self, "Wybierz folder docelowy PrestigeUSB")
         if not parent:
             return
         if QMessageBox.question(self, "Utwórz PrestigeUSB",
-                                f"Utworzyć nowy zestaw w {parent}/PrestigeUSB z {tool}? "
+                                f"Utworzyć nowy zestaw w {parent}/PrestigeUSB z "
+                                f"{len(tools)} narzędziami? "
                                 "Nośnik nie będzie formatowany.") == QMessageBox.Yes:
-            self._run_usb_operation("prepare", parent, tool)
+            self._run_usb_operation("prepare", parent, tools)
 
     def start_usb_verify(self):
         root = QFileDialog.getExistingDirectory(self, "Wybierz katalog PrestigeUSB")
@@ -384,18 +401,18 @@ class StorageWindow(QMainWindow):
         root = QFileDialog.getExistingDirectory(self, "Wybierz istniejący katalog PrestigeUSB")
         if not root:
             return
-        tool = QFileDialog.getExistingDirectory(self, "Wybierz nową wersję narzędzia prestige-*")
-        if not tool:
+        tools = self.select_directories("Wybierz nową wersję narzędzia prestige-*")
+        if not tools:
             return
         try:
-            preview = update_usb(root, [tool], prepare_usb, False)
+            preview = update_usb(root, tools, prepare_usb, False)
         except (OSError, ValueError, KeyError, TypeError) as error:
             self.show_backup_error(str(error))
             return
         if QMessageBox.question(self, "Aktualizuj PrestigeUSB",
                                 f"Zaktualizować {', '.join(preview['tools'])}? "
                                 "Poprzednia wersja zostanie zachowana do cofnięcia.") == QMessageBox.Yes:
-            self._run_usb_operation("update", root, tool)
+            self._run_usb_operation("update", root, tools)
 
     def start_usb_rollback(self):
         journal = QFileDialog.getExistingDirectory(self, "Wybierz Backup/Updates/<id> z journal.json")
@@ -516,7 +533,8 @@ class StorageWindow(QMainWindow):
             "pomija znane magazyny sekretów i odtwarza wyłącznie do nowego katalogu. "
             "Opcja ACL dotyczy kopii i odtwarzania. VSS tworzy migawki Windows i wymaga "
             "administratora; po przerwaniu sprawdź dziennik VSS. Eksport systemu, "
-            "sterowników i zakładek jest opcjonalny. PrestigeUSB tworzy katalog "
+            "sterowników i zakładek jest opcjonalny. Można wybrać kilka folderów "
+            "źródłowych i plików zakładek. PrestigeUSB tworzy katalog "
             "z narzędziami, sprawdza manifest, aktualizuje wersję z kopią i pozwala ją cofnąć; "
             "nie formatuje nośnika."
         )

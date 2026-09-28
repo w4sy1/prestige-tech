@@ -8,6 +8,21 @@ from prestige_core.backup import backup, plan, restore, verify
 
 
 class BackupMigrationTests(unittest.TestCase):
+    def test_multiple_sources_keep_distinct_paths(self):
+        with TemporaryDirectory() as folder:
+            root = Path(folder)
+            sources = []
+            for name in ("documents", "photos"):
+                source = root / name
+                source.mkdir()
+                (source / "same.txt").write_text(name, encoding="utf-8")
+                sources.append(source)
+            destination = root / "backup"
+            self.assertTrue(backup(sources, destination)["ok"])
+            self.assertTrue(verify(destination)["ok"])
+            self.assertEqual((destination / "1-documents/same.txt").read_text(), "documents")
+            self.assertEqual((destination / "2-photos/same.txt").read_text(), "photos")
+
     def test_backup_verify_restore_and_refuse_tampering(self):
         with TemporaryDirectory() as folder:
             root = Path(folder)
