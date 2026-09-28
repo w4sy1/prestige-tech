@@ -8,7 +8,8 @@ python -m pip wheel ./prestige-tech-cli --no-deps --wheel-dir ./prestige-tech-cl
 python development/smoke.py
 ```
 
-verify.py uruchamia każdy projekt w osobnym procesie, sprawdza strukturę i MIT.
+verify.py uruchamia każdy starszy projekt w osobnym procesie i porównuje
+jego licencję z główną Prestige Tech Free Use License.
 smoke.py wymaga najpierw zbudowanego wheel. Instaluje go do tymczasowego venv,
 sprawdza routing CLI i operacje na syntetycznych danych; nie wysyła ruchu do Internetu.
 Budowa wheel może pobrać izolowane zależności budowania (setuptools).

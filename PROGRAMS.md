@@ -1,6 +1,8 @@
 # Programy PRESTIGE TECH
 
-Każdy program ma samodzielne repozytorium, kod na MIT i wydanie testowe z EXE.
+Każdy starszy program ma samodzielne repozytorium i historyczne wydanie testowe z EXE.
+Aktualną licencję własnego kodu określa plik `LICENSE` danego repozytorium;
+nie należy mylić jej z licencjami zależności ani starszymi tagami wydań.
 
 | Program | Wersja | Pobieranie |
 |---|---|---|
