@@ -1,6 +1,16 @@
 PRESTIGE TECH — PLIK PRZEKAZANIA PRACY I TESTÓW
 Stan: 2026-09-28. Aktualizuj ten plik po każdym istotnym etapie.
 
+NAJNOWSZY ETAP — ARCHIWIZACJA HASH CHECKER
+`w4sy1/prestige-hash-checker` jest zarchiwizowane (publiczne, read-only),
+nie usunięte. Wszystkie stare funkcje mają odpowiedniki w Monitorze;
+stare/nowe manifesty i podpisy zweryfikowano w obie strony. Dashboard ma
+`download_url: null` dla starego modułu i uruchamia lokalnie instalowany EXE;
+jego 16 testów PASS po archiwizacji. `prestige-tech`: 213 PASS, 2 skip.
+Nowe EXE Monitora, duże drzewa i końcowy test użytkownika pozostają otwarte.
+W Dashboardzie są dwa zastane nieśledzone pliki `ui/main_window.py.*backup*`
+oraz `ui/main_window.py.before-encoding-fix`; nie zmieniano ich.
+
 NAJNOWSZY ETAP — NETWORK SNAPSHOT
 Porównanie migawek scala IP powtarzającego się MAC i normalizuje zapis
 MAC z myślnikami/dwukropkami, zgodnie ze starym Network Snapshot. Fixture

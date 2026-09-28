@@ -54,6 +54,12 @@ i `prestige_monitor/gui.py`.
 | Porównanie dwóch folderów | Tak | Fixture; GUI smoke |
 | Klucze, podpis i weryfikacja podpisu | Tak | Fixture; tożsamość właściciela klucza pozostaje poza zakresem |
 
+Manifesty i podpisy przeszły test zgodności w obie strony: stary plik
+weryfikuje nowe Centrum i odwrotnie. Stare repozytorium jest publicznie
+zarchiwizowane, więc kod i prerelease można nadal odczytać. Dashboard nadal
+potrafi uruchomić lokalnie zainstalowany stary EXE; nowy EXE Monitora nie
+został jeszcze przetestowany.
+
 ## Integrity Monitor → Monitor
 
 Źródło: `w4sy1/prestige-integrity-monitor` (`app.py`, `extended.py`).

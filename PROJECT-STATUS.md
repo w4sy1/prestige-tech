@@ -21,6 +21,14 @@ pozostają do wykonania przez użytkownika na końcu.
 
 ## Aktualny etap — 2026-09-28
 
+Stare repozytorium `w4sy1/prestige-hash-checker` zarchiwizowano na GitHubie
+po audycie funkcji oraz dwukierunkowym sprawdzeniu zgodności manifestów i
+podpisów z Monitorem. Kod i stary prerelease pozostały publicznie dostępne;
+Dashboard nie ma URL pobrania tego modułu i nadal uruchamia lokalny EXE.
+Testy repozytoriów: 213 zaliczonych + 2 pominięte w `prestige-tech`,
+16 zaliczonych w Dashboardzie. Jego dwa lokalne pliki nieśledzone pozostawiono.
+To archiwizacja kodu legacy, nie potwierdzenie nowego EXE Monitora.
+
 Network Snapshot scala teraz wiele IP tego samego MAC przy porównaniu oraz
 normalizuje zapis MAC z myślnikami i dwukropkami. Fixture starego formatu
 `hosts` z dwoma nowymi wierszami PASS. Pełna suita: 215 uruchomionych,

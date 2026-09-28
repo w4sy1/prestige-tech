@@ -1,7 +1,9 @@
 # Migracja modułów do Centrów — stan 2026-09-28
 
-`Częściowy` oznacza tylko wymieniony, przetestowany wycinek. Żaden Center nie
-zastępuje jeszcze starego programu. `Nie` w kolumnie EXE oznacza brak
+`Częściowy` oznacza tylko wymieniony, przetestowany wycinek. Hash Checker ma
+potwierdzony parytet funkcji w kodzie i zarchiwizowane stare repozytorium;
+pozostałe Centra nie zastępują jeszcze starych programów. `Nie` w kolumnie
+EXE oznacza brak
 **zweryfikowanego EXE nowego Center**, nie stan opublikowanego starego EXE.
 Szczegółowy audyt komend Backup, USB Toolkit i Hash Checker jest w
 `FUNCTION-PARITY-AUDIT.md`.
@@ -33,7 +35,7 @@ program nadal ma własną pozycję, a nie brak pozycji nowego Center.
 | USB Toolkit | Storage & Recovery / USB | Inwentaryzacja dysków oraz `prestige_core.usb`: odczytowy plan z walidacją wersji i celu, przygotowanie zestawu, manifest, weryfikacja, aktualizacja wersji z kopią i cofnięciem; GUI pokazuje plan wielu narzędzi. Pełny parytet UX i nośników niepotwierdzony | 16 zaadaptowanych testów legacy PASS, plan bez zapisu i smoke GUI PASS; fizycznego USB nie testowano | Nie | Legacy + Center |
 | Folder Watch | Monitor / Zdarzenia | Polling z hashowaniem, JSONL i SQLite/importem obu starych schematów (polling oraz native bez stanu); Windows native Security/Attributes z korelacją zmian treści/ACL/ADS przez skan przed/po. Audyt funkcji w `FUNCTION-PARITY-AUDIT.md` | Core/GUI, import native bez fikcyjnego baseline i syntetyczna korelacja PASS; duże drzewa, overflow oraz zmiana ACL w ograniczonym koncie niezweryfikowane | Nie | Legacy + Center |
 | Integrity Monitor | Monitor / Integralność | SHA-256, baseline, porównanie i kontrolowana aktualizacja z kopią .bak; ręczny skan ACL/ADS i podpis Ed25519 z weryfikacją. Stary baseline można importować do nowego pliku, bez nadpisania oryginału; niepełny pozostaje UNKNOWN | Import fixture, Core/GUI PASS; realny ACL/ADS na ograniczonym koncie niezweryfikowany | Nie | Legacy + Center |
-| Hash Checker | Monitor / Hash | Hash pliku, manifest folderu, zapis i weryfikacja, porównanie dwóch folderów i dwóch manifestów w GUI; czytanie starego formatu manifestu; odłączony podpis Ed25519 z weryfikacją względem wskazanego klucza; SHA1/MD5 tylko kompatybilność | Core/GUI fixture PASS; podpis i zmiana treści PASS; porównanie starego formatu fixture PASS; pełny parytet pozostałych zachowań do sprawdzenia | Nie | Legacy + Center |
+| Hash Checker | Monitor / Hash | Hash pliku, manifest folderu, zapis i weryfikacja, porównanie dwóch folderów i dwóch manifestów w GUI; czytanie starego formatu manifestu; odłączony podpis Ed25519 z weryfikacją względem wskazanego klucza; SHA1/MD5 tylko kompatybilność. Stare repo zarchiwizowane, publiczne | Core/GUI fixture PASS; zgodność starych/nowych manifestów i podpisów w obie strony PASS; końcowy test EXE niezweryfikowany | Nie | Legacy + Center |
 | Termux Setup | Termux Center / Setup | Wspólny CLI i GUI z pięcioma profilami, planem, instalacją przez pkg tylko w Termux, konfiguracją PATH/Git/klienta SSH oraz kopią i warunkowym cofnięciem | Fixture konfiguracji/cofnięcia i odmowy przy zmienionym pliku PASS; fizyczny Termux/pkg niesprawdzony | Nie | Legacy |
 | Termux Toolkit | Termux Center / Toolkit | Wspólny CLI i GUI z ośmioma kategoriami i operacjami, SHA-256 pliku, archiwum tar z wykluczeniem znanych sekretów i manifestem SHA-256 | Fixture poleceń, archiwum i verify PASS; polecenia Android/Termux:API na urządzeniu niesprawdzone | Nie | Legacy |
 | AI Diagnostic Assistant | Wspólna analiza | Core ma normalizację raportów Centrów, lokalne reguły, punktację i opcjonalny provider OpenAI z podglądem metryk bez alertów opisowych; wspólny ekran w System i Security Center z potwierdzeniem wysyłki oraz eksportem JSON/PDF | 3 testy Core/GUI PASS; zewnętrzny provider i koszty API niezweryfikowane na rzeczywistym koncie | Nie | Legacy |
