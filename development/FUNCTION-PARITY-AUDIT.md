@@ -31,7 +31,7 @@ Odpowiednik: `prestige_core/usb/` i `prestige_storage/gui.py`.
 
 | Funkcja starego programu | Kod w Center | GUI Center | Potwierdzenie |
 |---|---|---|---|
-| Plan przygotowania PrestigeUSB bez zapisu, z walidacją wersji i celu | Tak | Potwierdzenie z listą wersji | Fixture; plan nie tworzy katalogu |
+| Plan przygotowania PrestigeUSB bez zapisu | Tak; Center dodatkowo waliduje wersje i cel | Potwierdzenie z listą wersji | Fixture; plan nie tworzy katalogu |
 | Przygotowanie PrestigeUSB z wieloma narzędziami | Tak | Tak | Fixture |
 | Manifest i weryfikacja zestawu | Tak | Tak | Fixture |
 | Aktualizacja wielu narzędzi z zachowaniem danych | Tak | Tak | Fixture |
