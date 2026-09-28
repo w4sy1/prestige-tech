@@ -133,3 +133,19 @@ oraz integracja Repair Report ze wszystkimi Centrami nie są zweryfikowane.
 Pozostałe programy są nadal opisane na poziomie modułów w
 `CENTER-MIGRATION-MATRIX.md`; wymagają audytu komend i zachowań w tym samym
 formacie przed decyzją o usunięciu starych repozytoriów.
+
+## File Inspector → Security Center
+
+Źródło: `w4sy1/prestige-file-inspector` (`app.py`, `runtime.py`, `pdf_export.py`).
+Odpowiednik: `prestige_core/file_inspector.py`, `prestige_security/gui.py`.
+
+| Funkcja starego programu | Kod/GUI Center | Potwierdzenie |
+|---|---|---|
+| Odczyt pliku bez wykonania, metadane, magic, PE, entropia | Tak | Fixture starego i nowego kodu PASS |
+| SHA-256/512, SHA-1/MD5 podczas tego samego odczytu | Tak | Test pojedynczego otwarcia i hash PASS |
+| Ciągi znaków tylko po zgodzie | Tak | Test starego i nowego kodu oraz opcja GUI PASS |
+| Status podpisu Authenticode | Tak w kodzie | Podpisanego pliku Windows nie zweryfikowano |
+| Samodzielne CLI, eksport JSON/TXT/HTML i PDF | Nie jako samodzielna komenda File Inspector Center | Stare repo nadal potrzebne |
+
+Osobne repozytorium File Inspector pozostaje. Nie stwierdzono pełnego
+parytetu sposobu uruchamiania i eksportu; nowych EXE również nie sprawdzono.

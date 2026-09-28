@@ -3,6 +3,7 @@ import os
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from prestige_core.file_inspector import inspect_file
 
@@ -33,6 +34,24 @@ class FileInspectorTests(unittest.TestCase):
                 self.skipTest("Dowiązania niedostępne w tym środowisku")
             with self.assertRaises(ValueError):
                 inspect_file(link, platform="posix")
+
+    def test_hashes_and_entropy_use_one_file_read(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "sample.bin"
+            content = b"abc" * 1000
+            path.write_bytes(content)
+            original_open = Path.open
+            reads = []
+
+            def tracked_open(candidate, *args, **kwargs):
+                if candidate == path:
+                    reads.append(args[0] if args else kwargs.get("mode", "r"))
+                return original_open(candidate, *args, **kwargs)
+
+            with patch.object(Path, "open", tracked_open):
+                result = inspect_file(path, platform="posix")
+            self.assertEqual(reads, ["rb"])
+            self.assertEqual(result["hashes"]["sha256"], hashlib.sha256(content).hexdigest())
 
 
 class SecurityGuiTests(unittest.TestCase):

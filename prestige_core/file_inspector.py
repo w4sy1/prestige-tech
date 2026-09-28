@@ -1,6 +1,7 @@
 """Odczytowa analiza pliku przeniesiona z File Inspector do Security Center."""
 
 from collections import Counter
+import hashlib
 import math
 import mimetypes
 import os
@@ -8,9 +9,6 @@ from pathlib import Path
 import re
 import struct
 import subprocess
-
-from .hashing import FileHashService
-
 
 MAGIC = ((b"\x89PNG\r\n\x1a\n", "image/png"), (b"%PDF-", "application/pdf"),
          (b"PK\x03\x04", "application/zip"),
@@ -43,11 +41,14 @@ def inspect_file(path, *, include_strings=False, runner=subprocess.run, platform
     before = path.stat()
     counts = Counter()
     sample = bytearray()
+    digests = {name: hashlib.new(name) for name in ("sha256", "sha512", "sha1", "md5")}
     with path.open("rb") as stream:
         head = stream.read(64)
         stream.seek(0)
         for chunk in iter(lambda: stream.read(1024 * 1024), b""):
             counts.update(chunk)
+            for digest in digests.values():
+                digest.update(chunk)
             if include_strings and len(sample) < 1024 * 1024:
                 sample.extend(chunk[:1024 * 1024 - len(sample)])
         pe = None
@@ -59,7 +60,7 @@ def inspect_file(path, *, include_strings=False, runner=subprocess.run, platform
                 if header[:4] == b"PE\0\0":
                     machine, sections, timestamp = struct.unpack_from("<HHI", header, 4)
                     pe = {"machine": hex(machine), "sections": sections, "timestamp": timestamp}
-    hashes = FileHashService.hashes(path, ("sha256", "sha512", "sha1", "md5"))
+    hashes = {name: digest.hexdigest() for name, digest in digests.items()}
     after = path.stat()
     if (before.st_size, before.st_mtime_ns) != (after.st_size, after.st_mtime_ns):
         raise ValueError("Plik zmienił się podczas analizy.")

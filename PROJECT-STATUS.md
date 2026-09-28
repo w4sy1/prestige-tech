@@ -22,6 +22,13 @@ pozostają do wykonania przez użytkownika na końcu.
 
 ## Aktualny etap — 2026-09-28
 
+Audyt File Inspector: Security Center ma odpowiedniki analizy pliku, ale
+brakuje samodzielnego CLI i eksportów starego programu. Osobne repozytorium
+pozostaje. Hash, entropia i próbka ciągów powstają teraz z jednego odczytu
+pliku; test tej własności przeszedł. Szczegóły w
+`development/FUNCTION-PARITY-AUDIT.md`. Podpisanego pliku Windows i nowego
+EXE nie sprawdzono.
+
 Osobne repozytoria `prestige-system-snapshot`, `prestige-security-check`,
 `prestige-repair-report` i `prestige-pc-cleanup` usunięto z GitHuba po
 sprawdzeniu odpowiedników w Centrach i testów. Ich pełne historie Git mają

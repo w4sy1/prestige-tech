@@ -1,6 +1,13 @@
 PRESTIGE TECH — PLIK PRZEKAZANIA PRACY I TESTÓW
 Stan: 2026-09-28. Aktualizuj ten plik po każdym istotnym etapie.
 
+NAJNOWSZY ETAP — FILE INSPECTOR
+Porównano stare `app.py` i `runtime.py` z Security Center. Podstawowa analiza
+pliku ma odpowiednik; brak osobnej komendy CLI i eksportów JSON/TXT/HTML/PDF.
+Repo `prestige-file-inspector` pozostaje. W nowym core hashe, entropia i
+próbka ciągów pochodzą z jednego odczytu; test PASS. Podpisanego pliku
+Windows ani nowego EXE nie sprawdzono. Audyt: `FUNCTION-PARITY-AUDIT.md`.
+
 NAJNOWSZY ETAP — CZTERY ZDUBLOWANE REPOZYTORIA
 Usunięto z GitHuba stare osobne repozytoria System Snapshot, Security Check,
 Repair Report i PC Cleanup. Każde ma zweryfikowany pełny bundle historii Git
