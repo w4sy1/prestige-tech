@@ -13,7 +13,7 @@ def main():
     for project in sorted(ROOT.glob('prestige-*')):
         if not project.is_dir():continue
         missing=[name for name in REQUIRED if not (project/name).exists()]
-        if (project/'LICENSE').read_text(encoding='utf-8')!=(ROOT/'prestige-windows-toolkit/LICENSE').read_text(encoding='utf-8'):missing.append('MIT mismatch')
+        if (project/'LICENSE').read_text(encoding='utf-8')!=(ROOT/'LICENSE').read_text(encoding='utf-8'):missing.append('Prestige Tech license mismatch')
         if (project/'app.py').exists():
             command=[sys.executable,'-m','unittest','discover','-s','tests','-v']
             help_command=[sys.executable,'app.py','--help']

@@ -1,21 +1,266 @@
 # Prestige Tech — stan realizacji
 
+Aktualna licencja własnego kodu: **Prestige Tech Free Use License** (`LICENSE`).
+Wpisy historyczne poniżej opisujące MIT odnoszą się do wcześniejszych stanów
+projektu i nie zastępują bieżącego pliku licencji.
+
+Bieżący plik przekazania pracy i lista końcowych testów: `development/CONTINUE-HANDOFF.txt`.
+
+## Aktualny etap — 2026-09-28
+
+GUI i Dashboard: dziesięć źródłowych Centrów (Network, Monitor, Registry,
+Storage, Android, Security, System, Termux, AI i Repair Report) ma wspólny
+ciemny motyw z kartami i widocznym fokusem; Termux, AI i Report dostały
+spójny nagłówek. Samodzielne launchery wszystkich Centrów ładują dołączoną
+czcionkę, także przy starcie z Dashboardu. Sąsiednie repozytorium
+`prestige-tech-dashboard` ma 10 nowych pozycji katalogu oraz bezpieczną,
+stałą mapę źródłowych launcherów. Dashboard zachował układ i styl; w trybie
+źródłowym przycisk „Uruchom z kodu” otwiera każde Centrum. Wbudowane EXE
+tych Centrów nie są jeszcze sprawne ani zweryfikowane, więc to nie jest
+potwierdzenie gotowości wersji instalacyjnej. Dziesięć smoke GUI, smoke
+Dashboardu i jego 16 testów oraz 194 testy Core przeszły (2 pominięte).
+Wizualny podgląd wykonano dla Termux Center przy 850×650; pozostałe
+rozdzielczości i zgodność pikselowa z referencjami pozostają do sprawdzenia.
+
+Registry Manager: 29 ręcznych odczytów i 471 unikalnych odczytów zasad
+z 33 lokalnych szablonów ADMX Microsoftu daje **500 odrębnych operacji odczytu
+na tym komputerze**. Wszystkie wykonały się bez zapisu rejestru: 66 dostępnych
+wartości, 434 nieustawionych zasad lub nieistniejących kluczy. Na innym Windows
+liczba szablonów może być inna. GUI pozwala wczytać ADMX i filtrować katalog.
+Zbiorczy audyt całego katalogu pokazuje tylko liczbę dostępnych i nieustawionych
+zasad, z możliwością przerwania; nie zapisuje treści wartości.
+Dziewięć wąskich zmian HKCU Explorer ma kopię i warunkowe cofnięcie; osiem
+nowych zmian przeszło fixture, ale żadnego zapisu nie sprawdzono w VM.
+To nie oznacza 500 operacji zapisu ani pełnego parytetu starego Registry Tool.
+
+Network Center ma teraz DNS Benchmark w karcie DNS (profile, pomiar UDP/TCP,
+ranking, przerwanie) oraz przypina lokalny kontekst Wi-Fi do wyniku Internet
+Diagnostic. Sentinel otrzymał ręcznie uruchamiany Deep Capture TShark/Npcap:
+metadane ARP/TCP/UDP/ICMP, limity pamięci i czasu, heurystyczne alerty;
+payload nie jest zapisywany. Monitor koreluje natywne zdarzenia Windows ze
+zmianami treści, ACL i ADS przez pełny skan przed/po. Testy syntetyczne i smoke
+GUI przechodzą; rzeczywistego Deep Capture, zmian ACL pod ograniczonym kontem
+ani dużych drzew nie sprawdzono. Sentinel ma także opcjonalną automatyczną
+blokadę własnymi regułami IN/OUT po dwóch oddzielnych alertach HIGH, po
+pełnym odczycie zaufanych urządzeń, z limitem pięciu adresów na sesję.
+Politykę i Firewall sprawdzono na atrapach, bez zmiany zapory hosta.
+Repair Report w System i Security Center wstępnie wypełnia diagnozę i wykonane
+czynności z ostatniego udanego wyniku; nie kopiuje ścieżek ani surowych dowodów,
+a klient i test końcowy pozostają puste. System Center ma także plany i
+kontrolowane wykonanie sześciu napraw Windows Toolkit: SFC, DISM scan/restore,
+flush DNS, reset Winsock i odnowienie DHCP. Wymaga administratora, wskazanego
+katalogu dziennika, migawki diagnostycznej i potwierdzenia braku rollbacku.
+Testy atrap PASS; poleceń nie uruchamiano na hoście. Pełny parytet legacy,
+Backup/USB i zasilanie raportów z pozostałych Centrów nadal pozostają.
+
 ## Konsolidacja centrów — rozpoczęta 2026-09-26
 
 Plan migracji 26 programów do większych centrów i wykryte duplikaty opisano w
 `development/CONSOLIDATION-MAP.md`. Audyt wykazał identyczne pliki wykrywania
 LAN w LAN Radar i Network Snapshot oraz wiele kopii `runtime.py` i eksportu PDF.
+Wykonane i brakujące odpowiedniki na poziomie każdego starego modułu zapisano
+w `development/CENTER-MIGRATION-MATRIX.md`.
+Instalowalny Tech CLI `prestige` ma polecenia `center`, `legacy` i `ai`.
+Wheel zawiera launchery 10 Centrów; po instalacji smoke System/AI/Report
+przeszedł. Stare 26 narzędzi pozostaje dostępnych przez `legacy` z ustawionym
+`--tools-root`; pełnych backendów i EXE nie przetestowano.
+Wspólne AI analizuje lokalnie raporty nowych Centrów, a przed opcjonalną
+wysyłką do OpenAI pokazuje dokładne metryki bez opisowych alertów źródłowych.
+Osobne potwierdzenie i ponowna kontrola metryk chronią przed wysłaniem
+zmienionego raportu. Ekran jest w System i Security Center, ma eksport JSON/PDF.
+Rzeczywistej wysyłki do API nie sprawdzono.
+Termux Center łączy Setup i Toolkit we wspólnym CLI i źródłowym GUI: profile
+pakietów, plan/konfigurację z kopią i cofnięciem oraz osiem kategorii operacji,
+w tym backup tar z manifestem SHA-256. Fixture przeszły; fizycznego Termuxa,
+`pkg` i Termux:API nie testowano.
+System Center przenosi też odczytowy wycinek Windows Toolkit: historię 50
+aktualizacji, usługi i polityki aktualizacji oraz sygnały restartu. Lokalny
+odczyt wszystkich czterech sekcji przeszedł; naprawy pozostają w legacy.
+Wspólny ReportService przenosi formularz Repair Report oraz lokalny eksport
+HTML/JSON/TXT i PDF Unicode do System i Security Center. Długi PDF sprawdzono
+na czterech wyrenderowanych stronach; brak jeszcze automatycznego pobierania
+wyników z pozostałych Centrów. Bieżąca nowa suita Core/Centrów: 194 testy, 1 pominięty.
 Istniejące aplikacje i wydania nie zostały usunięte. Dashboard ma już własny
 system komponentów PySide6, ale nadal wskazuje 26 modułów i stare nazwy EXE.
 
 Pierwszy kod wspólnego Core to `prestige_core.FileHashService`: jeden odczyt
 pliku może wyliczyć kilka hashy i wykrywa zmianę pliku podczas odczytu.
 Jest spakowany jako lokalny pakiet Python `prestige-core`, z osobnymi testami.
-Żadne z dotychczasowych narzędzi ani GUI nie korzysta jeszcze z tego pakietu;
-nie ma nowych Center, EXE ani integracji z Dashboardem. Do dalszych etapów
-pozostają Network Center, Monitor, kolejne centra, migracja funkcji, testy
+Pierwszy wycinek Network Center korzysta z `prestige_core.network` i pokazuje
+odczyt lokalnej tablicy sąsiadów bez skanowania oraz adaptery, bramy i DNS IPv4.
+Ma PySide6 GUI, pomoc, JSON CLI, zapis lokalnej migawki bez nadpisania,
+porównanie dwóch migawek w GUI i Core, obsługę błędu, testy i skrypt budowy EXE.
+Karta Sentinel czyta istniejący plik mostu JSON v2 i ostatnie alerty JSONL
+Network Sentinel bez uruchamiania skanu przy odczycie statusu; rozróżnia aktualny i przestarzały
+raport, a uszkodzony wiersz alertu oznacza `UNKNOWN`. Lokalnie status okazał
+się nieaktualny, a 5 ostatnich alertów odczytano poprawnie. Monitoring
+Firewall ma nowy moduł planowania i własnych reguł IN/OUT z próbą cofnięcia
+częściowej zmiany. Testy fixture i lokalny plan odczytowy przeszły; rzeczywistej
+blokady/odblokowania w VM nie sprawdzono. Deep Capture nie jest przeniesiony.
+Network Center odczytuje teraz również istniejący log historii urządzeń
+Sentinel JSONL; błędny wiersz jest sygnalizowany jako `UNKNOWN`. Ma też
+ograniczony aktywny skan ICMP lokalnej podsieci do /24 z wyborem adaptera
+i przerwaniem. Testy fixture oraz odczyt lokalnych scope przeszły; realnego
+skanu LAN jeszcze nie wykonano. Stare automatyczne reguły ochrony pozostają w legacy.
+Karta Internet dodaje pomiary ICMP/DNS z opcjonalną trasą i MTU; karta Porty
+ma sześć ograniczonych profili Nmap oraz odczyt i porównanie wyników XML.
+Testy fixture i smoke GUI przeszły. Nmap nie jest dostępny lokalnie, więc
+realnego skanu Nmap nie zweryfikowano. Nie wykonano też pomiaru zewnętrznego
+łącza. Lokalny kontekst DHCP/interfejsów/tras/DNS/Wi-Fi jest dostępny
+w osobnym odczycie Core/GUI; pełna korelacja z pomiarem pozostaje.
+Dodano opcjonalną lokalną bazę historii LAN SQLite. Rejestruje nowe urządzenia
+i zmiany IP/MAC, a brak wpisu w cache nie jest zapisywany jako stan offline.
+Test utrwalania i ponownego otwarcia bazy przeszedł. Dodano tagowanie,
+opcjonalne reverse DNS/OUI i import starej bazy do nowego pliku; testy fixture
+przeszły, ale prywatnej bazy użytkownika nie importowano.
+Karta Optymalizacja odczytuje sześć sekcji ustawień adaptera (DNS, MTU, TCP,
+zasilanie, powiązania i liczbę wpisów cache DNS); lokalny odczyt Windows
+przeszedł. Dodano zmianę DNS IPv4 i MTU 576–1500 z kopią, weryfikacją i
+warunkowym cofnięciem; testy fixture i lokalne plany przeszły, ale zapisy na
+Windows wymagają VM. Jumbo MTU nie jest objęty nowym przepływem. Karta Ruch analizuje logi
+Windows/JSONL/Linux heurystyką NetRadar, śledzi przyrostowo rosnący log
+z rotacją oraz ma ograniczony odczyt metadanych Windows TCP SYN bez payloadu;
+fixture i GUI przeszły, ale rzeczywistego przechwytywania jako administrator
+nie sprawdzono. Pełne Deep Capture pozostaje w starym module.
+Na tym komputerze wykonano odczytowy skan własnej podsieci Wi-Fi /24:
+253 sondy ICMP, 1 odpowiedź i 0 błędów sond. Brak odpowiedzi pozostałych
+adresów nie dowodzi, że urządzenia są offline. Diagnostyka Internetu na
+1.1.1.1 otrzymała 2/2 odpowiedzi ICMP i poprawną odpowiedź DNS; pojedyncza
+próba nie potwierdza stabilności połączenia. Nmap nie jest zainstalowany.
+Porównanie migawek Network Snapshot rozpoznaje teraz również stary format
+`hosts` i zmiany nazwy hosta lub producenta; test mieszanego formatu przeszedł.
+Android Center ma źródłowe GUI do wyboru autoryzowanego urządzenia ADB,
+diagnostyki systemu i inspekcji aplikacji. Odczytuje m.in. baterię, pakiety,
+uprawnienia, role i appops; opcjonalny logcat zapisuje tylko statystyki błędów,
+bez treści wiadomości. Fixture i smoke GUI przeszły. Lokalne ADB działa,
+ale nie było podłączonego urządzenia, więc wyników telefonu/OEM nie zweryfikowano.
+Security Center ma pierwszy odczytowy odpowiednik File Inspector: analiza pliku
+bez wykonania, hashe, entropia, typ pliku, nagłówek PE, opcjonalne ciągi i
+stan podpisu Authenticode na Windows. Test fixture i smoke GUI przeszły;
+podpisanego pliku Windows nie zweryfikowano w nowym Center. Przeniesiono też
+21 kategorii odczytowych Security Check z istniejącymi regułami i coverage
+UNKNOWN. Rzeczywisty audyt lokalnego Windows ukończył się: 21 kategorii,
+4 UNKNOWN; ten wynik nie jest prawdopodobieństwem infekcji. Malware Triage
+ma odczytowy odpowiednik w Core/GUI: 21 sekcji, próbka CPU/GPU, korelacje
+procesów z autostartem i połączeniami, rozszerzenia przeglądarek oraz
+ograniczony skan wybranego folderu. Lokalny odczyt 1 s ukończył 21 sekcji
+z 1 UNKNOWN; odczyt 30 s ukończył 21 sekcji z 1 UNKNOWN i 14 klatkami GPU.
+Wyniki heurystyk
+nie są werdyktem malware. Analiza offline odmawia uznania brakujących sekcji
+za pełny wynik.
+System Center ma pierwsze dwie funkcje: System Snapshot odczytuje 12 kategorii
+Windows, zapisuje nowy plik JSON bez nadpisania i porównuje migawki po
+identyfikatorach tam, gdzie są dostępne. Lokalny odczyt ukończył 12/12 sekcji.
+PC Cleanup skanuje profile, tworzy plan, przenosi zatwierdzone pliki TEMP/cache
+do nowej kwarantanny i przywraca je bez nadpisania później utworzonych plików.
+Downloads/logi/Kosz służą wyłącznie do analizy. Testy fixture obejmują
+roundtrip, zmianę pliku, niedozwolony katalog i kolizję; nie czyszczono danych
+użytkownika. Windows Toolkit pozostaje w legacy.
+Pierwszy wycinek Monitora (`prestige_core.file_snapshot`, `prestige_monitor`)
+odczytuje hashe SHA-256 plików, porównuje migawki i oznacza wynik `UNKNOWN`
+przy niepełnym odczycie. Ma GUI PySide6 z wyborem katalogu, zapisem i odczytem
+baseline oraz przerwaniem między plikami. Obserwacja na żywo działa przez
+odczyt co 2 sekundy, porównuje zdarzenia i ponownie hashuje tylko pliki ze
+zmienionym rozmiarem lub czasem modyfikacji. Co 30 odczytów (około minutę
+przy typowym czasie skanu) ponownie hashuje wszystkie pliki; test potwierdza
+wykrycie zmiany treści przy identycznym rozmiarze i czasie modyfikacji.
+Monitor zgłasza także modyfikację samego czasu pliku, zgodnie z zachowaniem
+legacy Folder Watch. Rozpoznaje też jednoznaczną zmianę nazwy po identyfikatorze pliku i
+SHA-256, zachowując starą oraz nową ścieżkę w historii. Bez wiarygodnego
+identyfikatora pokazuje osobno dodanie i usunięcie, zamiast zgadywać.
+Historia zdarzeń ma filtr w GUI oraz ręczny zapis/odczyt JSON bez
+nadpisywania pliku; niezapisane zdarzenia blokują zmianę katalogu. Nie ma
+jeszcze pełnego parytetu
+Folder Watch/Integrity Monitor ani EXE Monitora.
+Wczytany baseline można świadomie zaktualizować po kompletnym skanie;
+poprzedni plik zostaje zachowany jako nowa kopia `.bak`. Testy obejmują odmowę
+aktualizacji bez potwierdzenia w API i odmowę przy niepełnym skanie.
+Opcjonalny automatyczny dziennik JSONL jest tworzony wyłącznie w nowym pliku
+poza obserwowanym katalogiem; każde zdarzenie jest utrwalane z `fsync`.
+Opcjonalna baza SQLite poza obserwowanym katalogiem przechowuje ostatnią
+kompletną migawkę i zdarzenia. Monitor potrafi po restarcie porównać stan
+bieżący z zapisanym i pokazać zmiany z przerwy. Obcej bazy nie nadpisuje.
+Główna obserwacja domyślnie używa polling. Jest też osobny, ograniczony do 10 sekund
+odczyt Windows FileSystemWatcher,
+który potrafi pokazać zdarzenia chwilowe (np. plik utworzony i usunięty między
+skanami). Potwierdzono lokalnie takie zdarzenie; przepełnienie bufora daje
+`UNKNOWN`. Dodatkowy przycisk uruchamia ciągły natywny odczyt w jednym procesie
+aż do zatrzymania; test na Windows potwierdził utworzenie i usunięcie pliku
+oraz zamknięcie procesu. Historia tego trybu wymaga ręcznego zapisu lub JSONL;
+SQLite przechowuje stan trybu polling.
+Stara baza SQLite Folder Watch może zostać zaimportowana do nowego pliku bez
+zmiany oryginału; test obejmuje stan, zdarzenia, odmowę nadpisania i odrzucenie
+ścieżki wychodzącej poza źródło. Czas wykonania starej migawki jest oznaczony
+jako nieznany. Przy wznowieniu z SQLite Monitor zawsze ponownie hashuje pliki,
+aby wykryć także zmianę treści z identycznym rozmiarem i `mtime`.
+Ręczny skan Monitora ma opcję ACL/ADS (Windows SDDL i alternatywne
+strumienie); niepełny odczyt daje `UNKNOWN`. Lokalny test ACL oraz zmiany
+rzeczywistego ADS przeszedł. Dodano generowanie szyfrowanego klucza Ed25519,
+podpis i weryfikację baseline względem wskazanego klucza publicznego. Testy
+wykazały odmowę nadpisania i wykrycie zmiany treści; nie testowano wszystkich
+odmów dostępu.
+Obserwacja polling może teraz pracować w trybie ACL/ADS. Wznowienie z SQLite
+odrzuca zmianę trybu, aby nie porównać niezgodnych migawek; test Windows
+potwierdził wykrycie zmiany rzeczywistego ADS. Karta Hash Checker oblicza hash
+pliku oraz tworzy i sprawdza manifest folderu. Niepełny skan nie może stać się
+baseline; SHA-1/MD5 służą wyłącznie do zgodności ze starszymi danymi.
+Manifest można teraz podpisać odłączonym podpisem Ed25519 i zweryfikować względem
+wskazanego klucza publicznego. Test potwierdza wykrycie zmiany treści pliku manifestu;
+podpis nie potwierdza tożsamości właściciela klucza.
+Registry Manager ma odczytowy GUI i 25 udokumentowanych operacji: lokalizacje
+folderów, Run/RunOnce oraz odrębne wartości Explorer, UAC, proxy, RDP i ścieżek
+systemowych. Fixture i lokalny odczyt Windows przeszły dla wszystkich 25;
+nie wykonywano zapisów rejestru. Dodano REG-WRITE-001 (HKCU HideFileExt=0)
+z kopią JSON i warunkowym cofnięciem; test fixture przeszedł, ale rzeczywisty
+zapis/rollback na VM jest niezweryfikowany i nie zwiększa licznika 25/500.
+Licznik 25/500 i pozostałe 475 operacji są w
+`development/REGISTRY-OPERATIONS.md`.
+Storage & Recovery ma pierwszy odczytowy widok fizycznych dysków, numeru
+PhysicalDrive, rozmiaru, magistrali, liter woluminów i ostrzeżenia o dysku
+systemowym. Po wybraniu dysku pokazuje jego `UniqueId`. Odczyt lokalny wykrył
+1 dysk systemowy; nie otwierano urządzenia blokowo ani nie zmieniano atrybutu
+readonly. Dodano osobny backend obrazu RAW `PhysicalDrive` tylko dla dysku
+niesystemowego z atrybutem read-only i celu na innym dysku. GUI umożliwia
+wybór obrazu i przerwanie, a backend zapisuje metadane oraz weryfikuje obraz
+SHA-256. Test fixture przeszedł; prawdziwego dysku fizycznego nie otwierano.
+Atrybut Windows read-only nie jest sprzętową blokadą zapisu.
+Get-Disk może pomijać dyski dynamiczne. BitLocker i ochrona sprzętowa nie są
+jeszcze weryfikowane.
+Testowy silnik RAW (`prestige_core.imaging_fixture`) kopiuje wyłącznie zwykły
+plik do nowego `.img`, liczy SHA-256, ponownie odczytuje obraz i zapisuje
+metadane `COMPLETE`/`INCOMPLETE`. Test potwierdza niezmienność pliku źródłowego,
+odmowę nadpisania istniejącego obrazu i oznaczenie przerwania. Nie przyjmuje
+PhysicalDrive i nie jest write blockerem.
+Natywny backend legacy Folder Watch w `prestige-folder-watch/native.py`
+(Windows FileSystemWatcher przez PowerShell) posłużył jako punkt odniesienia
+dla ograniczonego i ciągłego odczytu w nowym GUI. Nadal trzeba sprawdzić
+pełny parytet, w tym zachowanie przy błędach i restarcie.
+Network Center nie jest jeszcze pełny;
+stare moduły nadal zawierają duplikaty, a Dashboard nie został jeszcze
+przełączony. Testy źródłowe przechodzą, natomiast EXE z PyInstaller
+nie przechodzi kontroli startu: wersje diagnostyczne z PySide6 6.11.2
+zwracały błąd ładowania DLL przy imporcie QtWidgets na Pythonie 3.14 i 3.13.
+Build diagnostyczny onedir/console z PySide6 6.10.2 na Pythonie 3.13
+potwierdził ten sam błąd importu QtWidgets. Import działa poza pakietem;
+dokładna brakująca procedura DLL pozostaje nieustalona. Minimalny EXE z samym
+importem `PySide6.QtWidgets` odtwarza błąd, więc źródłem jest pakowanie Qt w
+tym środowisku, a nie logika Network Center. Z tego powodu nie
+udostępniono nowego modułu w Dashboardzie ani wydania. Do dalszych etapów
+pozostają poprawa pakowania, dalsze funkcje Network Center,
+Monitor, kolejne centra, migracja funkcji, testy
 sprzętowe, aktualizacja Dashboardu i pełny build. Prestige Distant,
 iDiagnostics oraz Registry Tool wymagają ustalenia lokalizacji kodu.
+
+Stan roboczy 2026-09-28: gałąź `codex/consolidation-audit`; 147 testów Core,
+Network Center, Monitora, Registry Managera, Storage, Android, Security i System Center przechodzi (1 test dowiązania pominięty z powodu uprawnień), siedem GUI przechodzi smoke z kodu
+źródłowego. Network Center odczytał lokalnie 1 wpis cache i 3 adaptery.
+Dashboard nie został zmieniony. Manualne testy EXE przez użytkownika są
+odłożone do końcowego etapu; automatyczny test startu nadal jest negatywny.
+Ostatni build Network Center nie może być traktowany jako działający;
+minimalny konsolowy EXE potwierdził błąd importu QtWidgets. Następne
+prace: integracja ACL/ADS z obserwacją Monitora i test odmowy dostępu, dalsze funkcje Network
+Center bez duplikowania istniejącego DNS Center, Registry Manager, Storage &
+Recovery, testy parytetu, integracja Dashboardu.
 
 ## Publikacja GitHub — 2026-09-15
 

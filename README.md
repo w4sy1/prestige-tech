@@ -1,23 +1,57 @@
 # PRESTIGE TECH
 by Dominik Wasilak
 
-Zestaw **26 samodzielnych projektów — paczka 0.3.4 (wydanie testowe)**: diagnostyka, administracja,
-monitoring, integralność, Android i raporty. Własny kod na MIT; zależności zachowują swoje licencje.
+PRESTIGE TECH rozwija 26 samodzielnych narzędzi w połączone Centra. Stare
+repozytoria i wydania pozostają dostępne jako historia projektu. Obecny kod
+źródłowy Centrów jest wersją testową; nie zastępuje jeszcze sprawdzonej paczki EXE.
 
-## Pobieranie z GitHuba
+Własny kod jest udostępniony na [Prestige Tech Free Use License](LICENSE).
+Zależności i czcionki zachowują swoje odrębne licencje.
+
+## Nowe Centra — kod źródłowy
+
+| Obszar | Program | Uruchomienie |
+|---|---|---|
+| Sieć | Network Center | `python network_center.py` |
+| Pliki i integralność | Monitor | `python monitor.py` |
+| Rejestr Windows | Registry Manager | `python registry_manager.py` |
+| Dyski i odzyskiwanie | Storage & Recovery | `python storage_center.py` |
+| Android | Android Center | `python android_center.py` |
+| Bezpieczeństwo | Security Center | `python security_center.py` |
+| System Windows | System Center | `python system_center.py` |
+| Termux | Termux Center | `python termux_center_gui.py` |
+| Analiza | AI Diagnostic Assistant | `python ai_center.py` |
+| Raporty | Repair Report | `python report_center.py` |
+
+Windows, Python 3.11+ i PySide6 są wymagane dla GUI. Wybrane funkcje wymagają
+ADB, Nmap, PowerShell lub uprawnień administratora. Po sklonowaniu tego repo
+uruchom w nim `python -m pip install -e ".[gui,pdf,signing]"`, a potem wybrane
+Centrum. Test okna bez urządzeń: `python network_center.py --smoke`.
+
+[Dashboard](https://github.com/w4sy1/prestige-tech-dashboard) może uruchamiać
+Centra z kodu, gdy oba repozytoria są w sąsiednich katalogach. Nie zmienia to
+wyglądu Dashboardu. Nowe EXE nie są jeszcze gotowe: testowe pakowanie PySide6
+kończy się błędem ładowania QtWidgets. Nie pobieraj archiwalnej paczki 0.3.4
+z oczekiwaniem, że zawiera te Centra.
+
+[Stan funkcji i ograniczenia](PROJECT-STATUS.md) ·
+[Macierz migracji](development/CENTER-MIGRATION-MATRIX.md) ·
+[Katalog starych programów](PROGRAMS.md)
+
+## Archiwalna paczka 0.3.4
 
 [Pełna paczka Windows EXE i źródła 0.3.4](https://github.com/w4sy1/prestige-tech/releases/tag/v0.3.4).
 Wydanie jest oznaczone jako **Pre-release**. Pobierz `prestige-tech-desktop-0.3.4-windows-x64.zip`,
 rozpakuj je i uruchom `prestige-tech-dashboard.exe` lub dowolny pojedynczy program.
 
-To repozytorium zawiera dokumentację zestawu i skrypty budowania. Kod 26 programów
+Wydanie 0.3.4 zawiera dokumentację zestawu i skrypty budowania. Kod 26 programów
 znajduje się w osobnych repozytoriach `w4sy1/prestige-*`; komplet źródeł ze strukturą
 katalogów potrzebną do budowania zawiera załącznik `prestige-tech-0.3.4.zip` w wydaniu.
 Automatyczny przycisk GitHuba „Source code” pobiera tylko zawartość tego repozytorium.
 
 [Lista wszystkich 26 programów: repozytoria i pojedyncze EXE](PROGRAMS.md).
 
-## Windows: interfejs graficzny
+## Windows: interfejs graficzny paczki 0.3.4
 
 Wersje programów pozostają niezależne: Backup/Integrity 0.3.2, Cleanup/USB 0.3.3,
 Termux Setup/Network Optimizer 0.3.4, pozostałe 0.3.1.
@@ -89,6 +123,7 @@ snapshot diagnostyczny nie jest kopią systemu. Heurystyki nie są werdyktem mal
 
 ## Autor, licencja i wsparcie
 
-Dominik Wasilak — Prestige Tech — prestigetech@gmail.com. Licencja MIT.
+Dominik Wasilak — Prestige Tech — prestigetech@gmail.com. Własny kod:
+[Prestige Tech Free Use License](LICENSE).
 Opcja wsparcia autora zostanie udostępniona w przyszłości.
 Każdy samodzielny projekt zawiera config/author.json.

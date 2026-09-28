@@ -7,8 +7,24 @@ name = "prestige-core"
 version = "0.1.0.dev0"
 description = "Shared services for PRESTIGE TECH centers"
 requires-python = ">=3.11"
-license = "MIT"
+license-files = ["LICENSE"]
 authors = [{name = "Dominik Wasilak"}]
 
+[project.optional-dependencies]
+signing = ["cryptography>=42"]
+pdf = ["reportlab>=4,<5"]
+gui = ["PySide6>=6.6,<7"]
+
+[project.scripts]
+prestige = "prestige_cli:main"
+
+[tool.setuptools]
+py-modules = ["network_center", "monitor", "registry_manager", "storage_center",
+    "android_center", "security_center", "system_center", "termux_center",
+    "termux_center_gui", "ai_center", "report_center"]
+
 [tool.setuptools.packages.find]
-include = ["prestige_core*"]
+include = ["prestige_core*", "prestige_network_center*", "prestige_monitor*", "prestige_registry*", "prestige_storage*", "prestige_android*", "prestige_security*", "prestige_system*", "prestige_report*", "prestige_termux*", "prestige_ai*", "prestige_cli*"]
+
+[tool.setuptools.package-data]
+prestige_core = ["assets/DejaVuSans.ttf", "assets/FONT-LICENSE.txt"]
