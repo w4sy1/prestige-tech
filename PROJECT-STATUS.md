@@ -21,6 +21,12 @@ pozostają do wykonania przez użytkownika na końcu.
 
 ## Aktualny etap — 2026-09-28
 
+USB Toolkit w Storage & Recovery ma teraz odczytowy plan przygotowania zestawu,
+który sprawdza nazwy, wersje, duplikaty i cel przed potwierdzeniem GUI.
+Potwierdzenie pokazuje wersje narzędzi. Plan nie tworzy katalogu; fixture i
+GUI PASS. Pełna suita: 214 uruchomionych, 212 zaliczonych, 2 pominięte.
+Fizycznego USB ani utraty połączenia nie testowano.
+
 GUI Storage & Recovery ma wybór czterech standardowych folderów użytkownika
 przez pola wyboru. Ścieżki są wykrywane na bieżąco; niedostępny katalog
 blokuje plan. Testy GUI łączenia z ręcznym wyborem i błędu PASS; lokalny

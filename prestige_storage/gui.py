@@ -16,7 +16,7 @@ from prestige_core.physical_imaging import image_readonly_disk
 from prestige_core.backup import backup, known_folders, plan, restore, verify
 from prestige_core.backup.vss import backup as vss_backup
 from prestige_core.backup.vss import recover as recover_vss
-from prestige_core.usb import prepare as prepare_usb, verify as verify_usb
+from prestige_core.usb import plan_prepare as plan_usb_prepare, prepare as prepare_usb, verify as verify_usb
 from prestige_core.usb import update as update_usb, rollback as rollback_usb
 from prestige_core.ui_theme import APP_QSS, COLORS
 
@@ -416,9 +416,16 @@ class StorageWindow(QMainWindow):
         parent = QFileDialog.getExistingDirectory(self, "Wybierz folder docelowy PrestigeUSB")
         if not parent:
             return
+        try:
+            preview = plan_usb_prepare(parent, tools)
+        except (OSError, ValueError, KeyError, TypeError) as error:
+            self.show_backup_error(str(error))
+            return
         if QMessageBox.question(self, "Utwórz PrestigeUSB",
-                                f"Utworzyć nowy zestaw w {parent}/PrestigeUSB z "
-                                f"{len(tools)} narzędziami? "
+                                f"Utworzyć nowy zestaw w {preview['destination']} z "
+                                f"{len(preview['versions'])} narzędziami: "
+                                + ", ".join(f"{name} {version}" for name, version in preview['versions'].items())
+                                + "? "
                                 "Nośnik nie będzie formatowany.") == QMessageBox.Yes:
             self._run_usb_operation("prepare", parent, tools)
 

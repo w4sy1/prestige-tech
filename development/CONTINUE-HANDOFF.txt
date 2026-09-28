@@ -1,6 +1,13 @@
 PRESTIGE TECH — PLIK PRZEKAZANIA PRACY I TESTÓW
 Stan: 2026-09-28. Aktualizuj ten plik po każdym istotnym etapie.
 
+NAJNOWSZY ETAP — USB TOOLKIT PLAN
+Core/CLI i GUI Storage & Recovery używają odczytowego planu PrestigeUSB.
+Przed zapisem waliduje on nazwy i wersje narzędzi, duplikaty oraz wolny cel;
+GUI pokazuje wersje przy potwierdzeniu. Fixture planu bez zapisu i GUI PASS;
+pełna suita 214 uruchomionych, 212 zaliczonych, 2 pominięte. Fizycznego
+USB i przerwania nośnika nie testowano.
+
 NAJNOWSZY ETAP — STANDARDOWE FOLDERY BACKUP
 GUI Storage & Recovery dodaje wybór Pulpitu, Dokumentów, Obrazów i Pobranych.
 Wykrywa ścieżki przy planowaniu kopii, łączy je z ręcznymi folderami bez

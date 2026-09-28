@@ -6,6 +6,40 @@ from unittest.mock import patch
 
 
 class StorageGuiTests(unittest.TestCase):
+    def test_usb_prepare_rejects_invalid_plan_before_confirmation(self):
+        os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+        from PySide6.QtWidgets import QApplication
+        from prestige_storage.gui import StorageWindow
+        application = QApplication.instance() or QApplication([])
+        window = StorageWindow(autoload=False)
+        with patch.object(window, "select_directories", return_value=["C:/prestige-invalid"]), patch(
+                "prestige_storage.gui.QFileDialog.getExistingDirectory", return_value="C:/output"), patch(
+                "prestige_storage.gui.plan_usb_prepare", side_effect=ValueError("Brak wersji")), patch(
+                "prestige_storage.gui.QMessageBox.question") as question, patch.object(
+                window, "_run_usb_operation") as start:
+            window.start_usb_prepare()
+            question.assert_not_called()
+            start.assert_not_called()
+            self.assertIn("Brak wersji", window.status.text())
+        window.close()
+
+    def test_usb_prepare_shows_validated_versions_before_start(self):
+        os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+        from PySide6.QtWidgets import QApplication, QMessageBox
+        from prestige_storage.gui import StorageWindow
+        application = QApplication.instance() or QApplication([])
+        window = StorageWindow(autoload=False)
+        with patch.object(window, "select_directories", return_value=["C:/prestige-tool"]), patch(
+                "prestige_storage.gui.QFileDialog.getExistingDirectory", return_value="C:/output"), patch(
+                "prestige_storage.gui.plan_usb_prepare", return_value={
+                    "destination": "C:/output/PrestigeUSB", "versions": {"prestige-tool": "1.2.3"}}), patch(
+                "prestige_storage.gui.QMessageBox.question", return_value=QMessageBox.Yes) as question, patch.object(
+                window, "_run_usb_operation") as start:
+            window.start_usb_prepare()
+            self.assertIn("prestige-tool 1.2.3", question.call_args.args[2])
+            start.assert_called_once_with("prepare", "C:/output", ["C:/prestige-tool"])
+        window.close()
+
     def test_standard_folders_merge_with_manual_without_duplicates(self):
         os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
         from PySide6.QtWidgets import QApplication, QMessageBox

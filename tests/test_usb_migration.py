@@ -5,10 +5,27 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 import unittest
 
-from prestige_core.usb import prepare, rollback, update, verify
+from prestige_core.usb import plan_prepare, prepare, rollback, update, verify
 
 
 class UsbMigrationTests(unittest.TestCase):
+    def test_prepare_plan_validates_versions_without_writing(self):
+        with TemporaryDirectory() as folder:
+            base = Path(folder)
+            tool = base / "prestige-fixture"
+            tool.mkdir()
+            (tool / "metadata.json").write_text(json.dumps({"version": "1.2.3"}))
+            target = base / "stick"
+            preview = plan_prepare(target, [tool])
+            self.assertEqual(preview["versions"], {"prestige-fixture": "1.2.3"})
+            self.assertFalse(target.exists())
+            with self.assertRaises(ValueError):
+                plan_prepare(target, [tool, tool])
+            (tool / "metadata.json").write_text(json.dumps({"version": "invalid"}))
+            with self.assertRaises(ValueError):
+                plan_prepare(target, [tool])
+            self.assertFalse(target.exists())
+
     def test_prepare_multiple_tools(self):
         with TemporaryDirectory() as folder:
             base = Path(folder)

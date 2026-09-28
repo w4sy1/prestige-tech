@@ -8,19 +8,28 @@ from prestige_core.backup.runtime import atomic_json,digest,entry,files,inside,p
 FOLDERS=['Diagnostics','Windows','Network','Android','Backup','Recovery','Reports','Tools']
 EXCLUDE={'.git','.env','logs','reports','__pycache__','.venv','node_modules'}
 
-def prepare(destination,tools):
+def plan_prepare(destination, tools):
     root=Path(destination).resolve()/'PrestigeUSB';sources=[Path(p).resolve() for p in tools]
+    if not sources:raise ValueError('Wskaż co najmniej jedno narzędzie Prestige.')
+    if root.exists():raise FileExistsError(root)
+    versions={}
     for source in sources:
         if not source.name.startswith('prestige-') or not source.is_dir():raise ValueError('Wskaż katalog narzędzia Prestige.')
         if root.is_relative_to(source):raise ValueError('Docelowy katalog znajduje się w źródle.')
         meta=read_json(source/'metadata.json')
         if not re.fullmatch(r'\d+\.\d+\.\d+',meta.get('version','')):raise ValueError('Brak poprawnej wersji.')
+        versions[source.name]=meta['version']
     if len({s.name for s in sources})!=len(sources):raise ValueError('Powtórzona nazwa narzędzia.')
+    return {'destination':str(root),'folders':FOLDERS,'tools':[str(source) for source in sources],
+            'versions':versions}
+
+def prepare(destination,tools):
+    preview=plan_prepare(destination,tools)
+    root=Path(preview['destination']);sources=[Path(path) for path in preview['tools']]
     root.mkdir(parents=True,exist_ok=False)
     for folder in FOLDERS:(root/folder).mkdir()
-    versions={}
+    versions=preview['versions']
     for source in sources:
-        versions[source.name]=read_json(source/'metadata.json')['version']
         for path in files(source):
             relative=path.relative_to(source)
             if any(p in EXCLUDE or p.startswith('.env.') for p in relative.parts):continue
@@ -56,7 +65,7 @@ def handle(a):
     if a.command=='update':return update(a.destination,a.tool,prepare,a.apply)
     if a.command=='rollback':return rollback(a.destination,a.apply)
     if a.command=='prepare':
-        if not a.apply:return {'plan':{'destination':str(Path(a.destination)/'PrestigeUSB'),'folders':FOLDERS,'tools':a.tool}}
+        if not a.apply:return {'plan':plan_prepare(a.destination,a.tool)}
         return prepare(a.destination,a.tool)
     raise ValueError('Wybierz polecenie.')
 
