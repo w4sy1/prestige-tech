@@ -14,6 +14,8 @@ from PySide6.QtWidgets import (
 from prestige_core.storage_inventory import read_disks
 from prestige_core.physical_imaging import image_readonly_disk
 from prestige_core.backup import backup, plan, restore, verify
+from prestige_core.backup.vss import backup as vss_backup
+from prestige_core.backup.vss import recover as recover_vss
 from prestige_core.usb import prepare as prepare_usb, verify as verify_usb
 from prestige_core.usb import update as update_usb, rollback as rollback_usb
 from prestige_core.ui_theme import APP_QSS, COLORS
@@ -52,19 +54,32 @@ class BackupWorker(QThread):
     loaded = Signal(dict)
     failed = Signal(str)
 
-    def __init__(self, operation, source, destination=None, preserve_acl=False, parent=None):
+    def __init__(self, operation, source, destination=None, preserve_acl=False,
+                 system_export=False, drivers=False, bookmarks=None, vss=False, parent=None):
         super().__init__(parent)
         self.operation = operation
         self.source = source
         self.destination = destination
         self.preserve_acl = preserve_acl
+        self.system_export = system_export
+        self.drivers = drivers
+        self.bookmarks = bookmarks
+        self.vss = vss
 
     def run(self):
         try:
             if self.operation == "backup":
-                result = backup([self.source], self.destination, preserve_acl=self.preserve_acl)
+                options = dict(system=self.system_export, drivers=self.drivers,
+                               bookmarks=[self.bookmarks] if self.bookmarks else None,
+                               preserve_acl=self.preserve_acl)
+                if self.vss:
+                    result = vss_backup([self.source], self.destination, backup, **options)
+                else:
+                    result = backup([self.source], self.destination, **options)
             elif self.operation == "verify":
                 result = verify(self.source)
+            elif self.operation == "vss-recover":
+                result = recover_vss(self.source, execute=True)
             else:
                 result = restore(self.source, self.destination, apply=True,
                                  restore_acl=self.preserve_acl)
@@ -183,6 +198,25 @@ class StorageWindow(QMainWindow):
         backup_layout.addLayout(backup_actions)
         self.acl_checkbox = QCheckBox("Zachowaj ACL (Windows) / tryb plików")
         backup_layout.addWidget(self.acl_checkbox)
+        options = QHBoxLayout()
+        self.vss_checkbox = QCheckBox("VSS (Windows, administrator)")
+        options.addWidget(self.vss_checkbox)
+        self.system_export_checkbox = QCheckBox("Eksport systemu")
+        options.addWidget(self.system_export_checkbox)
+        self.drivers_checkbox = QCheckBox("Eksport sterowników")
+        options.addWidget(self.drivers_checkbox)
+        backup_layout.addLayout(options)
+        self.bookmark_path = None
+        bookmark_actions = QHBoxLayout()
+        self.bookmark_button = QPushButton("Wybierz zakładki Chromium/Firefox")
+        self.bookmark_button.clicked.connect(self.choose_bookmarks)
+        bookmark_actions.addWidget(self.bookmark_button)
+        self.bookmark_label = QLabel("Zakładki: nie wybrano")
+        bookmark_actions.addWidget(self.bookmark_label, 1)
+        self.vss_recover_button = QPushButton("Dziennik VSS")
+        self.vss_recover_button.clicked.connect(self.start_vss_recover)
+        bookmark_actions.addWidget(self.vss_recover_button)
+        backup_layout.addLayout(bookmark_actions)
         main.addWidget(backup_card)
         usb_card = QFrame()
         usb_card.setObjectName("Card")
@@ -210,15 +244,26 @@ class StorageWindow(QMainWindow):
     def _run_backup_operation(self, operation, source, destination=None):
         if self.backup_worker is not None and self.backup_worker.isRunning():
             return
-        self.backup_worker = BackupWorker(operation, source, destination,
-                                          self.acl_checkbox.isChecked(), self)
-        for button in (self.backup_button, self.verify_button, self.restore_button):
+        self.backup_worker = BackupWorker(
+            operation, source, destination, self.acl_checkbox.isChecked(),
+            self.system_export_checkbox.isChecked(), self.drivers_checkbox.isChecked(),
+            self.bookmark_path, self.vss_checkbox.isChecked(), self)
+        for button in (self.backup_button, self.verify_button, self.restore_button,
+                       self.vss_recover_button):
             button.setEnabled(False)
         self.status.setText(f"{operation}: operacja trwa…")
         self.backup_worker.loaded.connect(self.show_backup_result)
         self.backup_worker.failed.connect(self.show_backup_error)
         self.backup_worker.finished.connect(self.finish_backup_operation)
         self.backup_worker.start()
+
+    def choose_bookmarks(self):
+        path, _ = QFileDialog.getOpenFileName(
+            self, "Wybierz plik Bookmarks Chromium lub places.sqlite Firefox", "",
+            "Zakładki (Bookmarks places.sqlite *.sqlite *.db);;Wszystkie pliki (*)")
+        if path:
+            self.bookmark_path = path
+            self.bookmark_label.setText(f"Zakładki: {Path(path).name}")
 
     def start_backup(self):
         source = QFileDialog.getExistingDirectory(self, "Folder źródłowy kopii")
@@ -239,7 +284,11 @@ class StorageWindow(QMainWindow):
             self, "Utwórz kopię",
             f"Skopiować {len(summary['files'])} plików ({summary['total_bytes']} bajtów) "
             f"do nowego katalogu {destination}? Pominięte znane magazyny sekretów: "
-            f"{summary['excluded_count']}.")
+            f"{summary['excluded_count']}. "
+            f"VSS: {'TAK' if self.vss_checkbox.isChecked() else 'NIE'}; "
+            f"eksport systemu: {'TAK' if self.system_export_checkbox.isChecked() else 'NIE'}; "
+            f"sterowniki: {'TAK' if self.drivers_checkbox.isChecked() else 'NIE'}; "
+            f"zakładki: {'TAK' if self.bookmark_path else 'NIE'}.")
         if answer == QMessageBox.Yes:
             self._run_backup_operation("backup", source, destination)
 
@@ -269,6 +318,21 @@ class StorageWindow(QMainWindow):
         if answer == QMessageBox.Yes:
             self._run_backup_operation("restore", source, destination)
 
+    def start_vss_recover(self):
+        journal, _ = QFileDialog.getOpenFileName(
+            self, "Dziennik pozostałych migawek VSS", "", "Dziennik JSON (*.json)")
+        if not journal:
+            return
+        try:
+            preview = recover_vss(journal, execute=False)
+        except (OSError, ValueError, KeyError, TypeError) as error:
+            self.show_backup_error(str(error))
+            return
+        if QMessageBox.question(self, "Usuń pozostałe migawki VSS",
+                                f"Usunąć {len(preview['snapshots'])} migawek "
+                                "wymienionych wyłącznie w tym dzienniku?") == QMessageBox.Yes:
+            self._run_backup_operation("vss-recover", journal)
+
     def show_backup_result(self, result):
         if result.get("ok") is False:
             self.status.setText(f"Operacja niepełna: {result}")
@@ -279,7 +343,8 @@ class StorageWindow(QMainWindow):
         self.status.setText(f"Błąd kopii: {message}")
 
     def finish_backup_operation(self):
-        for button in (self.backup_button, self.verify_button, self.restore_button):
+        for button in (self.backup_button, self.verify_button, self.restore_button,
+                       self.vss_recover_button):
             button.setEnabled(True)
 
     def _run_usb_operation(self, operation, path, tool=None):
@@ -449,8 +514,9 @@ class StorageWindow(QMainWindow):
             "dyski dynamiczne. Atrybut read-only Windows nie daje gwarancji sprzętowej blokady zapisu; "
             "BitLocker i RAM nie są obsługiwane. Kopia folderu zapisuje manifest SHA-256, "
             "pomija znane magazyny sekretów i odtwarza wyłącznie do nowego katalogu. "
-            "Opcja ACL dotyczy tylko kopii i odtwarzania; VSS i eksporty serwisowe "
-            "są dostępne w backendzie, lecz nie w tym oknie. PrestigeUSB tworzy katalog "
+            "Opcja ACL dotyczy kopii i odtwarzania. VSS tworzy migawki Windows i wymaga "
+            "administratora; po przerwaniu sprawdź dziennik VSS. Eksport systemu, "
+            "sterowników i zakładek jest opcjonalny. PrestigeUSB tworzy katalog "
             "z narzędziami, sprawdza manifest, aktualizuje wersję z kopią i pozwala ją cofnąć; "
             "nie formatuje nośnika."
         )

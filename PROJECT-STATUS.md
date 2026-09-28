@@ -24,8 +24,9 @@ pozostają do wykonania przez użytkownika na końcu.
 Storage & Recovery: przeniesiono backend Backup do `prestige_core.backup` bez
 zależności od starego repozytorium: plan, kopia folderu, manifest SHA-256,
 weryfikacja, odtwarzanie do nowego katalogu, eksporty serwisowe, ACL i VSS.
-GUI ma wybór folderów oraz tworzenie/sprawdzenie/odtworzenie kopii z opcją ACL;
-VSS i eksporty serwisowe pozostają dostępne tylko w backendzie. 29 testów
+GUI ma wybór folderów oraz tworzenie/sprawdzenie/odtworzenie kopii z opcją ACL,
+VSS, eksportem systemu/sterowników/zakładek i odzyskaniem migawek z dziennika.
+W jednym przebiegu GUI wybiera jeden folder i jeden plik zakładek. 29 testów
 starego Backup zaadaptowanych do nowej ścieżki przeszło, podobnie dwa nowe
 testy migracji i smoke GUI. Cała suita nowego repo po migracji Backup i USB:
 197 testów PASS, 2 pominięte.
