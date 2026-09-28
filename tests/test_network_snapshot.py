@@ -37,6 +37,21 @@ class NetworkSnapshotTests(unittest.TestCase):
         self.assertEqual(result["changed_hostnames"][0]["after"], "new")
         self.assertEqual(result["changed_vendors"][0]["after"], "B")
 
+    def test_hyphen_mac_and_multiple_ip_rows_match_legacy_host(self):
+        old = {"schema_version": 1, "hosts": {"aa:bb:cc:dd:ee:02": {
+            "mac": "AA:BB:CC:DD:EE:02", "ips": ["192.168.1.2", "192.168.1.3"],
+            "hostname": "device", "vendor": "vendor"}}}
+        new = make_snapshot(neighbors=[
+            {"mac": "AA-BB-CC-DD-EE-02", "ips": ["192.168.1.3"], "hostname": "device"},
+            {"mac": "aa-bb-cc-dd-ee-02", "ips": ["192.168.1.2"], "vendor": "vendor"},
+        ], adapters=[])
+        result = compare_snapshots(old, new)
+        self.assertEqual(result["newly_observed"], [])
+        self.assertEqual(result["not_observed_now"], [])
+        self.assertEqual(result["changed_ips"], [])
+        self.assertEqual(result["changed_hostnames"], [])
+        self.assertEqual(result["changed_vendors"], [])
+
 
 if __name__ == "__main__":
     unittest.main()

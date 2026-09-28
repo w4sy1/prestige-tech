@@ -21,6 +21,11 @@ pozostają do wykonania przez użytkownika na końcu.
 
 ## Aktualny etap — 2026-09-28
 
+Network Snapshot scala teraz wiele IP tego samego MAC przy porównaniu oraz
+normalizuje zapis MAC z myślnikami i dwukropkami. Fixture starego formatu
+`hosts` z dwoma nowymi wierszami PASS. Pełna suita: 215 uruchomionych,
+213 zaliczonych, 2 pominięte. Discovery i realny skan nadal wymagają audytu.
+
 USB Toolkit w Storage & Recovery ma teraz odczytowy plan przygotowania zestawu,
 który sprawdza nazwy, wersje, duplikaty i cel przed potwierdzeniem GUI.
 Potwierdzenie pokazuje wersje narzędzi. Plan nie tworzy katalogu; fixture i

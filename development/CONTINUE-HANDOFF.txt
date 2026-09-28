@@ -1,6 +1,13 @@
 PRESTIGE TECH — PLIK PRZEKAZANIA PRACY I TESTÓW
 Stan: 2026-09-28. Aktualizuj ten plik po każdym istotnym etapie.
 
+NAJNOWSZY ETAP — NETWORK SNAPSHOT
+Porównanie migawek scala IP powtarzającego się MAC i normalizuje zapis
+MAC z myślnikami/dwukropkami, zgodnie ze starym Network Snapshot. Fixture
+starego hosts i GUI PASS; suita 215 uruchomionych, 213 zaliczonych,
+2 pominięte. Realny skan, metadane discovery i pełny parytet CLI nie są
+potwierdzone. Audyt: development/FUNCTION-PARITY-AUDIT.md.
+
 NAJNOWSZY ETAP — USB TOOLKIT PLAN
 Core/CLI i GUI Storage & Recovery używają odczytowego planu PrestigeUSB.
 Przed zapisem waliduje on nazwy i wersje narzędzi, duplikaty oraz wolny cel;

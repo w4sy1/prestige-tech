@@ -1,8 +1,24 @@
 """Jawne, lokalne migawki odczytowego stanu sieci."""
 
 from datetime import datetime, timezone
+import ipaddress
 import json
 from pathlib import Path
+import re
+
+
+_MAC = re.compile(r"(?:[0-9a-f]{2}:){5}[0-9a-f]{2}\Z")
+
+
+def _mac_key(value):
+    key = value.lower().replace("-", ":")
+    return key if _MAC.fullmatch(key) else value.lower()
+
+
+def _ips(values):
+    return [str(address) for address in sorted(
+        {ipaddress.ip_address(value) for value in values},
+        key=lambda address: (address.version, int(address)))]
 
 
 def make_snapshot(*, neighbors, adapters, captured_at=None):
@@ -40,7 +56,18 @@ def compare_snapshots(earlier, later):
         if any(not isinstance(row, dict) or not isinstance(row.get("mac"), str)
                or not isinstance(row.get("ips"), list) for row in rows):
             raise ValueError("Nieprawidłowy wpis urządzenia w migawce.")
-        return {row["mac"].lower(): row for row in rows}
+        result = {}
+        for row in rows:
+            mac = _mac_key(row["mac"])
+            if mac not in result:
+                result[mac] = {**row, "mac": mac, "ips": _ips(row["ips"])}
+                continue
+            current = result[mac]
+            current["ips"] = _ips([*current["ips"], *row["ips"]])
+            for field in ("hostname", "vendor", "status"):
+                if row.get(field):
+                    current[field] = row[field]
+        return result
 
     before, after = hosts(earlier), hosts(later)
     return {

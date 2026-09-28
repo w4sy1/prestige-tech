@@ -90,6 +90,24 @@ traktuje braku migawki jako kompletnego skanu. Zdarzenia natywne nowego
 Monitora nie aktualizują automatycznie bazy polling; trzeba je zapisać
 osobno w historii JSONL.
 
+## Network Snapshot → Network Center
+
+Źródło: `w4sy1/prestige-network-snapshot` (`app.py`, `hosts.py`,
+`discovery.py`). Odpowiednik: `prestige_core/network_snapshot.py`, funkcje
+odkrywania LAN i `prestige_network_center/gui.py`.
+
+| Funkcja starego programu | Kod/GUI Center | Potwierdzenie |
+|---|---|---|
+| Zapis nowej migawki bez nadpisania poprzedniej | Tak | Fixture |
+| Porównanie dwóch migawek i oznaczenie braku obserwacji | Tak | Fixture; brak urządzenia nie jest dowodem offline |
+| Odczyt starego formatu `hosts` | Tak | Fixture |
+| Scalenie IP tego samego MAC i formatów `aa-bb`/`aa:bb` | Tak | Fixture zgodności |
+| Jawne discovery / import listy i OUI | Częściowe odpowiedniki w Network Center | Realny skan i pełny parytet komend pozostają otwarte |
+
+Nowe porównanie normalizuje IP i MAC bez zmiany zapisanych migawek. Nie
+potwierdzono jeszcze parytetu danych `discovery` ze starej migawki ani
+wszystkich parametrów starego CLI.
+
 Pozostałe programy są nadal opisane na poziomie modułów w
 `CENTER-MIGRATION-MATRIX.md`; wymagają audytu komend i zachowań w tym samym
 formacie przed decyzją o usunięciu starych repozytoriów.
