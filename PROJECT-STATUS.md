@@ -21,6 +21,12 @@ pozostają do wykonania przez użytkownika na końcu.
 
 ## Aktualny etap — 2026-09-28
 
+GUI Storage & Recovery pozwala utworzyć kopię zawierającą tylko eksport
+systemu, sterowników lub zakładek, bez wybierania folderu źródłowego. VSS
+nadal wymaga folderu. Fixture kopii samych zakładek, manifestu i GUI PASS;
+eksportu systemu/sterowników na prawdziwym Windows nie testowano.
+Pełna suita po zmianie: 209 uruchomionych, 207 zaliczonych, 2 pominięte.
+
 Audyt Folder Watch wykrył drugi wariant starej bazy SQLite: tryb native
 zapisuje zdarzenia bez tabeli stanu. Monitor importuje teraz także tę historię
 do nowej bazy, pozostawiając baseline pusty do pierwszego skanu. Test importu

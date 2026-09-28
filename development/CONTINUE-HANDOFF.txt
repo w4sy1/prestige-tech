@@ -1,6 +1,12 @@
 PRESTIGE TECH — PLIK PRZEKAZANIA PRACY I TESTÓW
 Stan: 2026-09-28. Aktualizuj ten plik po każdym istotnym etapie.
 
+NAJNOWSZY ETAP — BACKUP EXPORT-ONLY
+GUI Storage & Recovery dopuszcza kopię wyłącznie eksportu systemu,
+sterowników albo zakładek bez folderu źródłowego, zgodnie ze starym CLI.
+VSS bez folderu jest odrzucany. Fixture zakładek/manifestu i GUI PASS;
+prawdziwego eksportu systemu oraz sterowników Windows nie testowano.
+
 NAJNOWSZY ETAP — FOLDER WATCH
 Import starej bazy Folder Watch obejmuje teraz oba schematy: polling ze
 stanem plików oraz native z samą historią zdarzeń. W drugim wariancie nie

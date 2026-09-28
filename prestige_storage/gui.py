@@ -282,7 +282,12 @@ class StorageWindow(QMainWindow):
 
     def start_backup(self):
         sources = self.select_directories("Wybierz folder źródłowy kopii")
-        if not sources:
+        has_export = (self.system_export_checkbox.isChecked()
+                      or self.drivers_checkbox.isChecked() or bool(self.bookmark_paths))
+        if not sources and not has_export:
+            return
+        if not sources and self.vss_checkbox.isChecked():
+            self.show_backup_error("VSS wymaga co najmniej jednego folderu źródłowego.")
             return
         parent = QFileDialog.getExistingDirectory(self, "Folder docelowy na nową kopię")
         if not parent:
