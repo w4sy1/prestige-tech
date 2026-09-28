@@ -21,6 +21,20 @@ pozostają do wykonania przez użytkownika na końcu.
 
 ## Aktualny etap — 2026-09-28
 
+Storage & Recovery: przeniesiono backend Backup do `prestige_core.backup` bez
+zależności od starego repozytorium: plan, kopia folderu, manifest SHA-256,
+weryfikacja, odtwarzanie do nowego katalogu, eksporty serwisowe, ACL i VSS.
+GUI ma wybór folderów oraz tworzenie/sprawdzenie/odtworzenie kopii z opcją ACL;
+VSS i eksporty serwisowe pozostają dostępne tylko w backendzie. 29 testów
+starego Backup zaadaptowanych do nowej ścieżki przeszło, podobnie dwa nowe
+testy migracji i smoke GUI. Cała suita nowego repo po migracji Backup i USB:
+197 testów PASS, 2 pominięte.
+Rzeczywistego VSS/ACL Windows, dużej kopii ani pełnego parytetu GUI nie
+zweryfikowano. USB Toolkit ma teraz w Storage & Recovery backend i GUI
+przygotowania, weryfikacji, aktualizacji i rollbacku wersji narzędzia.
+Zaadaptowanych 16 testów starego USB Toolkit i nowy test migracji przeszły;
+fizycznego nośnika nie testowano.
+
 GUI i Dashboard: dziesięć źródłowych Centrów (Network, Monitor, Registry,
 Storage, Android, Security, System, Termux, AI i Repair Report) ma wspólny
 ciemny motyw z kartami i widocznym fokusem; Termux, AI i Report dostały
@@ -64,7 +78,7 @@ kontrolowane wykonanie sześciu napraw Windows Toolkit: SFC, DISM scan/restore,
 flush DNS, reset Winsock i odnowienie DHCP. Wymaga administratora, wskazanego
 katalogu dziennika, migawki diagnostycznej i potwierdzenia braku rollbacku.
 Testy atrap PASS; poleceń nie uruchamiano na hoście. Pełny parytet legacy,
-Backup/USB i zasilanie raportów z pozostałych Centrów nadal pozostają.
+pełny parytet Backup/USB i zasilanie raportów z pozostałych Centrów nadal pozostają.
 
 ## Konsolidacja centrów — rozpoczęta 2026-09-26
 

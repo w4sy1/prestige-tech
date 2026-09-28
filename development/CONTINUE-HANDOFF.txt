@@ -84,6 +84,17 @@ pozostają na końcowym etapie. Oryginalnych obrazów referencyjnych nie ma
 w repo; wykorzystano dostarczony opis stylu.
 
 DO ZROBIENIA W KODZIE
+Aktualizacja 2026-09-28: Storage & Recovery ma nowy pakiet `prestige_core.backup`
+z backendem przeniesionym ze starego Backup (plan, backup, verify, restore,
+eksporty serwisowe, ACL, VSS) i podstawowym GUI do kopii folderu, sprawdzenia
+i odtworzenia do nowego katalogu. Zaadaptowane 29 testów legacy PASS, 2 nowe
+testy PASS, pełna suita 196 PASS / 2 skip, smoke Storage GUI PASS. VSS i
+eksporty serwisowe nie są jeszcze obsługiwane w GUI; rzeczywistych operacji
+VSS/ACL Windows nie uruchamiano. USB Toolkit ma teraz w `prestige_core.usb`
+prepare/verify/update/rollback i cztery akcje w GUI Storage. 16 zaadaptowanych
+testów legacy oraz nowy test migracji PASS; fizycznego USB nie testowano.
+Następny etap: pełne porównanie Backup/USB funkcja po funkcji, potem pozostałe
+moduły według macierzy.
 1. EXE i pakowanie GUI odłożone na prośbę użytkownika do osobnego czatu. Nie traktować tego jako zadania bieżącego; zachować diagnostykę powyżej.
 2. Migrować realne funkcje istniejących programów do Centrów — priorytet wybrany przez użytkownika. Monitor: ACL/ADS działa w polling, natywny watcher słucha Security/Attributes, ale nie koreluje jeszcze sam ACL/ADS. Sentinel: nowy moduł Firewall wymaga próby zapisu/cofnięcia reguł w VM; pełniejsze wykrywanie, automatyczne reguły ochrony i Deep Capture pozostają w legacy. Następnie reszta Network Center i pozostałe moduły.
 3. Registry Manager ma 500 odczytów na bieżącym Windows, lecz ADMX są zależne od instalacji. Dokończyć parytet starego Registry Tool i pokrycie innych Windows; zapisy/rollback dziewięciu zmian zweryfikować w VM później. Nie liczyć nieustawionych zasad jako potwierdzonych wartości konfiguracji.

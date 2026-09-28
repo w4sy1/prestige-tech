@@ -1,15 +1,21 @@
 """Wyłącznie odczytowa lista dysków i woluminów Windows."""
 
 from threading import Event
+from pathlib import Path
+from uuid import uuid4
 
 from PySide6.QtCore import QThread, Signal
 from PySide6.QtWidgets import (
     QFrame, QHBoxLayout, QLabel, QMainWindow, QMessageBox, QPushButton,
     QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget, QHeaderView, QFileDialog,
+    QCheckBox,
 )
 
 from prestige_core.storage_inventory import read_disks
 from prestige_core.physical_imaging import image_readonly_disk
+from prestige_core.backup import backup, plan, restore, verify
+from prestige_core.usb import prepare as prepare_usb, verify as verify_usb
+from prestige_core.usb import update as update_usb, rollback as rollback_usb
 from prestige_core.ui_theme import APP_QSS, COLORS
 
 
@@ -42,6 +48,56 @@ class PhysicalImageWorker(QThread):
             self.failed.emit(str(error))
 
 
+class BackupWorker(QThread):
+    loaded = Signal(dict)
+    failed = Signal(str)
+
+    def __init__(self, operation, source, destination=None, preserve_acl=False, parent=None):
+        super().__init__(parent)
+        self.operation = operation
+        self.source = source
+        self.destination = destination
+        self.preserve_acl = preserve_acl
+
+    def run(self):
+        try:
+            if self.operation == "backup":
+                result = backup([self.source], self.destination, preserve_acl=self.preserve_acl)
+            elif self.operation == "verify":
+                result = verify(self.source)
+            else:
+                result = restore(self.source, self.destination, apply=True,
+                                 restore_acl=self.preserve_acl)
+            self.loaded.emit(result)
+        except (OSError, ValueError, RuntimeError, KeyError, TypeError) as error:
+            self.failed.emit(f"{type(error).__name__}: {error}")
+
+
+class UsbWorker(QThread):
+    loaded = Signal(dict)
+    failed = Signal(str)
+
+    def __init__(self, operation, path, tool=None, parent=None):
+        super().__init__(parent)
+        self.operation = operation
+        self.path = path
+        self.tool = tool
+
+    def run(self):
+        try:
+            if self.operation == "prepare":
+                result = prepare_usb(self.path, [self.tool])
+            elif self.operation == "verify":
+                result = verify_usb(self.path)
+            elif self.operation == "update":
+                result = update_usb(self.path, [self.tool], prepare_usb, True)
+            else:
+                result = rollback_usb(self.path, True)
+            self.loaded.emit(result)
+        except (OSError, ValueError, RuntimeError, KeyError, TypeError) as error:
+            self.failed.emit(f"{type(error).__name__}: {error}")
+
+
 class StorageWindow(QMainWindow):
     def __init__(self, *, autoload=True):
         super().__init__()
@@ -51,6 +107,8 @@ class StorageWindow(QMainWindow):
         self.setStyleSheet(APP_QSS)
         self.worker = None
         self.image_worker = None
+        self.backup_worker = None
+        self.usb_worker = None
         self.disks = []
         root = QWidget()
         self.setCentralWidget(root)
@@ -66,6 +124,8 @@ class StorageWindow(QMainWindow):
         side.addWidget(QLabel("STORAGE & RECOVERY"))
         side.addSpacing(28)
         side.addWidget(QLabel("● Dyski i woluminy"))
+        side.addWidget(QLabel("● Kopie i odtwarzanie"))
+        side.addWidget(QLabel("● Zestaw PrestigeUSB"))
         side.addStretch()
         side.addWidget(QLabel("By Dominik Wasilak"))
         layout.addWidget(sidebar)
@@ -106,12 +166,185 @@ class StorageWindow(QMainWindow):
         self.details = QLabel("Wybierz dysk, aby zobaczyć jego identyfikator.")
         self.details.setWordWrap(True)
         main.addWidget(self.details)
+        backup_card = QFrame()
+        backup_card.setObjectName("Card")
+        backup_layout = QVBoxLayout(backup_card)
+        backup_layout.addWidget(QLabel("Kopia folderu — nowy katalog, bez nadpisywania"))
+        backup_actions = QHBoxLayout()
+        self.backup_button = QPushButton("Utwórz kopię")
+        self.backup_button.clicked.connect(self.start_backup)
+        backup_actions.addWidget(self.backup_button)
+        self.verify_button = QPushButton("Sprawdź kopię")
+        self.verify_button.clicked.connect(self.start_verify)
+        backup_actions.addWidget(self.verify_button)
+        self.restore_button = QPushButton("Odtwórz do nowego folderu")
+        self.restore_button.clicked.connect(self.start_restore)
+        backup_actions.addWidget(self.restore_button)
+        backup_layout.addLayout(backup_actions)
+        self.acl_checkbox = QCheckBox("Zachowaj ACL (Windows) / tryb plików")
+        backup_layout.addWidget(self.acl_checkbox)
+        main.addWidget(backup_card)
+        usb_card = QFrame()
+        usb_card.setObjectName("Card")
+        usb_layout = QVBoxLayout(usb_card)
+        usb_layout.addWidget(QLabel("PrestigeUSB — wersjonowana kopia narzędzi, bez formatowania nośnika"))
+        usb_actions = QHBoxLayout()
+        self.usb_buttons = []
+        for label, slot in (("Utwórz zestaw", self.start_usb_prepare),
+                            ("Sprawdź zestaw", self.start_usb_verify),
+                            ("Aktualizuj narzędzie", self.start_usb_update),
+                            ("Cofnij aktualizację", self.start_usb_rollback)):
+            button = QPushButton(label)
+            button.clicked.connect(slot)
+            usb_actions.addWidget(button)
+            self.usb_buttons.append(button)
+        usb_layout.addLayout(usb_actions)
+        main.addWidget(usb_card)
         self.status = QLabel("Brak odczytu.")
         self.status.setWordWrap(True)
         main.addWidget(self.status)
         layout.addWidget(content, 1)
         if autoload:
             self.refresh()
+
+    def _run_backup_operation(self, operation, source, destination=None):
+        if self.backup_worker is not None and self.backup_worker.isRunning():
+            return
+        self.backup_worker = BackupWorker(operation, source, destination,
+                                          self.acl_checkbox.isChecked(), self)
+        for button in (self.backup_button, self.verify_button, self.restore_button):
+            button.setEnabled(False)
+        self.status.setText(f"{operation}: operacja trwa…")
+        self.backup_worker.loaded.connect(self.show_backup_result)
+        self.backup_worker.failed.connect(self.show_backup_error)
+        self.backup_worker.finished.connect(self.finish_backup_operation)
+        self.backup_worker.start()
+
+    def start_backup(self):
+        source = QFileDialog.getExistingDirectory(self, "Folder źródłowy kopii")
+        if not source:
+            return
+        parent = QFileDialog.getExistingDirectory(self, "Folder docelowy na nową kopię")
+        if not parent:
+            return
+        destination = str(Path(parent) / f"PrestigeBackup-{uuid4().hex[:12]}")
+        try:
+            summary = plan([source])
+            if Path(destination).is_relative_to(Path(source).resolve()):
+                raise ValueError("Cel znajduje się wewnątrz źródła.")
+        except (OSError, ValueError) as error:
+            self.show_backup_error(str(error))
+            return
+        answer = QMessageBox.question(
+            self, "Utwórz kopię",
+            f"Skopiować {len(summary['files'])} plików ({summary['total_bytes']} bajtów) "
+            f"do nowego katalogu {destination}? Pominięte znane magazyny sekretów: "
+            f"{summary['excluded_count']}.")
+        if answer == QMessageBox.Yes:
+            self._run_backup_operation("backup", source, destination)
+
+    def start_verify(self):
+        source = QFileDialog.getExistingDirectory(self, "Wybierz katalog kopii do sprawdzenia")
+        if source:
+            self._run_backup_operation("verify", source)
+
+    def start_restore(self):
+        source = QFileDialog.getExistingDirectory(self, "Wybierz katalog kopii do odtworzenia")
+        if not source:
+            return
+        parent = QFileDialog.getExistingDirectory(self, "Folder docelowy dla nowego katalogu")
+        if not parent:
+            return
+        destination = str(Path(parent) / f"PrestigeRestore-{uuid4().hex[:12]}")
+        try:
+            summary = restore(source, destination, apply=False,
+                              restore_acl=self.acl_checkbox.isChecked())
+        except (OSError, ValueError, KeyError, TypeError) as error:
+            self.show_backup_error(str(error))
+            return
+        answer = QMessageBox.question(
+            self, "Odtwórz kopię",
+            f"Odtworzyć {summary['files']} plików do nowego katalogu {destination}? "
+            "Istniejące pliki nie będą nadpisywane.")
+        if answer == QMessageBox.Yes:
+            self._run_backup_operation("restore", source, destination)
+
+    def show_backup_result(self, result):
+        if result.get("ok") is False:
+            self.status.setText(f"Operacja niepełna: {result}")
+        else:
+            self.status.setText(f"Operacja zakończona: {result}")
+
+    def show_backup_error(self, message):
+        self.status.setText(f"Błąd kopii: {message}")
+
+    def finish_backup_operation(self):
+        for button in (self.backup_button, self.verify_button, self.restore_button):
+            button.setEnabled(True)
+
+    def _run_usb_operation(self, operation, path, tool=None):
+        if self.usb_worker is not None and self.usb_worker.isRunning():
+            return
+        self.usb_worker = UsbWorker(operation, path, tool, self)
+        for button in self.usb_buttons:
+            button.setEnabled(False)
+        self.status.setText(f"PrestigeUSB {operation}: operacja trwa…")
+        self.usb_worker.loaded.connect(self.show_backup_result)
+        self.usb_worker.failed.connect(self.show_backup_error)
+        self.usb_worker.finished.connect(self.finish_usb_operation)
+        self.usb_worker.start()
+
+    def finish_usb_operation(self):
+        for button in self.usb_buttons:
+            button.setEnabled(True)
+
+    def start_usb_prepare(self):
+        tool = QFileDialog.getExistingDirectory(self, "Wybierz katalog narzędzia prestige-*")
+        if not tool:
+            return
+        parent = QFileDialog.getExistingDirectory(self, "Wybierz folder docelowy PrestigeUSB")
+        if not parent:
+            return
+        if QMessageBox.question(self, "Utwórz PrestigeUSB",
+                                f"Utworzyć nowy zestaw w {parent}/PrestigeUSB z {tool}? "
+                                "Nośnik nie będzie formatowany.") == QMessageBox.Yes:
+            self._run_usb_operation("prepare", parent, tool)
+
+    def start_usb_verify(self):
+        root = QFileDialog.getExistingDirectory(self, "Wybierz katalog PrestigeUSB")
+        if root:
+            self._run_usb_operation("verify", root)
+
+    def start_usb_update(self):
+        root = QFileDialog.getExistingDirectory(self, "Wybierz istniejący katalog PrestigeUSB")
+        if not root:
+            return
+        tool = QFileDialog.getExistingDirectory(self, "Wybierz nową wersję narzędzia prestige-*")
+        if not tool:
+            return
+        try:
+            preview = update_usb(root, [tool], prepare_usb, False)
+        except (OSError, ValueError, KeyError, TypeError) as error:
+            self.show_backup_error(str(error))
+            return
+        if QMessageBox.question(self, "Aktualizuj PrestigeUSB",
+                                f"Zaktualizować {', '.join(preview['tools'])}? "
+                                "Poprzednia wersja zostanie zachowana do cofnięcia.") == QMessageBox.Yes:
+            self._run_usb_operation("update", root, tool)
+
+    def start_usb_rollback(self):
+        journal = QFileDialog.getExistingDirectory(self, "Wybierz Backup/Updates/<id> z journal.json")
+        if not journal:
+            return
+        try:
+            preview = rollback_usb(journal, False)
+        except (OSError, ValueError, KeyError, TypeError) as error:
+            self.show_backup_error(str(error))
+            return
+        if QMessageBox.question(self, "Cofnij aktualizację",
+                                f"Przywrócić poprzednie wersje: {', '.join(preview['tools'])}? "
+                                "Zmiany w plikach po aktualizacji mogą zablokować cofnięcie.") == QMessageBox.Yes:
+            self._run_usb_operation("rollback", journal)
 
     def refresh(self):
         if ((self.worker is not None and self.worker.isRunning()) or
@@ -214,7 +447,12 @@ class StorageWindow(QMainWindow):
             "niesystemowego dysku z atrybutem read-only i celu na innym dysku. Otwiera źródło "
             "wyłącznie do odczytu, tworzy nowy .img i weryfikuje SHA-256. Get-Disk może pomijać "
             "dyski dynamiczne. Atrybut read-only Windows nie daje gwarancji sprzętowej blokady zapisu; "
-            "BitLocker i RAM nie są obsługiwane."
+            "BitLocker i RAM nie są obsługiwane. Kopia folderu zapisuje manifest SHA-256, "
+            "pomija znane magazyny sekretów i odtwarza wyłącznie do nowego katalogu. "
+            "Opcja ACL dotyczy tylko kopii i odtwarzania; VSS i eksporty serwisowe "
+            "są dostępne w backendzie, lecz nie w tym oknie. PrestigeUSB tworzy katalog "
+            "z narzędziami, sprawdza manifest, aktualizuje wersję z kopią i pozwala ją cofnąć; "
+            "nie formatuje nośnika."
         )
 
     def closeEvent(self, event):
@@ -223,4 +461,8 @@ class StorageWindow(QMainWindow):
             self.image_worker.wait()
         if self.worker is not None and self.worker.isRunning():
             self.worker.wait(21000)
+        if self.backup_worker is not None and self.backup_worker.isRunning():
+            self.backup_worker.wait()
+        if self.usb_worker is not None and self.usb_worker.isRunning():
+            self.usb_worker.wait()
         super().closeEvent(event)
