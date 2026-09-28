@@ -70,6 +70,25 @@ Odpowiednik: `prestige_core/file_snapshot.py`, `prestige_core/baseline_update.py
 Import nie podnosi niepełnego starego baseline do stanu `complete`. Nie
 sprawdzono jeszcze dużych drzew i metadanych ACL/ADS na ograniczonym koncie.
 
+## Folder Watch → Monitor
+
+Źródło: `w4sy1/prestige-folder-watch` (`app.py`, `native.py`).
+Odpowiednik: `prestige_core/watch_state.py`, `watch_state_import.py`,
+`native_events.py` oraz `prestige_monitor/gui.py`.
+
+| Funkcja starego programu | Kod/GUI Center | Potwierdzenie |
+|---|---|---|
+| Skan i wykrywanie create/modify/delete/rename | Tak | Fixture i smoke GUI; duże drzewo niezweryfikowane |
+| Polling z trwałą bazą SQLite | Tak | Fixture; wznowienie po restarcie z ponownym hashowaniem |
+| Import starej bazy polling | Tak, do nowego pliku | Fixture; oryginał bez zmian |
+| Natywne zdarzenia FileSystemWatcher | Tak | Lokalny Windows i smoke GUI; overflow wymaga testu obciążenia |
+| Import starej bazy native bez tabeli `state` | Tak, tylko historia zdarzeń | Fixture; baseline powstaje przy pierwszym skanie |
+
+Stary tryb native zapisywał historię, lecz nie tworzył migawki. Import nie
+traktuje braku migawki jako kompletnego skanu. Zdarzenia natywne nowego
+Monitora nie aktualizują automatycznie bazy polling; trzeba je zapisać
+osobno w historii JSONL.
+
 Pozostałe programy są nadal opisane na poziomie modułów w
 `CENTER-MIGRATION-MATRIX.md`; wymagają audytu komend i zachowań w tym samym
 formacie przed decyzją o usunięciu starych repozytoriów.

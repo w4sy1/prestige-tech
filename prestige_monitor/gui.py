@@ -818,9 +818,12 @@ class MonitorWindow(QMainWindow):
         except ValueError as error:
             self.status.setText(f"Import zakończony, ale nie wczytano bazy: {error}")
             return
+        detail = ("Czas wykonania starej migawki jest nieznany."
+                  if result["baseline_imported"] else
+                  "Stara baza natywna nie zawiera migawki; pierwszy skan utworzy baseline.")
         self.status.setText(
             f"Import zakończony: {result['files']} plików i {result['events']} zdarzeń. "
-            "Czas wykonania starej migawki jest nieznany."
+            + detail
         )
 
     def finish_legacy_import_worker(self):

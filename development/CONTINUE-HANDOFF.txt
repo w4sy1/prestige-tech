@@ -1,6 +1,14 @@
 PRESTIGE TECH — PLIK PRZEKAZANIA PRACY I TESTÓW
 Stan: 2026-09-28. Aktualizuj ten plik po każdym istotnym etapie.
 
+NAJNOWSZY ETAP — FOLDER WATCH
+Import starej bazy Folder Watch obejmuje teraz oba schematy: polling ze
+stanem plików oraz native z samą historią zdarzeń. W drugim wariancie nie
+tworzy fikcyjnego baseline; pierwszy skan Monitora go założy. Stara baza
+pozostaje bez zmian. Audyt funkcji: development/FUNCTION-PARITY-AUDIT.md.
+Testy importu i GUI Monitora PASS; duże drzewo, overflow i urządzenia nie były
+testowane. Niższe akapity opisują także historyczne stany sprzed tej zmiany.
+
 PUBLIKACJA GITHUB 2026-09-28
 Kod 10 Centrów jest w master w4sy1/prestige-tech (PR #1), a katalog oraz
 źródłowe uruchamianie Centrów w master w4sy1/prestige-tech-dashboard (PR #1).

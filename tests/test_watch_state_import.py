@@ -56,6 +56,33 @@ class WatchStateImportTests(unittest.TestCase):
                 import_legacy_watch_database(old, root, new)
             self.assertFalse(new.exists())
 
+    def test_imports_native_event_only_database_without_fabricating_baseline(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory) / "source"
+            root.mkdir()
+            old = Path(directory) / "native.sqlite"
+            new = Path(directory) / "new.sqlite"
+            connection = sqlite3.connect(old)
+            try:
+                connection.executescript(
+                    "CREATE TABLE metadata(root TEXT);"
+                    "CREATE TABLE events(id INTEGER PRIMARY KEY, timestamp TEXT, type TEXT, path TEXT, old_path TEXT, sha256 TEXT);"
+                )
+                connection.execute("INSERT INTO metadata VALUES (?)", (str(root),))
+                connection.execute("INSERT INTO events(timestamp,type,path,old_path,sha256) VALUES (?,?,?,?,?)",
+                                   ("2026-09-27T10:00:00+00:00", "create", "new.txt", None, "a" * 64))
+                connection.commit()
+            finally:
+                connection.close()
+            original_bytes = old.read_bytes()
+            result = import_legacy_watch_database(old, root, new)
+            self.assertFalse(result["baseline_imported"])
+            self.assertEqual(result["events"], 1)
+            self.assertEqual(old.read_bytes(), original_bytes)
+            with WatchStateStore(root, new) as store:
+                self.assertIsNone(store.load())
+                self.assertEqual(store.load_events()[0]["path"], "new.txt")
+
 
 if __name__ == "__main__":
     unittest.main()

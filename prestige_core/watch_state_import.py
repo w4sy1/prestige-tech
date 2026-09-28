@@ -34,14 +34,15 @@ def read_legacy_watch_database(source, root):
     connection = sqlite3.connect(source.resolve().as_uri() + "?mode=ro", uri=True)
     try:
         names = {row[0] for row in connection.execute("SELECT name FROM sqlite_master WHERE type='table'")}
-        if not {"metadata", "state", "events"}.issubset(names):
+        if not {"metadata", "events"}.issubset(names):
             raise ValueError("Nieznany schemat starej bazy Folder Watch.")
         owner = connection.execute("SELECT root FROM metadata LIMIT 1").fetchone()
         if owner is None or Path(owner[0]).resolve() != root:
             raise ValueError("Stara baza dotyczy innego katalogu.")
         files = []
         seen = set()
-        for name, raw in connection.execute("SELECT path, data FROM state"):
+        state_rows = connection.execute("SELECT path, data FROM state") if "state" in names else ()
+        for name, raw in state_rows:
             relative = _relative(name)
             if relative in seen:
                 raise ValueError("Duplikat ścieżki w starej bazie.")
@@ -71,7 +72,7 @@ def read_legacy_watch_database(source, root):
                 "imported_at_utc": datetime.now(timezone.utc).isoformat(),
                 "capture_time_unknown": True,
                 "files": sorted(files, key=lambda row: row["path"]),
-                "errors": [], "complete": True}
+                "errors": [], "complete": True} if "state" in names else None
     return snapshot, events
 
 
@@ -86,7 +87,8 @@ def import_legacy_watch_database(source, root, destination):
     created = False
     try:
         with WatchStateStore(root, temporary) as store:
-            store.record(snapshot)
+            if snapshot is not None:
+                store.record(snapshot)
             with store.connection:
                 store.connection.executemany(
                     "INSERT INTO events(at_utc, kind, path, old_path) VALUES (?, ?, ?, ?)",
@@ -104,5 +106,6 @@ def import_legacy_watch_database(source, root, destination):
         raise
     finally:
         temporary.unlink(missing_ok=True)
-    return {"destination": str(target.resolve()), "files": len(snapshot["files"]),
-            "events": len(events)}
+    return {"destination": str(target.resolve()),
+            "files": len(snapshot["files"]) if snapshot is not None else 0,
+            "baseline_imported": snapshot is not None, "events": len(events)}
