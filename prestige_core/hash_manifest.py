@@ -79,6 +79,14 @@ def validate_manifest(data):
     return data
 
 
+def compatible_manifest(data):
+    """Czytaj manifest starego Hash Checker bez osłabiania walidacji nowych."""
+    if (isinstance(data, dict) and data.get("schema_version") == 1
+            and "complete" not in data and set(data) == {"schema_version", "algorithm", "files"}):
+        data = {**data, "complete": True, "errors": [], "legacy_format": True}
+    return validate_manifest(data)
+
+
 def compare_manifests(before, after):
     before, after = validate_manifest(before), validate_manifest(after)
     if before["algorithm"] != after["algorithm"]:

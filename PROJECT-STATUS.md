@@ -29,12 +29,17 @@ VSS, eksportem systemu/sterowników/zakładek i odzyskaniem migawek z dziennika.
 W jednym przebiegu GUI wybiera jeden folder i jeden plik zakładek. 29 testów
 starego Backup zaadaptowanych do nowej ścieżki przeszło, podobnie dwa nowe
 testy migracji i smoke GUI. Cała suita nowego repo po migracji Backup i USB:
-197 testów PASS, 2 pominięte.
+198 testów PASS, 2 pominięte.
 Rzeczywistego VSS/ACL Windows, dużej kopii ani pełnego parytetu GUI nie
 zweryfikowano. USB Toolkit ma teraz w Storage & Recovery backend i GUI
 przygotowania, weryfikacji, aktualizacji i rollbacku wersji narzędzia.
 Zaadaptowanych 16 testów starego USB Toolkit i nowy test migracji przeszły;
 fizycznego nośnika nie testowano.
+
+Monitor / Hash Checker: dodano w GUI porównanie dwóch folderów i dwóch
+manifestów oraz zgodny odczyt starego manifestu `schema_version=1` bez pola
+`complete`. Walidacja ścieżek i hashy pozostaje wymagana; test starego formatu
+i smoke Monitora przeszły. Pozostała kontrola parytetu funkcja po funkcji.
 
 GUI i Dashboard: dziesięć źródłowych Centrów (Network, Monitor, Registry,
 Storage, Android, Security, System, Termux, AI i Repair Report) ma wspólny

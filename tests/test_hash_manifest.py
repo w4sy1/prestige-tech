@@ -2,11 +2,21 @@ import tempfile
 from pathlib import Path
 import unittest
 
-from prestige_core.hash_manifest import compare_manifests, make_manifest, save_manifest, validate_manifest
+from prestige_core.hash_manifest import compare_manifests, compatible_manifest, make_manifest, save_manifest, validate_manifest
 from prestige_core.baseline_signing import new_key, sign, verify
 
 
 class HashManifestTests(unittest.TestCase):
+    def test_old_hash_checker_manifest_can_be_compared(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "one.txt").write_text("one", encoding="utf-8")
+            current = make_manifest(root)
+            old = {key: current[key] for key in ("schema_version", "algorithm", "files")}
+            self.assertTrue(compare_manifests(compatible_manifest(old), current)["ok"])
+            with self.assertRaises(ValueError):
+                compatible_manifest({**old, "files": {"../escape": {"hash": "0" * 64}}})
+
     def test_saved_manifest_can_be_signed_and_tamper_is_detected(self):
         with tempfile.TemporaryDirectory() as directory:
             base = Path(directory)

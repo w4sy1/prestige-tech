@@ -25,7 +25,7 @@ from prestige_core.watch_state import WatchStateStore
 from prestige_core.watch_state_import import import_legacy_watch_database
 from prestige_core.baseline_signing import new_key, sign, verify
 from prestige_core.hashing import FileHashService
-from prestige_core.hash_manifest import compare_manifests, make_manifest, save_manifest, validate_manifest
+from prestige_core.hash_manifest import compare_manifests, compatible_manifest, make_manifest, save_manifest, validate_manifest
 
 
 class ScanWorker(QThread):
@@ -197,16 +197,21 @@ class ManifestWorker(QThread):
     loaded = Signal(dict)
     failed = Signal(str)
 
-    def __init__(self, root, algorithm, destination=None, baseline=None, parent=None):
+    def __init__(self, root, algorithm, destination=None, baseline=None,
+                 other=None, parent=None):
         super().__init__(parent)
         self.root, self.algorithm = root, algorithm
         self.destination, self.baseline = destination, baseline
+        self.other = other
         self.cancel_event = Event()
 
     def run(self):
         try:
             current = make_manifest(self.root, self.algorithm, cancel_event=self.cancel_event)
-            if self.destination is not None:
+            if self.other is not None:
+                second = make_manifest(self.other, self.algorithm, cancel_event=self.cancel_event)
+                self.loaded.emit({"mode": "verified", "result": compare_manifests(current, second)})
+            elif self.destination is not None:
                 save_manifest(current, self.destination)
                 self.loaded.emit({"mode": "saved", "path": self.destination,
                                   "count": len(current["files"])})
@@ -352,11 +357,17 @@ class MonitorWindow(QMainWindow):
         self.manifest_verify_button = QPushButton("Sprawdź manifest")
         self.manifest_verify_button.clicked.connect(self.choose_manifest_verify)
         manifest_actions.addWidget(self.manifest_verify_button)
+        self.compare_folders_button = QPushButton("Porównaj foldery")
+        self.compare_folders_button.clicked.connect(self.choose_compare_folders)
+        manifest_actions.addWidget(self.compare_folders_button)
         self.manifest_cancel_button = QPushButton("Przerwij")
         self.manifest_cancel_button.setEnabled(False)
         self.manifest_cancel_button.clicked.connect(self.cancel_manifest)
         manifest_actions.addWidget(self.manifest_cancel_button)
         hash_layout.addLayout(manifest_actions)
+        self.compare_manifests_button = QPushButton("Porównaj dwa manifesty")
+        self.compare_manifests_button.clicked.connect(self.choose_compare_manifests)
+        hash_layout.addWidget(self.compare_manifests_button)
         signature_actions = QHBoxLayout()
         self.manifest_sign_button = QPushButton("Podpisz manifest")
         self.manifest_sign_button.clicked.connect(self.sign_manifest)
@@ -1044,11 +1055,35 @@ class MonitorWindow(QMainWindow):
         if not root:
             return
         try:
-            baseline = validate_manifest(json.loads(Path(path).read_text(encoding="utf-8")))
+            baseline = compatible_manifest(json.loads(Path(path).read_text(encoding="utf-8")))
         except (OSError, ValueError, TypeError) as error:
             self.hash_result.setPlainText(f"Nie wczytano manifestu: {error}")
             return
         self.start_manifest_worker(root, baseline["algorithm"], baseline=baseline)
+
+    def choose_compare_folders(self):
+        if self.manifest_worker is not None and self.manifest_worker.isRunning():
+            return
+        left = QFileDialog.getExistingDirectory(self, "Pierwszy folder do porównania")
+        if not left:
+            return
+        right = QFileDialog.getExistingDirectory(self, "Drugi folder do porównania")
+        if right:
+            self.start_manifest_worker(left, self.hash_algorithm.currentText(), other=right)
+
+    def choose_compare_manifests(self):
+        left, _ = QFileDialog.getOpenFileName(self, "Pierwszy manifest", "", "JSON (*.json)")
+        if not left:
+            return
+        right, _ = QFileDialog.getOpenFileName(self, "Drugi manifest", "", "JSON (*.json)")
+        if not right:
+            return
+        try:
+            before = compatible_manifest(json.loads(Path(left).read_text(encoding="utf-8")))
+            after = compatible_manifest(json.loads(Path(right).read_text(encoding="utf-8")))
+            self.show_manifest_result({"mode": "verified", "result": compare_manifests(before, after)})
+        except (OSError, ValueError, TypeError, KeyError) as error:
+            self.show_hash_error(str(error))
 
     def sign_manifest(self):
         manifest, _ = QFileDialog.getOpenFileName(self, "Manifest do podpisania", "", "JSON (*.json)")
@@ -1101,12 +1136,16 @@ class MonitorWindow(QMainWindow):
             "Podpis manifestu poprawny względem podanego klucza; tożsamość właściciela klucza nie jest potwierdzona."
             if result["ok"] else f"Podpis manifestu niepoprawny: {result['reason']}")
 
-    def start_manifest_worker(self, root, algorithm, *, destination=None, baseline=None):
+    def start_manifest_worker(self, root, algorithm, *, destination=None, baseline=None,
+                              other=None):
         self.manifest_save_button.setEnabled(False)
         self.manifest_verify_button.setEnabled(False)
+        self.compare_folders_button.setEnabled(False)
+        self.compare_manifests_button.setEnabled(False)
         self.manifest_cancel_button.setEnabled(True)
         self.hash_result.setPlainText("Skanuję folder…")
-        self.manifest_worker = ManifestWorker(root, algorithm, destination, baseline, self)
+        self.manifest_worker = ManifestWorker(root, algorithm, destination, baseline,
+                                              other, self)
         self.manifest_worker.loaded.connect(self.show_manifest_result)
         self.manifest_worker.failed.connect(self.show_hash_error)
         self.manifest_worker.finished.connect(self.finish_manifest)
@@ -1133,6 +1172,8 @@ class MonitorWindow(QMainWindow):
     def finish_manifest(self):
         self.manifest_save_button.setEnabled(True)
         self.manifest_verify_button.setEnabled(True)
+        self.compare_folders_button.setEnabled(True)
+        self.compare_manifests_button.setEnabled(True)
         self.manifest_cancel_button.setEnabled(False)
 
     def closeEvent(self, event):
