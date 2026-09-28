@@ -1,6 +1,14 @@
 PRESTIGE TECH — PLIK PRZEKAZANIA PRACY I TESTÓW
 Stan: 2026-09-28. Aktualizuj ten plik po każdym istotnym etapie.
 
+PUBLIKACJA GITHUB 2026-09-28
+Kod 10 Centrów jest w master w4sy1/prestige-tech (PR #1), a katalog oraz
+źródłowe uruchamianie Centrów w master w4sy1/prestige-tech-dashboard (PR #1).
+CI Dashboardu na Pythonie 3.11 i 3.14 jest zielone także po scaleniu.
+Wszystkie 26 repozytoriów Prestige Tech pozostają aktywne; ich opisy wskazują
+Prestige Tech Free Use License. Nie powstało nowe wydanie EXE ani release.
+Ręczne testy użytkownika i naprawa bundlera PySide6 pozostają otwarte.
+
 CEL I ZASADY
 Rozwijaj istniejące programy Prestige Tech i łącz je w Centra z Dashboardem. Wyglądu Dashboardu nie zmieniaj. Zachowaj istniejące funkcje, branding, pomoc „?”, osobne repozytoria i aktualną Prestige Tech Free Use License. Registry Manager ma docelowo katalog 500 rzeczywistych, udokumentowanych operacji, bez sztucznego liczenia wariantów. Storage & Recovery ma docelowo chronić źródło przed zapisem, tworzyć i weryfikować obraz bitowy nośnika; nie wolno twierdzić, że testowy kopiownik zwykłych plików zapewnia fizyczny write blocker. Publikacja release i działania zmieniające historię Git wymagają zgody użytkownika. Użytkownik wykona ręczne testy EXE na końcu, ale testy źródłowe i automatyczne sprawdzaj podczas implementacji.
 

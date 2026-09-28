@@ -6,6 +6,19 @@ projektu i nie zastępują bieżącego pliku licencji.
 
 Bieżący plik przekazania pracy i lista końcowych testów: `development/CONTINUE-HANDOFF.txt`.
 
+## Publikacja kodu źródłowego — 2026-09-28
+
+Dziesięć Centrów i dokumentacja wersji testowej są na domyślnej gałęzi
+`w4sy1/prestige-tech` ([PR #1](https://github.com/w4sy1/prestige-tech/pull/1)).
+Połączenie źródłowych Centrów z Dashboardem jest na domyślnej gałęzi
+`w4sy1/prestige-tech-dashboard`
+([PR #1](https://github.com/w4sy1/prestige-tech-dashboard/pull/1)); jego GitHub
+Actions przeszedł na Pythonie 3.11 i 3.14 także po scaleniu. Wszystkie 26
+repozytoriów Prestige Tech pozostaje aktywnych; opisy wskazują bieżącą
+Prestige Tech Free Use License. Nie opublikowano nowych EXE ani release.
+Ręczne testy urządzeń, VM, skalowania GUI i działania instalacyjnych EXE
+pozostają do wykonania przez użytkownika na końcu.
+
 ## Aktualny etap — 2026-09-28
 
 GUI i Dashboard: dziesięć źródłowych Centrów (Network, Monitor, Registry,
