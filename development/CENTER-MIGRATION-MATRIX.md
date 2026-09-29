@@ -1,4 +1,13 @@
-# Migracja modułów do Centrów — stan 2026-09-28
+# Migracja modułów do Centrów — stan 2026-09-29
+
+Najnowszy etap: lokalne wykrywanie pokazuje obok odpowiedzi ICMP także
+przefiltrowane wpisy tablicy sąsiadów z odrębnym oznaczeniem
+„Cache — dostępność nieznana”. Nie dowodzi to, że host jest online.
+System Center odczytuje dodatkowo dostępne aktualizacje, dyski fizyczne,
+liczniki niezawodności i partycje; jego Windows Toolkit ma teraz osiem
+sekcji odczytowych, nadal bez pełnego parytetu starego zestawu kolektorów.
+Porównanie źródeł Termux Setup/Toolkit wykazało te same funkcje backendu
+(różnią się importem do pakietu i wejściem CLI); urządzenia nie testowano.
 
 `Częściowy` oznacza tylko wymieniony, przetestowany wycinek. Hash Checker,
 System Snapshot, Security Check, Repair Report i PC Cleanup mają odpowiedniki
@@ -28,7 +37,7 @@ program nadal ma własną pozycję, a nie brak pozycji nowego Center.
 | Security Check | Security / Kontrole | Security Center: 21 odczytowych kategorii Windows i dotychczasowe reguły audytu/scoringu z coverage UNKNOWN; opcjonalna analiza offline JSON. Stare osobne repo usunięte; bundle zachowany | Fixture/GUI i 19 testów starego repo PASS; rzeczywisty lokalny audyt: 21 kategorii, 4 UNKNOWN; inne konfiguracje Windows niesprawdzone | Nie | Legacy + Center |
 | Malware Triage | Security / Triage | Security Center: 21 odczytowych sekcji, próbka CPU/GPU, procesy, persistence, połączenia, heurystyki i korelacje, rozszerzenia Chromium/Firefox oraz opcjonalny ograniczony skan wskazanego folderu; analiza offline JSON | Fixture/GUI PASS; lokalny odczyt 30 s: 21 sekcji, 1 UNKNOWN, 14 klatek GPU; pełniejszy parytet systemów do sprawdzenia | Nie | Legacy |
 | File Inspector | Security / Pliki | Security Center: odczyt pliku bez wykonania, SHA-256/SHA-512/SHA-1/MD5, entropia, typ magic/rozszerzenie, nagłówek PE, opcjonalne ciągi i Authenticode Windows | Fixture/GUI PASS; bez testu podpisanego pliku Windows i pełnego parytetu | Nie | Legacy |
-| Windows Toolkit | System / Diagnostyka | Odczyt historii 50 aktualizacji, usług/polityk/restartu oraz plan i kontrolowane wykonanie SFC, DISM scan/restore, flush DNS, reset Winsock i DHCP renew z dziennikiem, migawką i potwierdzeniem braku rollbacku. Pozostała diagnostyka legacy wymaga audytu | Core/GUI i fixture wykonania PASS; rzeczywistych napraw nie uruchamiano | Nie | Legacy |
+| Windows Toolkit | System / Diagnostyka | Osiem sekcji odczytowych: dostępne aktualizacje, historia 50 aktualizacji, usługi, polityki, restart, dyski fizyczne, SMART i partycje; plan i kontrolowane wykonanie SFC, DISM scan/restore, flush DNS, reset Winsock i DHCP renew z dziennikiem, migawką i potwierdzeniem braku rollbacku. Pozostałe kolektory legacy wymagają migracji lub wskazania odpowiednika | Core/GUI fixture PASS; rzeczywistych napraw i zapytania do Windows Update nie uruchamiano | Nie | Legacy |
 | PC Cleanup | System / Czyszczenie | System Center: profile TEMP/cache, analiza Downloads/logów/Kosza, plan i kwarantanna tylko zatwierdzonych plików, odtworzenie bez nadpisania nowszego pliku. Stare osobne repo usunięte; bundle zachowany | Fixture clean/restore/kolizja i 17 testów starego repo PASS; nie czyszczono danych użytkownika | Nie | Legacy + Center |
 | System Snapshot | System / Migawki | System Center: odczyt 12 kategorii Windows, zapis nowego JSON i porównanie offline z identyfikacją zmian. Stare osobne repo usunięte; bundle zachowany | Fixture/GUI i 14 testów starego repo PASS; lokalny odczyt 12/12 sekcji bez UNKNOWN | Nie | Legacy + Center |
 | Repair Report | Wspólny ReportService | Walidacja i eksport HTML/JSON/TXT/PDF; formularz w System i Security Center. Ostatni udany wynik tych Centrów zasila krótką diagnozę i czynności bez ścieżek/surowych dowodów; klient i test końcowy pozostają puste. Stare osobne repo usunięte; bundle zachowany. Pozostałe Centra jeszcze bez integracji | Core/PDF, 11 testów starego repo, prefill/GUI i kontrola wizualna długiego PDF PASS | Nie | Legacy + Center |

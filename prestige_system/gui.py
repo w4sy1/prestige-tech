@@ -128,7 +128,7 @@ class SystemCenterWindow(QMainWindow):
         self.compare_button = QPushButton("Porównaj dwie migawki")
         self.compare_button.clicked.connect(self.choose_compare)
         controls.addWidget(self.compare_button)
-        self.toolkit_button = QPushButton("Diagnostyka aktualizacji")
+        self.toolkit_button = QPushButton("Diagnostyka Windows Toolkit")
         self.toolkit_button.clicked.connect(lambda: self._start("toolkit", ()))
         controls.addWidget(self.toolkit_button)
         self.help_button = QPushButton("?")
@@ -354,7 +354,7 @@ class SystemCenterWindow(QMainWindow):
         else:
             sections = data["diagnostic"]["sections"]
             unknown = sum(row["status"] == "UNKNOWN" for row in sections.values())
-            self.status.setText(f"Diagnostyka aktualizacji: {len(sections)} sekcje; UNKNOWN: {unknown}.")
+            self.status.setText(f"Diagnostyka Windows: {len(sections)} sekcji; UNKNOWN: {unknown}.")
         self.result.setPlainText(json.dumps(data, ensure_ascii=False, indent=2))
 
     def show_error(self, message):

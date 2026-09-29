@@ -7,7 +7,7 @@ from prestige_core.windows_toolkit import QUERIES, collect
 
 
 class WindowsToolkitTests(unittest.TestCase):
-    def test_four_bounded_read_only_sections(self):
+    def test_bounded_read_only_sections(self):
         seen = []
 
         def runner(command, **kwargs):
@@ -18,7 +18,9 @@ class WindowsToolkitTests(unittest.TestCase):
             return SimpleNamespace(returncode=0, stdout=json.dumps(sections))
 
         result = collect(runner=runner, platform="nt")
-        self.assertEqual(len(result["sections"]), 4)
+        self.assertEqual(len(result["sections"]), 8)
+        self.assertIn("available_updates", result["sections"])
+        self.assertIn("smart", result["sections"])
         self.assertEqual(result["sections"]["update_history"]["status"], "UNKNOWN")
         self.assertEqual(result["sections"]["reboot"]["data"][0]["WindowsUpdate"], True)
         self.assertEqual(seen[0][1]["timeout"], 90)

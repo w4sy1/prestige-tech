@@ -7,6 +7,19 @@ from .security_check import _powershell
 
 
 QUERIES = {
+    "available_updates": """$job=Start-Job -ScriptBlock {
+        $ErrorActionPreference='Stop';$s=New-Object -ComObject Microsoft.Update.Session;
+        $u=$s.CreateUpdateSearcher().Search("IsInstalled=0 and IsHidden=0 and Type='Software'");
+        [pscustomobject]@{ResultCode=[int]$u.ResultCode;Updates=@(foreach($item in $u.Updates){
+            [pscustomobject]@{Title=$item.Title;KB=@($item.KBArticleIDs);
+                Downloaded=$item.IsDownloaded;RebootRequired=$item.RebootRequired;Mandatory=$item.IsMandatory}})}
+        };try{if(-not (Wait-Job $job -Timeout 45)){throw [TimeoutException]::new()};
+            Receive-Job $job -ErrorAction Stop}finally{
+            Stop-Job $job -ErrorAction SilentlyContinue;
+            Remove-Job $job -Force -ErrorAction SilentlyContinue}""",
+    "physical_disks": "Get-PhysicalDisk -ErrorAction Stop | Select-Object FriendlyName,MediaType,HealthStatus,OperationalStatus,Size",
+    "smart": "Get-PhysicalDisk -ErrorAction Stop | Get-StorageReliabilityCounter -ErrorAction Stop | Select-Object DeviceId,Temperature,Wear,PowerOnHours,ReadErrorsTotal,WriteErrorsTotal",
+    "partitions": "Get-Partition -ErrorAction Stop | Select-Object DiskNumber,PartitionNumber,DriveLetter,Size,Type",
     "update_history": """$s=New-Object -ComObject Microsoft.Update.Session;
         $u=$s.CreateUpdateSearcher();$n=[Math]::Min($u.GetTotalHistoryCount(),50);
         if($n -gt 0){$u.QueryHistory(0,$n) | Select-Object Title,Date,

@@ -6,6 +6,17 @@ projektu i nie zastępują bieżącego pliku licencji.
 
 Bieżący plik przekazania pracy i lista końcowych testów: `development/CONTINUE-HANDOFF.txt`.
 
+## Etap 2026-09-29 — diagnostyka Windows i wykrywanie sieci
+
+Network Center pokazuje obok odpowiedzi ICMP wpisy cache sąsiadów w tej
+samej lokalnej podsieci, oznaczone jako obserwacja o nieznanej dostępności.
+System Center rozszerzono o odczyt dostępnych aktualizacji, dysków fizycznych,
+liczników SMART i partycji (razem osiem sekcji Windows Toolkit). Porównano
+backend Termux Setup/Toolkit ze starymi źródłami: logika jest taka sama;
+testu fizycznego Termuxa nie wykonano. 221 uruchomionych, 220 PASS, 1 skip.
+Pełny parytet Sentinel oraz pozostałych kolektorów Windows Toolkit,
+rzeczywiste naprawy i test EXE nadal pozostają otwarte.
+
 ## Publikacja kodu źródłowego — 2026-09-28
 
 Dziesięć Centrów i dokumentacja wersji testowej są na domyślnej gałęzi

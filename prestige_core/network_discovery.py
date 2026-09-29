@@ -129,7 +129,9 @@ def scan_local_scope(scope, local_ip, *, cancel_event=None, ping_runner=subproce
     except RuntimeError:
         neighbors = []
         errors += 1
-    by_ip = {ip: row["mac"] for row in neighbors for ip in row["ips"]}
+    network = ipaddress.IPv4Network(scope)
+    by_ip = {ip: row["mac"] for row in neighbors for ip in row["ips"]
+             if ipaddress.IPv4Address(ip) in network and ip != local_ip}
     responsive = [{"ip": ip, "mac": by_ip.get(ip)}
                   for ip in sorted(responses, key=ipaddress.IPv4Address)]
     for row in responsive:
@@ -145,9 +147,17 @@ def scan_local_scope(scope, local_ip, *, cancel_event=None, ping_runner=subproce
                     futures[future]["hostname"] = future.result()
                 except (OSError, ValueError, RuntimeError):
                     errors += 1
+    # Cache może zawierać hosty bez odpowiedzi ICMP. Pokazujemy je osobno,
+    # bez przypisywania im stanu online.
+    observed = [{**row, "evidence": "ICMP"} for row in responsive]
+    for ip, mac in by_ip.items():
+        if ip not in responses:
+            observed.append({"ip": ip, "mac": mac, "vendor": vendor_for_mac(mac, oui or {}),
+                             "hostname": "", "evidence": "Cache — dostępność nieznana"})
+    observed.sort(key=lambda row: ipaddress.IPv4Address(row["ip"]))
     return {"scope": scope, "local_ip": local_ip, "probed": len(targets),
             "cancelled": cancel_event is not None and cancel_event.is_set(),
             "status": "UNKNOWN" if errors or (cancel_event is not None and cancel_event.is_set()) else "COMPLETE",
             "probe_errors": errors,
-            "responsive": responsive,
+            "responsive": responsive, "observed": observed,
             "note": "Brak odpowiedzi ICMP nie dowodzi, że urządzenie jest offline."}

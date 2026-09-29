@@ -158,3 +158,27 @@ MZ), z ciągami znaków wyłączonymi i włączonymi: wszystkie pola `data` są
 identyczne po poprawieniu wyboru PowerShell i tekstu `note`. Osobny wrapper
 raportu nowego CLI nie ma pola `version` starej aplikacji, więc zgodność
 raportów jako całości pozostaje otwarta.
+
+# Audyt Windows Toolkit i Termux — 2026-09-29
+
+Stary Windows Toolkit udostępnia 33 kolektory `Get-PrestigeCollectors`.
+System Center ma teraz bezpośrednio osiem sekcji: `physical_disks`, `smart`,
+`partitions`, `update_history`, `update_services`, `update_policies`, `reboot`
+oraz odpowiednik `updates-check` jako `available_updates`. Naprawy SFC,
+DISM i sieci mają osobną ścieżkę z planem oraz potwierdzeniem.
+
+Inne Centra pokrywają część odczytów: System Snapshot (`system`, `disks`,
+`updates`, `network`, `processes`, `startup`, `tasks`, `services`, `software`),
+Security Check (`defender`, `detections`, `firewall`, `uac`, `smartscreen`,
+`tpm`, `secure_boot`, `bitlocker`) i Network Center (`adapters`). Są to
+odpowiedniki tematyczne, **nie potwierdzony parytet wszystkich pól**.
+Bez bezpośredniego odpowiednika pozostają `firmware`, `serial`, `uptime`,
+`reboot_file_operations` (jego sygnał jest częścią sekcji `reboot`),
+`activation`, `run_registry`, `process_details` i `events`. Kolejnym etapem
+jest audyt pól i dodanie brakujących odczytów z osobnym statusem UNKNOWN.
+
+Porównano `termux_setup.py`, `termux_configuration.py`, `termux_toolkit.py`
+i `termux_runtime.py` z odpowiadającymi plikami starych repozytoriów.
+Runtime jest identyczny; różnice pozostałych plików to importy pakietowe,
+usunięty samodzielny entrypoint i nieużywane importy. Backend funkcjonalny
+ma parytet źródeł. Test na urządzeniu z `pkg` i Termux:API pozostaje otwarty.

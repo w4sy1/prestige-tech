@@ -456,8 +456,8 @@ class NetworkCenterWindow(QMainWindow):
         self.discovery_note = QLabel("Nie wykonano skanu ICMP.")
         self.discovery_note.setWordWrap(True)
         discovery_layout.addWidget(self.discovery_note)
-        self.discovery_table = QTableWidget(0, 4)
-        self.discovery_table.setHorizontalHeaderLabels(["IP odpowiedziało", "MAC z cache", "Nazwa", "Producent"])
+        self.discovery_table = QTableWidget(0, 5)
+        self.discovery_table.setHorizontalHeaderLabels(["IP", "MAC z cache", "Nazwa", "Producent", "Dowód"])
         self.discovery_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.discovery_table.setEditTriggers(QTableWidget.NoEditTriggers)
         discovery_layout.addWidget(self.discovery_table, 1)
@@ -1069,17 +1069,19 @@ class NetworkCenterWindow(QMainWindow):
         self.discovery_worker.start()
 
     def show_discovery(self, result):
-        rows = result["responsive"]
+        rows = result.get("observed", result["responsive"])
         self.discovery_table.setRowCount(len(rows))
         for index, row in enumerate(rows):
             self.discovery_table.setItem(index, 0, QTableWidgetItem(row["ip"]))
             self.discovery_table.setItem(index, 1, QTableWidgetItem(row["mac"] or "Brak w cache"))
             self.discovery_table.setItem(index, 2, QTableWidgetItem(row.get("hostname") or ""))
             self.discovery_table.setItem(index, 3, QTableWidgetItem(row.get("vendor") or ""))
+            self.discovery_table.setItem(index, 4, QTableWidgetItem(row.get("evidence") or "ICMP"))
         state = "Przerwany/niepełny" if result["status"] != "COMPLETE" else "Zakończony"
         self.discovery_note.setText(
             f"{state}: {result['scope']}, sondowano {result['probed']} adresów, "
-            f"odpowiedziało {len(rows)}. {result['note']}"
+            f"odpowiedziało {len(result['responsive'])}; wpisów cache bez odpowiedzi: "
+            f"{len(rows) - len(result['responsive'])}. {result['note']}"
         )
         if self.device_history is not None:
             self.record_local_history([{"mac": row["mac"], "ips": [row["ip"]]}

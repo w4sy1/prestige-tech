@@ -37,6 +37,18 @@ class NetworkDiscoveryTests(unittest.TestCase):
         self.assertEqual(result["probed"], 5)
         self.assertEqual(result["status"], "COMPLETE")
 
+    def test_neighbor_without_icmp_is_observation_not_online(self):
+        def ping(*_args, **_kwargs):
+            return SimpleNamespace(returncode=1)
+        result = scan_local_scope(
+            "192.168.1.0/29", "192.168.1.2", ping_runner=ping,
+            neighbors_reader=lambda: [
+                {"mac": "00:11:22:33:44:55", "ips": ["192.168.1.3", "198.51.100.2"]}],
+            max_workers=2)
+        self.assertEqual(result["responsive"], [])
+        self.assertEqual([(row["ip"], row["evidence"]) for row in result["observed"]],
+                         [("192.168.1.3", "Cache — dostępność nieznana")])
+
     def test_oui_and_reverse_dns_are_optional_and_bounded(self):
         with tempfile.TemporaryDirectory() as folder:
             path = Path(folder) / "oui.json"
