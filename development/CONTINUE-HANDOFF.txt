@@ -1,6 +1,13 @@
 PRESTIGE TECH — PLIK PRZEKAZANIA PRACY I TESTÓW
 Stan: 2026-09-29. Aktualizuj ten plik po każdym istotnym etapie.
 
+NAJNOWSZY ETAP — WINDOWS TOOLKIT 14 SEKCJI
+Dodano firmware, numer seryjny BIOS, uptime, aktywację, Run/RunOnce bez
+ujawniania wartości oraz zdarzenia System/Application. 14/14 skryptów
+PowerShell ma poprawną składnię; Core 222 uruchomione, 221 PASS, 1 skip.
+Nowych odczytów na żywym Windows nie uruchomiono. Parytet pól i
+`process_details` (właściciel/podpis każdego procesu) pozostają otwarte.
+
 NAJNOWSZY ETAP — WYKRYWANIE / WINDOWS TOOLKIT / TERMUX
 Network Center pokazuje także wpisy tablicy sąsiadów w zakresie skanu,
 oddzielone od odpowiedzi ICMP etykietą „Cache — dostępność nieznana”.

@@ -6,6 +6,15 @@ projektu i nie zastępują bieżącego pliku licencji.
 
 Bieżący plik przekazania pracy i lista końcowych testów: `development/CONTINUE-HANDOFF.txt`.
 
+## Etap 2026-09-29 — kolejne odczyty Windows Toolkit
+
+System Center ma teraz 14 sekcji odczytowych Windows Toolkit. Dodano firmware,
+numer seryjny BIOS, uptime, aktywację Windows, nazwy i obecność wartości
+Run/RunOnce oraz ostatnie zdarzenia System/Application. Wartości autostartu
+nie są wyświetlane. Składnia wszystkich 14 zapytań PowerShell PASS; suita
+222 uruchomione, 221 PASS, 1 skip. Nowych odczytów nie testowano na żywym
+Windows. Pełny parytet pól oraz właściciel/podpis procesów nadal otwarte.
+
 ## Etap 2026-09-29 — diagnostyka Windows i wykrywanie sieci
 
 Network Center pokazuje obok odpowiedzi ICMP wpisy cache sąsiadów w tej
