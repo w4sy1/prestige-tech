@@ -1,6 +1,14 @@
 PRESTIGE TECH — PLIK PRZEKAZANIA PRACY I TESTÓW
 Stan: 2026-09-29. Aktualizuj ten plik po każdym istotnym etapie.
 
+NAJNOWSZY ETAP — DASHBOARD / FILE INSPECTOR
+Opisy kart Security Center i starego File Inspector wyjaśniają nowy eksport
+JSON/TXT/HTML/PDF oraz zachowany stary EXE. Obie karty pozostały; wygląd
+Dashboardu nie został zmieniony. Test uruchomienia Centrum z sąsiedniego
+repozytorium i starego lokalnego EXE oraz 17 testów Dashboardu PASS.
+Nieśledzone kopie `ui/main_window.py.before-encoding-fix` i
+`ui/main_window.py.encoding-backup` pozostawiono bez zmian.
+
 NAJNOWSZY ETAP — FILE INSPECTOR
 Porównano stare `app.py` i `runtime.py` z Security Center. Podstawowa analiza
 pliku ma odpowiednik; wspólny CLI dodaje `prestige file PLIK` z opcjonalnymi

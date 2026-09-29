@@ -22,6 +22,11 @@ pozostają do wykonania przez użytkownika na końcu.
 
 ## Aktualny etap — 2026-09-29
 
+Dashboard pokazuje teraz w opisach osobno aktualną inspekcję w Security
+Center i starszy samodzielny File Inspector. Obie pozycje pozostały w
+katalogu; test uruchomienia źródłowego Centrum i lokalnego starego EXE oraz
+pełna suita Dashboardu przeszły. Wygląd Dashboardu nie był zmieniany.
+
 Audyt File Inspector: Security Center ma odpowiedniki analizy pliku, a
 wspólne CLI obsługuje teraz `prestige file PLIK [--strings] [--output KATALOG]
 [--pdf NOWY_PLIK]`. Raporty JSON/TXT/HTML i PDF korzystają ze wspólnych usług.
