@@ -29,6 +29,7 @@ zdalnego assetu. Dashboard.exe i Launcher.exe przeszły smoke test z kodem 0,
 wskazuje to wydanie. Pełnego testu instalacji/aktualizacji w osobnej VM nie
 wykonano. Ekran „Aktualizacje” liczy stare moduły i nadal może pokazywać
 0; aktualizacja samego Dashboardu jest sprawdzana przez Launcher przy starcie.
+CI Dashboardu po normalizacji ścieżek testu PASS na Pythonie 3.11 i 3.14.
 Instalator nie zawiera nowego EXE Security Center; karta Centrum z kodu
 wymaga sąsiedniego checkoutu `prestige-tech`.
 

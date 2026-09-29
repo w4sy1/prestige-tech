@@ -6,6 +6,8 @@ Installer 1.1.3 opublikowano w `w4sy1/prestige-tech` tag
 `dashboard-v1.1.3`; lokalny SHA-256 i rozmiar są zgodne z assetem GitHub.
 Dashboard.exe i Launcher.exe smoke PASS, suita Dashboardu 17 PASS, Inno Setup
 compile PASS. Manifest self-update przełączono na 1.1.3 po publikacji.
+CI Dashboardu na Pythonie 3.11 i 3.14 jest zielone po poprawieniu asercji
+ścieżki Windows (krótka i długa postać katalogu TEMP).
 Ekran „Aktualizacje” porównuje osobne moduły, a Launcher sprawdza wersję
 Dashboardu podczas startu. Nowy EXE Security Center nie jest w installerze;
 do jego źródła potrzebny sąsiedni checkout. Instalacji w VM nie wykonano.
