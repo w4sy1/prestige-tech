@@ -22,6 +22,16 @@ pozostają do wykonania przez użytkownika na końcu.
 
 ## Aktualny etap — 2026-09-29
 
+Opublikowano instalator Dashboardu v1.1.3 jako GitHub Release
+`dashboard-v1.1.3`; jego 67 901 734 bajty i SHA-256 zweryfikowano z metadanymi
+zdalnego assetu. Dashboard.exe i Launcher.exe przeszły smoke test z kodem 0,
+17 testów Dashboardu PASS, kompilacja Inno Setup PASS. Manifest self-update
+wskazuje to wydanie. Pełnego testu instalacji/aktualizacji w osobnej VM nie
+wykonano. Ekran „Aktualizacje” liczy stare moduły i nadal może pokazywać
+0; aktualizacja samego Dashboardu jest sprawdzana przez Launcher przy starcie.
+Instalator nie zawiera nowego EXE Security Center; karta Centrum z kodu
+wymaga sąsiedniego checkoutu `prestige-tech`.
+
 Dashboard pokazuje teraz w opisach osobno aktualną inspekcję w Security
 Center i starszy samodzielny File Inspector. Obie pozycje pozostały w
 katalogu; test uruchomienia źródłowego Centrum i lokalnego starego EXE oraz

@@ -1,11 +1,11 @@
 {
     "schema":  1,
-    "generated_at":  "2026-09-21T13:40:20.1726935+00:00",
+    "generated_at":  "2026-09-29T19:04:44.5742992Z",
     "stable":  {
-                   "version":  "1.1.2",
-                   "installer_url":  "https://github.com/w4sy1/prestige-tech/releases/download/dashboard-v1.1.2/Prestige-Tech-Setup-v1.1.2.exe",
-                   "sha256":  "f6b3a207276d376151299866f7a7c8d7b43761f7d31778d68e3a6af3a2ad7bb0",
-                   "size":  58639124,
-                   "changelog":  "Hotfix Launchera: ONEDIR, poprawione CURRENT_VERSION i srodowisko PyInstaller. Stabilny self-update v1.1.2."
+                   "version":  "1.1.3",
+                   "installer_url":  "https://github.com/w4sy1/prestige-tech/releases/download/dashboard-v1.1.3/Prestige-Tech-Setup.exe",
+                   "sha256":  "d43afcfe31a9165a3dec0b28b81bd5b5c463b65ca23821704a873a69c6500a3c",
+                   "size":  67901734,
+                   "changelog":  "Dashboard 1.1.3: opisy aktualnej inspekcji w Security Center i zachowanego starego File Inspector; launcher oraz interfejs bez zmian. Nowy EXE Security Center nie jest częścią instalatora."
                }
 }

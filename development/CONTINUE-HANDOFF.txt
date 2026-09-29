@@ -1,6 +1,15 @@
 PRESTIGE TECH — PLIK PRZEKAZANIA PRACY I TESTÓW
 Stan: 2026-09-29. Aktualizuj ten plik po każdym istotnym etapie.
 
+NAJNOWSZY ETAP — DASHBOARD RELEASE 1.1.3
+Installer 1.1.3 opublikowano w `w4sy1/prestige-tech` tag
+`dashboard-v1.1.3`; lokalny SHA-256 i rozmiar są zgodne z assetem GitHub.
+Dashboard.exe i Launcher.exe smoke PASS, suita Dashboardu 17 PASS, Inno Setup
+compile PASS. Manifest self-update przełączono na 1.1.3 po publikacji.
+Ekran „Aktualizacje” porównuje osobne moduły, a Launcher sprawdza wersję
+Dashboardu podczas startu. Nowy EXE Security Center nie jest w installerze;
+do jego źródła potrzebny sąsiedni checkout. Instalacji w VM nie wykonano.
+
 NAJNOWSZY ETAP — DASHBOARD / FILE INSPECTOR
 Opisy kart Security Center i starego File Inspector wyjaśniają nowy eksport
 JSON/TXT/HTML/PDF oraz zachowany stary EXE. Obie karty pozostały; wygląd
