@@ -22,12 +22,12 @@ pozostają do wykonania przez użytkownika na końcu.
 
 ## Aktualny etap — 2026-09-28
 
-Audyt File Inspector: Security Center ma odpowiedniki analizy pliku, ale
-brakuje samodzielnego CLI i eksportów starego programu. Osobne repozytorium
-pozostaje. Hash, entropia i próbka ciągów powstają teraz z jednego odczytu
-pliku; test tej własności przeszedł. Szczegóły w
-`development/FUNCTION-PARITY-AUDIT.md`. Podpisanego pliku Windows i nowego
-EXE nie sprawdzono.
+Audyt File Inspector: Security Center ma odpowiedniki analizy pliku, a
+wspólne CLI obsługuje teraz `prestige file PLIK [--strings] [--output KATALOG]
+[--pdf NOWY_PLIK]`. Raporty JSON/TXT/HTML i PDF korzystają ze wspólnych usług.
+Hash, entropia i próbka ciągów powstają z jednego odczytu pliku. Osobne
+repozytorium pozostaje do weryfikacji podpisu Authenticode, końcowego GUI/EXE
+i pełnej zgodności raportów. Szczegóły w `development/FUNCTION-PARITY-AUDIT.md`.
 
 Osobne repozytoria `prestige-system-snapshot`, `prestige-security-check`,
 `prestige-repair-report` i `prestige-pc-cleanup` usunięto z GitHuba po

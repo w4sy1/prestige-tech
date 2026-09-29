@@ -9,6 +9,8 @@ import sys
 
 from . import legacy
 from prestige_core.ai_service import external, local, preview
+from prestige_core.file_inspector import inspect_file
+from prestige_core.file_inspector_report import export_file_report
 
 
 CENTERS = {
@@ -52,6 +54,11 @@ def main(argv=None, *, runner=subprocess.run):
     ai.add_argument("input")
     ai.add_argument("--model", default="gpt-5-mini")
     ai.add_argument("--send", action="store_true", help="Jawnie wyślij metryki do API")
+    file_command = subcommands.add_parser("file", help="Odczytowa inspekcja pliku")
+    file_command.add_argument("path")
+    file_command.add_argument("--strings", action="store_true", help="Dołącz ciągi znaków, także prywatne")
+    file_command.add_argument("--output", help="Katalog raportów JSON/TXT/HTML")
+    file_command.add_argument("--pdf", help="Nowa ścieżka raportu PDF")
     args = parser.parse_args(argv)
     try:
         if args.list:
@@ -83,6 +90,24 @@ def main(argv=None, *, runner=subprocess.run):
                       external(args.input, args.model))
             print(json.dumps(result, ensure_ascii=False, indent=2, default=str))
             return 0
+        if args.kind == "file":
+            if args.dry_run:
+                print(json.dumps({"file": args.path, "strings": args.strings,
+                                  "output": args.output, "pdf": args.pdf}, ensure_ascii=False))
+                return 0
+            from datetime import datetime, timezone
+            report = {"schema_version": 1, "tool": "Prestige File Inspector",
+                      "created_utc": datetime.now(timezone.utc).isoformat(),
+                      "data": inspect_file(args.path, include_strings=args.strings)}
+            if args.pdf:
+                from prestige_core.pdf_export import export_pdf
+                export_pdf(report, args.pdf, title="Prestige File Inspector")
+            if args.output:
+                print(json.dumps({"files": export_file_report(report, args.output)},
+                                 ensure_ascii=False))
+            else:
+                print(json.dumps(report, ensure_ascii=False, indent=2, allow_nan=False))
+            return 0
         forwarded = args.arguments[1:] if args.arguments[:1] == ["--"] else args.arguments
         if args.kind == "legacy":
             if not forwarded and args.tool != "prestige-windows-toolkit":
@@ -99,7 +124,7 @@ def main(argv=None, *, runner=subprocess.run):
             print(json.dumps({"center": args.name, "command": command}, ensure_ascii=False))
             return 0
         return runner(command, shell=False, cwd=str(Path(args.centers_root).resolve())).returncode
-    except (OSError, ValueError, RuntimeError, KeyError) as error:
+    except (OSError, ValueError, RuntimeError, KeyError, TypeError) as error:
         print("Błąd: " + str(error), file=sys.stderr)
         return 1
     except KeyboardInterrupt:
