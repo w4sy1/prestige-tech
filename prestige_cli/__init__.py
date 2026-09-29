@@ -10,7 +10,7 @@ import sys
 from . import legacy
 from prestige_core.ai_service import external, local, preview
 from prestige_core.file_inspector import inspect_file
-from prestige_core.file_inspector_report import export_file_report
+from prestige_core.file_inspector_report import build_file_report, export_file_report
 
 
 CENTERS = {
@@ -95,10 +95,7 @@ def main(argv=None, *, runner=subprocess.run):
                 print(json.dumps({"file": args.path, "strings": args.strings,
                                   "output": args.output, "pdf": args.pdf}, ensure_ascii=False))
                 return 0
-            from datetime import datetime, timezone
-            report = {"schema_version": 1, "tool": "Prestige File Inspector",
-                      "created_utc": datetime.now(timezone.utc).isoformat(),
-                      "data": inspect_file(args.path, include_strings=args.strings)}
+            report = build_file_report(inspect_file(args.path, include_strings=args.strings))
             if args.pdf:
                 from prestige_core.pdf_export import export_pdf
                 export_pdf(report, args.pdf, title="Prestige File Inspector")

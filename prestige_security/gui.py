@@ -8,6 +8,7 @@ from PySide6.QtWidgets import (QCheckBox, QFileDialog, QFrame, QHBoxLayout, QLab
                                QVBoxLayout, QWidget)
 
 from prestige_core.file_inspector import inspect_file
+from prestige_core.file_inspector_report import build_file_report, export_file_report
 from prestige_core.security_check import audit_windows, load_evidence
 from prestige_core.security_rules import audit
 from prestige_core.malware_triage import triage_windows
@@ -60,6 +61,7 @@ class SecurityCenterWindow(QMainWindow):
         self.worker = None
         self.report_dialog = None
         self.report_prefill = None
+        self.file_result = None
         self.ai_dialog = None
         root = QWidget()
         self.setCentralWidget(root)
@@ -85,6 +87,17 @@ class SecurityCenterWindow(QMainWindow):
         self.report_button.clicked.connect(self.open_report)
         controls.addWidget(self.report_button)
         main.addLayout(controls)
+        export_controls = QHBoxLayout()
+        self.export_file_button = QPushButton("Eksport analizy")
+        self.export_file_button.setEnabled(False)
+        self.export_file_button.clicked.connect(self.export_file_report)
+        export_controls.addWidget(self.export_file_button)
+        self.export_pdf_button = QPushButton("PDF analizy")
+        self.export_pdf_button.setEnabled(False)
+        self.export_pdf_button.clicked.connect(self.export_file_pdf)
+        export_controls.addWidget(self.export_pdf_button)
+        export_controls.addStretch()
+        main.addLayout(export_controls)
         audit_controls = QHBoxLayout()
         self.audit_button = QPushButton("Audyt konfiguracji Windows")
         self.audit_button.clicked.connect(self.start_audit)
@@ -159,6 +172,9 @@ class SecurityCenterWindow(QMainWindow):
     def _start(self, action, path=None):
         if self.worker is not None and self.worker.isRunning():
             return
+        self.file_result = None
+        self.export_file_button.setEnabled(False)
+        self.export_pdf_button.setEnabled(False)
         self.choose_button.setEnabled(False)
         self.audit_button.setEnabled(False)
         self.offline_button.setEnabled(False)
@@ -188,6 +204,9 @@ class SecurityCenterWindow(QMainWindow):
             self.report_prefill = None
         data = result["data"]
         if result["action"] == "file":
+            self.file_result = data
+            self.export_file_button.setEnabled(True)
+            self.export_pdf_button.setEnabled(True)
             self.status.setText(f"Analiza zakończona: {data['name']}")
         elif result["action"] in ("audit", "offline"):
             self.status.setText(f"Audyt zakończony: {data['unknown_checks']} kontroli UNKNOWN, wynik {data['risk_score']}/100.")
@@ -200,8 +219,38 @@ class SecurityCenterWindow(QMainWindow):
 
     def show_error(self, message):
         self.report_prefill = None
+        self.file_result = None
+        self.export_file_button.setEnabled(False)
+        self.export_pdf_button.setEnabled(False)
         self.status.setText("Nie ukończono analizy.")
         self.result.setPlainText(message)
+
+    def export_file_report(self):
+        if self.file_result is None:
+            return
+        directory = QFileDialog.getExistingDirectory(self, "Folder raportów File Inspector")
+        if not directory:
+            return
+        try:
+            export_file_report(build_file_report(self.file_result), directory)
+        except (OSError, ValueError, TypeError) as error:
+            QMessageBox.warning(self, "Eksport analizy", str(error))
+            return
+        self.status.setText("Zapisano raporty JSON, TXT i HTML: " + directory)
+
+    def export_file_pdf(self):
+        if self.file_result is None:
+            return
+        path, _ = QFileDialog.getSaveFileName(self, "Nowy PDF File Inspector", "", "PDF (*.pdf)")
+        if not path:
+            return
+        try:
+            from prestige_core.pdf_export import export_pdf
+            export_pdf(build_file_report(self.file_result), path, title="Prestige File Inspector")
+        except (OSError, ValueError, RuntimeError, TypeError) as error:
+            QMessageBox.warning(self, "PDF analizy", str(error))
+            return
+        self.status.setText("Zapisano PDF: " + path)
 
     def show_help(self):
         QMessageBox.information(self, "Pomoc — Security Center",

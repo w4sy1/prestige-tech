@@ -25,8 +25,10 @@ pozostają do wykonania przez użytkownika na końcu.
 Audyt File Inspector: Security Center ma odpowiedniki analizy pliku, a
 wspólne CLI obsługuje teraz `prestige file PLIK [--strings] [--output KATALOG]
 [--pdf NOWY_PLIK]`. Raporty JSON/TXT/HTML i PDF korzystają ze wspólnych usług.
+Security Center ma przyciski eksportu ostatniej udanej analizy pliku;
+po błędzie lub nowej operacji eksport jest wyłączany.
 Hash, entropia i próbka ciągów powstają z jednego odczytu pliku. Osobne
-repozytorium pozostaje do weryfikacji podpisu Authenticode, końcowego GUI/EXE
+repozytorium pozostaje do weryfikacji podpisu Authenticode, końcowego EXE
 i pełnej zgodności raportów. Szczegóły w `development/FUNCTION-PARITY-AUDIT.md`.
 
 Osobne repozytoria `prestige-system-snapshot`, `prestige-security-check`,

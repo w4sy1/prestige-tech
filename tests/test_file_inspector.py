@@ -63,4 +63,25 @@ class SecurityGuiTests(unittest.TestCase):
         window = SecurityCenterWindow()
         self.assertTrue(window.choose_button.isEnabled())
         self.assertFalse(window.strings_checkbox.isChecked())
+        self.assertFalse(window.export_file_button.isEnabled())
+        window.close()
+
+    def test_gui_exports_only_completed_file_result(self):
+        os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+        from PySide6.QtWidgets import QApplication
+        from prestige_security.gui import SecurityCenterWindow
+        app = QApplication.instance() or QApplication([])
+        window = SecurityCenterWindow()
+        with tempfile.TemporaryDirectory() as directory:
+            with patch("prestige_security.gui.QFileDialog.getExistingDirectory", return_value=directory):
+                window.export_file_report()
+                self.assertEqual(list(Path(directory).iterdir()), [])
+                window.show_result({"action": "file", "data": {"name": "sample.bin", "strings": []}})
+                self.assertTrue(window.export_file_button.isEnabled())
+                window.export_file_report()
+            files = list(Path(directory).iterdir())
+            self.assertEqual({path.suffix for path in files}, {".json", ".txt", ".html"})
+            window.show_error("odmowa dostępu")
+            self.assertFalse(window.export_file_button.isEnabled())
+            self.assertIsNone(window.file_result)
         window.close()

@@ -4,6 +4,12 @@ import html
 import json
 from pathlib import Path
 import uuid
+from datetime import datetime, timezone
+
+
+def build_file_report(result):
+    return {"schema_version": 1, "tool": "Prestige File Inspector",
+            "created_utc": datetime.now(timezone.utc).isoformat(), "data": result}
 
 
 def export_file_report(report, directory):

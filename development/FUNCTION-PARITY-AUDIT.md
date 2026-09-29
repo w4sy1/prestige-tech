@@ -146,8 +146,9 @@ Odpowiednik: `prestige_core/file_inspector.py`, `prestige_security/gui.py`.
 | Ciągi znaków tylko po zgodzie | Tak | Test starego i nowego kodu oraz opcja GUI PASS |
 | Status podpisu Authenticode | Tak w kodzie | Podpisanego pliku Windows nie zweryfikowano |
 | CLI `prestige file`, eksport JSON/TXT/HTML i opcjonalny PDF | Tak jako wspólna komenda Centrów | Testy CLI/eksportu PASS; rzeczywisty PDF ma nagłówek `%PDF-` |
+| Eksport z GUI po inspekcji pliku | Tak | JSON/TXT/HTML oraz PDF korzystają ze wspólnych usług; test eksportu tylko po udanej analizie PASS |
 
 Osobne repozytorium File Inspector pozostaje do weryfikacji podpisu
-Authenticode, końcowego GUI/EXE i pełnej zgodności raportów. Nowy PDF
+Authenticode, końcowego EXE i pełnej zgodności raportów. Nowy PDF
 korzysta ze wspólnej usługi Centrów; brak zależności `reportlab` daje
 czytelny błąd zamiast pominięcia raportu.
