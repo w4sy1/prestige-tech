@@ -6,10 +6,19 @@ import json
 import os
 from pathlib import Path
 import re
+import shutil
 import subprocess
 import sys
 
 from .network import read_neighbors
+
+
+PRIVATE_SCOPES = tuple(ipaddress.IPv4Network(value) for value in
+                       ("10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"))
+
+
+def _private_lan(address):
+    return any(address in network for network in PRIVATE_SCOPES)
 
 
 def load_oui(path):
@@ -76,7 +85,7 @@ def local_scopes(*, runner=subprocess.run, platform=None):
             address = ipaddress.IPv4Address(row["IPAddress"])
             prefix = int(row["PrefixLength"])
             network = ipaddress.IPv4Network((address, prefix), strict=False)
-            if not address.is_private or address.is_loopback or address.is_link_local:
+            if not _private_lan(address):
                 continue
             if prefix < 24:
                 network = ipaddress.IPv4Network((address, 24), strict=False)
@@ -92,14 +101,41 @@ def local_scopes(*, runner=subprocess.run, platform=None):
 def plan_targets(scope, local_ip):
     network = ipaddress.IPv4Network(scope, strict=True)
     address = ipaddress.IPv4Address(local_ip)
-    if address not in network or not address.is_private or network.prefixlen < 24:
+    if address not in network or not _private_lan(address) or network.prefixlen < 24:
         raise ValueError("Skan może obejmować tylko lokalną podsieć IPv4 o zakresie do /24.")
     return [str(target) for target in network.hosts() if target != address]
 
 
+def nmap_discover(scope, local_ip, *, runner=subprocess.run, executable=None):
+    """Opcjonalne wykrywanie hostów wyłącznie w zweryfikowanej lokalnej podsieci."""
+    plan_targets(scope, local_ip)
+    command = executable or shutil.which("nmap")
+    if not command:
+        raise RuntimeError("Nmap nie jest zainstalowany.")
+    try:
+        result = runner([command, "-sn", "-n", "--max-retries", "1", scope],
+                        capture_output=True, text=True, timeout=45, check=False)
+    except (OSError, subprocess.TimeoutExpired) as error:
+        raise RuntimeError("Skan Nmap nie został ukończony.") from error
+    if result.returncode or len(result.stdout) > 1024 * 1024:
+        raise RuntimeError("Skan Nmap nie zwrócił poprawnego wyniku.")
+    network = ipaddress.IPv4Network(scope)
+    found = set()
+    for address in re.findall(r"^Nmap scan report for (\d{1,3}(?:\.\d{1,3}){3})$",
+                              result.stdout, re.MULTILINE):
+        try:
+            ip = ipaddress.IPv4Address(address)
+            if ip in network and str(ip) != local_ip:
+                found.add(str(ip))
+        except ipaddress.AddressValueError:
+            continue
+    return sorted(found, key=ipaddress.IPv4Address)
+
+
 def scan_local_scope(scope, local_ip, *, cancel_event=None, ping_runner=subprocess.run,
                      neighbors_reader=read_neighbors, max_workers=16, oui=None,
-                     resolve_names=False, name_resolver=reverse_name):
+                     resolve_names=False, name_resolver=reverse_name,
+                     use_nmap=False, nmap_runner=subprocess.run, nmap_executable=None):
     targets = plan_targets(scope, local_ip)
     if not 1 <= max_workers <= 32:
         raise ValueError("Niedozwolona liczba równoległych sond.")
@@ -124,6 +160,15 @@ def scan_local_scope(scope, local_ip, *, cancel_event=None, ping_runner=subproce
                 responses.append(target)
             elif reachable is None:
                 errors += 1
+    nmap_ips = []
+    nmap_error = ""
+    if use_nmap and not (cancel_event is not None and cancel_event.is_set()):
+        try:
+            nmap_ips = nmap_discover(scope, local_ip, runner=nmap_runner,
+                                     executable=nmap_executable)
+        except RuntimeError as error:
+            nmap_error = str(error)
+            errors += 1
     try:
         neighbors = neighbors_reader()
     except RuntimeError:
@@ -150,8 +195,13 @@ def scan_local_scope(scope, local_ip, *, cancel_event=None, ping_runner=subproce
     # Cache może zawierać hosty bez odpowiedzi ICMP. Pokazujemy je osobno,
     # bez przypisywania im stanu online.
     observed = [{**row, "evidence": "ICMP"} for row in responsive]
-    for ip, mac in by_ip.items():
+    for ip in nmap_ips:
         if ip not in responses:
+            mac = by_ip.get(ip)
+            observed.append({"ip": ip, "mac": mac, "vendor": vendor_for_mac(mac, oui or {}),
+                             "hostname": "", "evidence": "Nmap"})
+    for ip, mac in by_ip.items():
+        if ip not in responses and ip not in nmap_ips:
             observed.append({"ip": ip, "mac": mac, "vendor": vendor_for_mac(mac, oui or {}),
                              "hostname": "", "evidence": "Cache — dostępność nieznana"})
     observed.sort(key=lambda row: ipaddress.IPv4Address(row["ip"]))
@@ -160,4 +210,5 @@ def scan_local_scope(scope, local_ip, *, cancel_event=None, ping_runner=subproce
             "status": "UNKNOWN" if errors or (cancel_event is not None and cancel_event.is_set()) else "COMPLETE",
             "probe_errors": errors,
             "responsive": responsive, "observed": observed,
+            "nmap_found": len(nmap_ips), "nmap_error": nmap_error,
             "note": "Brak odpowiedzi ICMP nie dowodzi, że urządzenie jest offline."}

@@ -5,7 +5,7 @@ from types import SimpleNamespace
 import unittest
 
 from prestige_core.network_discovery import (load_oui, local_scopes, plan_targets,
-                                             reverse_name, scan_local_scope)
+                                             reverse_name, scan_local_scope, nmap_discover)
 
 
 class NetworkDiscoveryTests(unittest.TestCase):
@@ -73,3 +73,23 @@ class NetworkDiscoveryTests(unittest.TestCase):
             self.assertEqual(command[-1], "192.0.2.1")
             return SimpleNamespace(returncode=0, stdout="host.example\n")
         self.assertEqual(reverse_name("192.0.2.1", runner=runner), "host.example")
+
+    def test_nmap_discovery_is_local_and_separate_from_icmp(self):
+        def nmap(command, **kwargs):
+            self.assertEqual(command[1:], ["-sn", "-n", "--max-retries", "1", "192.168.1.0/29"])
+            self.assertEqual(kwargs["timeout"], 45)
+            return SimpleNamespace(returncode=0, stdout=(
+                "Nmap scan report for 192.168.1.3\n"
+                "Nmap scan report for 198.51.100.2\n"))
+        found = nmap_discover("192.168.1.0/29", "192.168.1.2", runner=nmap,
+                              executable="nmap-test")
+        self.assertEqual(found, ["192.168.1.3"])
+        result = scan_local_scope("192.168.1.0/29", "192.168.1.2",
+                                  ping_runner=lambda *_a, **_kw: SimpleNamespace(returncode=1),
+                                  neighbors_reader=lambda: [], use_nmap=True,
+                                  nmap_runner=nmap, nmap_executable="nmap-test", max_workers=2)
+        self.assertEqual(result["responsive"], [])
+        self.assertEqual(result["observed"][0]["evidence"], "Nmap")
+        with self.assertRaises(ValueError):
+            nmap_discover("198.51.100.0/24", "198.51.100.2", runner=nmap,
+                          executable="nmap-test")

@@ -3,6 +3,9 @@
 Najnowszy etap: lokalne wykrywanie pokazuje obok odpowiedzi ICMP także
 przefiltrowane wpisy tablicy sąsiadów z odrębnym oznaczeniem
 „Cache — dostępność nieznana”. Nie dowodzi to, że host jest online.
+Opcjonalny Nmap `-sn -n` uzupełnia obserwacje tylko w wybranej prywatnej
+podsieci do /24; wynik ma odrębny dowód „Nmap”. Błąd kończy się statusem
+UNKNOWN bez utraty wyników ICMP. Testowano na fixture, nie na sieci.
 System Center odczytuje dodatkowo dostępne aktualizacje, dyski fizyczne,
 liczniki niezawodności i partycje; jego Windows Toolkit ma teraz osiem
 sekcji odczytowych, nadal bez pełnego parytetu starego zestawu kolektorów.
@@ -31,7 +34,7 @@ program nadal ma własną pozycję, a nie brak pozycji nowego Center.
 | NetRadar | Network / Ruch | Odczyt logów Windows/JSONL/Linux, przyrostowe śledzenie rosnącego logu z rotacją, heurystyka prób portów i ograniczony Windows TCP SYN metadata capture bez payloadu; brak pełnego Deep Capture | Fixture/GUI PASS; realnego przechwytywania nie testowano | Nie | Legacy |
 | Network Snapshot | Network / Historia | Zapis/porównanie migawek, historia obserwacji; porównanie ze starym formatem hosts, normalizacja MAC i scalenie IP tego samego urządzenia oraz zmian nazw i producenta | Core/GUI fixture PASS; pełny parytet discovery/CLI i realny skan niezweryfikowane | Nie | Legacy |
 | Nmap Profiles | Network / Porty | Sześć ograniczonych profili, plan, wykonanie, parser i porównanie XML w Core/GUI | Fixture/GUI PASS; Nmap niedostępny lokalnie | Nie | Legacy |
-| Network Sentinel (skrypt Dashboardu) | Network / Sentinel | Odczyt bridge/statusu/alertów/historii/list; skan ICMP; własne reguły Firewall IN/OUT; ręczny Deep Capture metadanych TShark/Npcap. Opcjonalna automatyczna blokada po dwóch alertach HIGH, pełnej liście zaufanych i zgodzie na sesję; limit 5 IP. Pełny parytet wykrywania pozostaje | Fixture polityki/parsera/Firewalla/GUI PASS; prawdziwego TShark i blokady w VM nie sprawdzono | Nie | Legacy |
+| Network Sentinel (skrypt Dashboardu) | Network / Sentinel | Odczyt bridge/statusu/alertów/historii/list; skan ICMP, cache sąsiadów i opcjonalny Nmap do /24; własne reguły Firewall IN/OUT; ręczny Deep Capture metadanych TShark/Npcap. Opcjonalna automatyczna blokada po dwóch alertach HIGH, pełnej liście zaufanych i zgodzie na sesję; limit 5 IP. Pełny parytet wykrywania pozostaje | Fixture polityki/parsera/Firewalla/Nmap/GUI PASS; prawdziwego Nmap, TShark i blokady w VM nie sprawdzono | Nie | Legacy |
 | ADB Diagnostic | Android / ADB | Android Center: wykrywanie autoryzowanych urządzeń, odczyt właściwości/systemu/baterii/pakietów/usług/uprawnień oraz opcjonalne statystyki logcat bez treści | Fixture/GUI PASS; ADB lokalnie bez urządzenia | Nie | Legacy |
 | Android Inspector | Android / Aplikacje | Android Center: lista aplikacji, wersje, deklaracje/granty, appops, role i Device Admin z oznaczeniem niepewności; częściowy parytet OEM | Fixture/GUI PASS; bez testu na urządzeniu | Nie | Legacy |
 | Security Check | Security / Kontrole | Security Center: 21 odczytowych kategorii Windows i dotychczasowe reguły audytu/scoringu z coverage UNKNOWN; opcjonalna analiza offline JSON. Stare osobne repo usunięte; bundle zachowany | Fixture/GUI i 19 testów starego repo PASS; rzeczywisty lokalny audyt: 21 kategorii, 4 UNKNOWN; inne konfiguracje Windows niesprawdzone | Nie | Legacy + Center |

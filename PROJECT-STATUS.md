@@ -16,6 +16,10 @@ backend Termux Setup/Toolkit ze starymi źródłami: logika jest taka sama;
 testu fizycznego Termuxa nie wykonano. 221 uruchomionych, 220 PASS, 1 skip.
 Pełny parytet Sentinel oraz pozostałych kolektorów Windows Toolkit,
 rzeczywiste naprawy i test EXE nadal pozostają otwarte.
+Opcjonalny Nmap `-sn -n` uzupełnia obserwacje wyłącznie w wybranej prywatnej
+podsieci do /24. Osobno oznaczono wyniki Nmap, ICMP i cache. Test fixture
+PASS; prawdziwego Nmap nie uruchamiano. 222 uruchomione testy, 221 PASS,
+1 skip.
 
 ## Publikacja kodu źródłowego — 2026-09-28
 

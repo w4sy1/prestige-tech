@@ -10,6 +10,9 @@ na żywo i napraw nie wykonywano. Backend Termux Setup/Toolkit porównano
 z legacy: poza importem/entrypointem funkcje są identyczne. Termux/pkg/API
 na telefonie nie testowano. Core: 221 uruchomionych, 220 PASS, 1 skip. Pełny parytet
 Sentinel i wszystkich kolektorów Windows Toolkit oraz nowe EXE są otwarte.
+Później dodano opcjonalny Nmap `-sn -n` tylko dla wybranej prywatnej podsieci
+do /24, z osobnym dowodem wyniku i UNKNOWN przy błędzie. Testy fixture PASS;
+realnego Nmap nie uruchamiano. Aktualna suita: 222 testy, 221 PASS, 1 skip.
 
 NAJNOWSZY ETAP — DASHBOARD RELEASE 1.1.3
 Installer 1.1.3 opublikowano w `w4sy1/prestige-tech` tag

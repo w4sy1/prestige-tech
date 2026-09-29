@@ -94,18 +94,20 @@ class DiscoveryWorker(QThread):
     loaded = Signal(dict)
     failed = Signal(str)
 
-    def __init__(self, scope, oui, resolve_names, parent=None):
+    def __init__(self, scope, oui, resolve_names, use_nmap=False, parent=None):
         super().__init__(parent)
         self.scope = scope
         self.oui = oui
         self.resolve_names = resolve_names
+        self.use_nmap = use_nmap
         self.cancel_event = Event()
 
     def run(self):
         try:
             self.loaded.emit(scan_local_scope(self.scope["scope"], self.scope["ip"],
                                               cancel_event=self.cancel_event, oui=self.oui,
-                                              resolve_names=self.resolve_names))
+                                              resolve_names=self.resolve_names,
+                                              use_nmap=self.use_nmap))
         except (OSError, ValueError, RuntimeError) as error:
             self.failed.emit(str(error))
 
@@ -449,6 +451,8 @@ class NetworkCenterWindow(QMainWindow):
         discovery_options = QHBoxLayout()
         self.discovery_names = QCheckBox("Reverse DNS (do 3 s na host)")
         discovery_options.addWidget(self.discovery_names)
+        self.discovery_nmap = QCheckBox("Nmap -sn (opcjonalnie, do 45 s)")
+        discovery_options.addWidget(self.discovery_nmap)
         self.discovery_oui_button = QPushButton("Wczytaj lokalną bazę OUI")
         self.discovery_oui_button.clicked.connect(self.choose_discovery_oui)
         discovery_options.addWidget(self.discovery_oui_button)
@@ -1062,7 +1066,8 @@ class NetworkCenterWindow(QMainWindow):
         self.discovery_note.setText(f"Skanuję {selected['scope']} przez ICMP…")
         self.stop_discovery_button.setEnabled(True)
         self.discovery_worker = DiscoveryWorker(selected, self.discovery_oui,
-                                                self.discovery_names.isChecked(), self)
+                                                self.discovery_names.isChecked(),
+                                                self.discovery_nmap.isChecked(), self)
         self.discovery_worker.loaded.connect(self.show_discovery)
         self.discovery_worker.failed.connect(self.show_discovery_error)
         self.discovery_worker.finished.connect(self.finish_discovery)
@@ -1081,7 +1086,9 @@ class NetworkCenterWindow(QMainWindow):
         self.discovery_note.setText(
             f"{state}: {result['scope']}, sondowano {result['probed']} adresów, "
             f"odpowiedziało {len(result['responsive'])}; wpisów cache bez odpowiedzi: "
-            f"{len(rows) - len(result['responsive'])}. {result['note']}"
+            f"{sum(row.get('evidence') == 'Cache — dostępność nieznana' for row in rows)}; "
+            f"Nmap: {result.get('nmap_found', 0)}. "
+            f"{result.get('nmap_error') or result['note']}"
         )
         if self.device_history is not None:
             self.record_local_history([{"mac": row["mac"], "ips": [row["ip"]]}
