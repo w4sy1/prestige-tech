@@ -3,9 +3,10 @@ import os
 import tempfile
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import patch
 
-from prestige_core.file_inspector import inspect_file
+from prestige_core.file_inspector import _signature, inspect_file
 
 
 class FileInspectorTests(unittest.TestCase):
@@ -52,6 +53,19 @@ class FileInspectorTests(unittest.TestCase):
                 result = inspect_file(path, platform="posix")
             self.assertEqual(reads, ["rb"])
             self.assertEqual(result["hashes"]["sha256"], hashlib.sha256(content).hexdigest())
+
+    def test_signature_prefers_available_pwsh_and_preserves_status(self):
+        calls = []
+
+        def runner(command, **kwargs):
+            calls.append(command)
+            return SimpleNamespace(returncode=0, stdout='{"status":"NotSigned","publisher":null}')
+
+        with patch("prestige_core.file_inspector.shutil.which",
+                   side_effect=lambda name: "C:/pwsh.exe" if name == "pwsh" else None):
+            result = _signature("C:/sample.bin", runner=runner, platform="nt")
+        self.assertEqual(result, {"status": "NotSigned", "publisher": None})
+        self.assertEqual(calls[0][0], "C:/pwsh.exe")
 
 
 class SecurityGuiTests(unittest.TestCase):

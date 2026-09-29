@@ -20,7 +20,7 @@ License. Nie opublikowano nowych EXE ani release Centrów.
 Ręczne testy urządzeń, VM, skalowania GUI i działania instalacyjnych EXE
 pozostają do wykonania przez użytkownika na końcu.
 
-## Aktualny etap — 2026-09-28
+## Aktualny etap — 2026-09-29
 
 Audyt File Inspector: Security Center ma odpowiedniki analizy pliku, a
 wspólne CLI obsługuje teraz `prestige file PLIK [--strings] [--output KATALOG]
@@ -30,6 +30,11 @@ po błędzie lub nowej operacji eksport jest wyłączany.
 Hash, entropia i próbka ciągów powstają z jednego odczytu pliku. Osobne
 repozytorium pozostaje do weryfikacji podpisu Authenticode, końcowego EXE
 i pełnej zgodności raportów. Szczegóły w `development/FUNCTION-PARITY-AUDIT.md`.
+Porównanie 4 lokalnych plików w obu trybach ciągów: pola analizy identyczne;
+nowy kod wybiera `pwsh`, jeśli jest dostępny. Podpisanego pliku nie sprawdzono,
+a wrapper nowego raportu nie zawiera starego pola `version`.
+
+## Poprzedni etap — 2026-09-28
 
 Osobne repozytoria `prestige-system-snapshot`, `prestige-security-check`,
 `prestige-repair-report` i `prestige-pc-cleanup` usunięto z GitHuba po

@@ -1,5 +1,5 @@
 PRESTIGE TECH — PLIK PRZEKAZANIA PRACY I TESTÓW
-Stan: 2026-09-28. Aktualizuj ten plik po każdym istotnym etapie.
+Stan: 2026-09-29. Aktualizuj ten plik po każdym istotnym etapie.
 
 NAJNOWSZY ETAP — FILE INSPECTOR
 Porównano stare `app.py` i `runtime.py` z Security Center. Podstawowa analiza
@@ -10,6 +10,10 @@ lub PDF; po nowej operacji/błędzie przyciski są wyłączone.
 Hashe, entropia i próbka ciągów pochodzą z jednego odczytu. Osobne repo
 `prestige-file-inspector` pozostaje do weryfikacji podpisanego pliku Windows,
 końcowego EXE i zgodności raportów. Audyt: `FUNCTION-PARITY-AUDIT.md`.
+Porównano 4 lokalne próbki w obu trybach ciągów: po wyborze `pwsh` i
+ujednoliceniu `note` wszystkie pola wyniku analizy są identyczne ze starym
+programem. Wrapper raportu w nowym CLI nie ma starego `version`; pełny
+parytet formatu raportu oraz podpisany plik wciąż wymagają sprawdzenia.
 
 NAJNOWSZY ETAP — CZTERY ZDUBLOWANE REPOZYTORIA
 Usunięto z GitHuba stare osobne repozytoria System Snapshot, Security Check,

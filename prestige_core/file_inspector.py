@@ -7,6 +7,7 @@ import mimetypes
 import os
 from pathlib import Path
 import re
+import shutil
 import struct
 import subprocess
 
@@ -22,7 +23,10 @@ def _signature(path, *, runner=subprocess.run, platform=None):
               f"$s=Get-AuthenticodeSignature -LiteralPath '{str(path).replace(chr(39), chr(39) * 2)}';"
               "[pscustomobject]@{status=[string]$s.Status;publisher=$s.SignerCertificate.Subject} | ConvertTo-Json -Compress")
     try:
-        result = runner(["powershell.exe", "-NoProfile", "-NonInteractive", "-Command", script],
+        executable = shutil.which("pwsh") or shutil.which("powershell")
+        if not executable:
+            return {"status": "UNKNOWN"}
+        result = runner([executable, "-NoProfile", "-NonInteractive", "-Command", script],
                         capture_output=True, text=True, encoding="utf-8", timeout=30, check=False)
         if result.returncode:
             return {"status": "UNKNOWN"}
@@ -76,4 +80,4 @@ def inspect_file(path, *, include_strings=False, runner=subprocess.run, platform
             "hashes": hashes, "entropy_bits_per_byte": entropy,
             "signature": _signature(path, runner=runner, platform=platform), "pe": pe,
             "strings": strings, "strings_sampled_bytes": len(sample),
-            "note": "SHA1/MD5 tylko do zgodności. Entropia i brak podpisu nie dowodzą malware."}
+            "note": "SHA1/MD5 wyłącznie dla kompatybilności. Entropia i brak podpisu nie dowodzą malware."}

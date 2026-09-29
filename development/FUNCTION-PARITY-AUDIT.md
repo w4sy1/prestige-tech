@@ -144,7 +144,7 @@ Odpowiednik: `prestige_core/file_inspector.py`, `prestige_security/gui.py`.
 | Odczyt pliku bez wykonania, metadane, magic, PE, entropia | Tak | Fixture starego i nowego kodu PASS |
 | SHA-256/512, SHA-1/MD5 podczas tego samego odczytu | Tak | Test pojedynczego otwarcia i hash PASS |
 | Ciągi znaków tylko po zgodzie | Tak | Test starego i nowego kodu oraz opcja GUI PASS |
-| Status podpisu Authenticode | Tak w kodzie | Podpisanego pliku Windows nie zweryfikowano |
+| Status podpisu Authenticode | Tak w kodzie | `pwsh` jak w starym programie; lokalne pliki bez podpisu zwróciły ten sam status; podpisanego pliku nie zweryfikowano |
 | CLI `prestige file`, eksport JSON/TXT/HTML i opcjonalny PDF | Tak jako wspólna komenda Centrów | Testy CLI/eksportu PASS; rzeczywisty PDF ma nagłówek `%PDF-` |
 | Eksport z GUI po inspekcji pliku | Tak | JSON/TXT/HTML oraz PDF korzystają ze wspólnych usług; test eksportu tylko po udanej analizie PASS |
 
@@ -152,3 +152,9 @@ Osobne repozytorium File Inspector pozostaje do weryfikacji podpisu
 Authenticode, końcowego EXE i pełnej zgodności raportów. Nowy PDF
 korzysta ze wspólnej usługi Centrów; brak zależności `reportlab` daje
 czytelny błąd zamiast pominięcia raportu.
+
+Porównano stare i nowe wyniki analizy 4 lokalnych próbek (pusty, PDF, ZIP,
+MZ), z ciągami znaków wyłączonymi i włączonymi: wszystkie pola `data` są
+identyczne po poprawieniu wyboru PowerShell i tekstu `note`. Osobny wrapper
+raportu nowego CLI nie ma pola `version` starej aplikacji, więc zgodność
+raportów jako całości pozostaje otwarta.
