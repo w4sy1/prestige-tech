@@ -1,6 +1,15 @@
 PRESTIGE TECH — PLIK PRZEKAZANIA PRACY I TESTÓW
 Stan: 2026-09-30. Aktualizuj ten plik po każdym istotnym etapie.
 
+NAJNOWSZA DECYZJA — STARE REPOZYTORIA
+Użytkownik zakończył kierunek migracji starego kodu. 19 osobnych starych
+repozytoriów skopiowano lokalnie (lustra Git, lokalne pliki, 114 załączników
+wydań), zweryfikowano i usunięto z GitHuba. Archiwum:
+C:\Users\01dwa\Documents\PrestigeTech-Legacy-Archive-2026-09-30
+Na GitHubie pozostały prestige-tech i prestige-tech-dashboard. Stare wpisy
+w Dashboardzie i jego kod pozostawiono bez zmian; źródłowe nowe Centra
+pozostały. Wpisy historyczne niżej są nieaktualne w zakresie listy repozytoriów.
+
 NAJNOWSZY ETAP — NETWORK SNAPSHOT I AUDYT KOMEND
 GUI zapisuje migawkę z wybranej listy LAN JSON bez skanowania i nadpisywania.
 Porównano komendy DNS Center, LAN Radar, NetRadar, Network Snapshot oraz

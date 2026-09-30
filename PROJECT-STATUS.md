@@ -6,6 +6,17 @@ projektu i nie zastępują bieżącego pliku licencji.
 
 Bieżący plik przekazania pracy i lista końcowych testów: `development/CONTINUE-HANDOFF.txt`.
 
+## Etap 2026-09-30 — lokalne archiwum i porządek GitHub
+
+Na życzenie właściciela zakończono migrację starych repozytoriów jako kierunek
+pracy. 19 wciąż istniejących osobnych repozytoriów `prestige-*` zapisano
+lokalnie jako lustra Git, paczki bieżących plików oraz komplet 114 załączników
+z 19 wydań. Po weryfikacji kopii usunięto te 19 repozytoriów z GitHuba.
+`w4sy1/prestige-tech` i `w4sy1/prestige-tech-dashboard` pozostają. Lokalne
+katalogi źródłowe oraz istniejące elementy Dashboardu nie zostały usunięte.
+Archiwum: `C:\Users\01dwa\Documents\PrestigeTech-Legacy-Archive-2026-09-30`.
+Historyczne wpisy poniżej opisują stan sprzed tej decyzji.
+
 ## Etap 2026-09-30 — import migawki Network Snapshot
 
 Network Center zapisuje teraz nową migawkę z jawnie wybranej listy JSON
