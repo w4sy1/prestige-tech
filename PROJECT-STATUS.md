@@ -6,6 +6,18 @@ projektu i nie zastępują bieżącego pliku licencji.
 
 Bieżący plik przekazania pracy i lista końcowych testów: `development/CONTINUE-HANDOFF.txt`.
 
+## Etap 2026-09-30 — import migawki Network Snapshot
+
+Network Center zapisuje teraz nową migawkę z jawnie wybranej listy JSON
+urządzeń LAN, również bez wcześniejszego odczytu adapterów. Waliduje MAC/IP,
+nie skanuje sieci, nie nazywa importu pełną obserwacją ani stanem online i
+odmawia nadpisania istniejącej migawki. Audyt starych komend potwierdził
+odpowiedniki LAN `observe/discover/list/history/tag`; Snapshot `capture` z
+cache/skanu/importu oraz `compare`; DNS `state/profiles/run/system-test`.
+Nadal brak m.in. konfiguracji DNS IPv6, listy kopii DNS oraz funkcji
+zarządzania/autostartu/raportu HTML Sentinel.
+Suita: 237 testów uruchomionych, 236 PASS, 1 skip.
+
 ## Etap 2026-09-30 — DNS Center i import obserwacji LAN
 
 Network Center ma odczyt konfiguracji DoH Windows, ograniczony czasowo test

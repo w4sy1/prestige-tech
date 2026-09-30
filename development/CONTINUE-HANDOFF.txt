@@ -1,6 +1,14 @@
 PRESTIGE TECH — PLIK PRZEKAZANIA PRACY I TESTÓW
 Stan: 2026-09-30. Aktualizuj ten plik po każdym istotnym etapie.
 
+NAJNOWSZY ETAP — NETWORK SNAPSHOT I AUDYT KOMEND
+GUI zapisuje migawkę z wybranej listy LAN JSON bez skanowania i nadpisywania.
+Porównano komendy DNS Center, LAN Radar, NetRadar, Network Snapshot oraz
+funkcje skryptu Sentinel. Audyt: development/FUNCTION-PARITY-AUDIT.md.
+Stary Sentinel musi pozostać: nowy Center nie ma zarządzania listami,
+harmonogramu, autostartu i eksportu HTML. Realne testy odłożone.
+Suita: 237 testów, 236 PASS, 1 skip.
+
 NAJNOWSZY ETAP — DNS SYSTEMOWY / HISTORIA / IMPORT LAN JSON
 Dodano odczyt wpisów DoH Windows (nie dowodzi użycia DoH), test resolvera
 systemowego z 15 s limitem i opt-in historię statystyk benchmarku DNS.

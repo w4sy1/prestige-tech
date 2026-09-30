@@ -16,7 +16,8 @@ from PySide6.QtWidgets import (
 )
 
 from prestige_core.network import read_adapters, read_neighbors
-from prestige_core.network_snapshot import compare_snapshots, make_snapshot, save_snapshot
+from prestige_core.network_snapshot import (compare_snapshots, make_snapshot, save_snapshot,
+                                            snapshot_from_json_list)
 from prestige_core.network_discovery import load_oui, local_scopes, scan_local_scope
 from prestige_core.internet_diagnostic import diagnose
 from prestige_core.internet_context import correlate_diagnostic, read_context
@@ -440,6 +441,9 @@ class NetworkCenterWindow(QMainWindow):
         self.save_button.setToolTip("Zapisz nowy plik JSON z lokalnymi adresami IP i MAC")
         self.save_button.clicked.connect(self.save_current_snapshot)
         header.addWidget(self.save_button)
+        self.import_snapshot_button = QPushButton("Migawka z listy JSON")
+        self.import_snapshot_button.clicked.connect(self.save_imported_snapshot)
+        header.addWidget(self.import_snapshot_button)
         self.compare_button = QPushButton("Porównaj migawki")
         self.compare_button.clicked.connect(self.choose_snapshots_to_compare)
         header.addWidget(self.compare_button)
@@ -1949,6 +1953,26 @@ class NetworkCenterWindow(QMainWindow):
             QMessageBox.warning(self, "Nie zapisano migawki", str(error))
             return
         self.status.setText(f"Migawka zapisana: {path}")
+
+    def save_imported_snapshot(self):
+        source, _ = QFileDialog.getOpenFileName(self, "Wybierz listę urządzeń LAN", "", "JSON (*.json)")
+        if not source:
+            return
+        try:
+            snapshot = snapshot_from_json_list(source)
+        except (OSError, ValueError) as error:
+            QMessageBox.warning(self, "Nie odczytano listy LAN", str(error))
+            return
+        destination, _ = QFileDialog.getSaveFileName(
+            self, "Zapisz nową migawkę", "network-snapshot-import.json", "JSON (*.json)")
+        if not destination:
+            return
+        try:
+            save_snapshot(snapshot, destination)
+        except (FileExistsError, OSError) as error:
+            QMessageBox.warning(self, "Nie zapisano migawki", str(error))
+            return
+        self.status.setText(f"Migawka z {len(snapshot['neighbors'])} urządzeń zapisana: {destination}")
 
     def choose_snapshots_to_compare(self):
         before_path, _ = QFileDialog.getOpenFileName(self, "Wybierz wcześniejszą migawkę", "", "JSON (*.json)")

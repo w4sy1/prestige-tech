@@ -6,6 +6,8 @@ import json
 from pathlib import Path
 import re
 
+from .device_history import load_observation_json
+
 
 _MAC = re.compile(r"(?:[0-9a-f]{2}:){5}[0-9a-f]{2}\Z")
 
@@ -79,6 +81,14 @@ def save_snapshot(snapshot, destination):
     with path.open("x", encoding="utf-8") as stream:
         stream.write(content)
     return path
+
+
+def snapshot_from_json_list(source):
+    """Migawka z jawnie wskazanej listy LAN, bez wnioskowania o stanie online."""
+    rows = load_observation_json(source)
+    snapshot = make_snapshot(neighbors=rows, adapters=[])
+    snapshot["source"] = "wskazana lista JSON urządzeń LAN"
+    return snapshot
 
 
 def compare_snapshots(earlier, later):

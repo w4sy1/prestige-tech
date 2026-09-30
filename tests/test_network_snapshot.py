@@ -3,10 +3,22 @@ import tempfile
 from pathlib import Path
 import unittest
 
-from prestige_core.network_snapshot import compare_snapshots, make_snapshot, save_snapshot
+from prestige_core.network_snapshot import (compare_snapshots, make_snapshot, save_snapshot,
+                                            snapshot_from_json_list)
 
 
 class NetworkSnapshotTests(unittest.TestCase):
+    def test_snapshot_from_json_list_keeps_source_and_does_not_claim_online(self):
+        with tempfile.TemporaryDirectory() as directory:
+            source = Path(directory) / "devices.json"
+            source.write_text('[{"mac":"00:11:22:33:44:55","ip":"192.0.2.5"}]', encoding="utf-8")
+            snapshot = snapshot_from_json_list(source)
+            self.assertEqual(snapshot["neighbors"][0]["ips"], ["192.0.2.5"])
+            self.assertEqual(snapshot["adapters"], [])
+            self.assertFalse(snapshot["observation_complete"])
+            self.assertIn("lista JSON", snapshot["source"])
+            self.assertTrue(source.exists())
+
     def test_discovery_enriches_snapshot_without_online_claim(self):
         neighbors = [{"mac": "aa:bb:cc:dd:ee:02", "ips": ["192.168.1.2"]}]
         scan = {"scope": "192.168.1.0/24", "status": "UNKNOWN", "probed": 253,

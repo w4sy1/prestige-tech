@@ -5,6 +5,28 @@ from unittest.mock import patch
 
 
 class NetworkGuiTests(unittest.TestCase):
+    def test_imported_snapshot_gui_does_not_overwrite_existing_file(self):
+        os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+        from PySide6.QtWidgets import QApplication
+        from prestige_network_center.gui import NetworkCenterWindow
+        application = QApplication.instance() or QApplication([])
+        with tempfile.TemporaryDirectory() as directory:
+            source = os.path.join(directory, "devices.json")
+            destination = os.path.join(directory, "snapshot.json")
+            with open(source, "w", encoding="utf-8") as stream:
+                stream.write('[{"mac":"00:11:22:33:44:55","ip":"192.0.2.5"}]')
+            window = NetworkCenterWindow(autoload=False)
+            with patch("prestige_network_center.gui.QFileDialog.getOpenFileName", return_value=(source, "")), \
+                    patch("prestige_network_center.gui.QFileDialog.getSaveFileName", return_value=(destination, "")), \
+                    patch("prestige_network_center.gui.QMessageBox.warning") as warning:
+                window.save_imported_snapshot()
+                self.assertTrue(os.path.isfile(destination))
+                window.save_imported_snapshot()
+                warning.assert_called_once()
+            with open(destination, encoding="utf-8") as stream:
+                self.assertIn("00:11:22:33:44:55", stream.read())
+            window.close()
+
     def test_lan_history_toggle_does_not_close_dns_history(self):
         os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
         from PySide6.QtWidgets import QApplication
