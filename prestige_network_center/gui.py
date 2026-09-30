@@ -27,7 +27,8 @@ from prestige_core.network_optimizer import inspect_adapter
 from prestige_core.network_dns_change import (WindowsDnsBackend, apply_dns_change,
                                               plan_dns_change, rollback_dns_change)
 from prestige_core.dns_benchmark import benchmark as benchmark_dns
-from prestige_core.dns_profiles import PROFILES as DNS_PROFILES, get_profile
+from prestige_core.dns_profiles import (PROFILES as DNS_PROFILES,
+                                        discovery_candidates, get_profile)
 from prestige_core.network_mtu_change import (WindowsMtuBackend, apply_mtu_change,
                                               plan_mtu_change, rollback_mtu_change)
 from prestige_core.traffic_analysis import analyze_log
@@ -36,7 +37,8 @@ from prestige_core.traffic_capture import capture_syn
 from prestige_core.sentinel_deep_capture import capture as deep_capture, list_interfaces
 from prestige_core.sentinel_status import read_sentinel_events, read_sentinel_status
 from prestige_core.sentinel_history import read_device_history
-from prestige_core.sentinel_devices import correlate_devices, read_device_registry
+from prestige_core.sentinel_devices import (assess_observations, correlate_devices,
+                                            read_device_registry)
 from prestige_core.sentinel_firewall import WindowsFirewallBackend, change_block
 from prestige_core.sentinel_policy import ProtectionPolicy
 from prestige_core.ui_theme import APP_QSS, COLORS
@@ -373,6 +375,7 @@ class NetworkCenterWindow(QMainWindow):
         self.protection_policy = None
         self.neighbors_data = None
         self.adapters_data = None
+        self.last_discovery_result = None
         self.discovery_oui = {}
 
         root = QWidget()
@@ -526,6 +529,13 @@ class NetworkCenterWindow(QMainWindow):
         self.dns_benchmark_stop.clicked.connect(self.stop_dns_benchmark)
         dns_controls.addWidget(self.dns_benchmark_stop)
         dns_layout.addLayout(dns_controls)
+        dns_sources = QHBoxLayout()
+        self.dns_include_system = QCheckBox("Dodaj aktualny DNS systemu")
+        self.dns_include_system.setChecked(True)
+        dns_sources.addWidget(self.dns_include_system)
+        self.dns_include_gateway = QCheckBox("Dodaj bramę (DNS niepotwierdzony)")
+        dns_sources.addWidget(self.dns_include_gateway)
+        dns_layout.addLayout(dns_sources)
         self.dns_benchmark_note = QLabel("Wybierz profil albo porównaj osiem publicznych resolverów.")
         self.dns_benchmark_note.setWordWrap(True)
         dns_layout.addWidget(self.dns_benchmark_note)
@@ -771,6 +781,13 @@ class NetworkCenterWindow(QMainWindow):
         self.registry_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.registry_table.setEditTriggers(QTableWidget.NoEditTriggers)
         registry_layout.addWidget(self.registry_table, 1)
+        self.registry_compare_button = QPushButton("Porównaj listy z ostatnim skanem")
+        self.registry_compare_button.clicked.connect(self.compare_sentinel_devices)
+        registry_layout.addWidget(self.registry_compare_button)
+        self.registry_comparison = QPlainTextEdit()
+        self.registry_comparison.setReadOnly(True)
+        self.registry_comparison.setMaximumHeight(125)
+        registry_layout.addWidget(self.registry_comparison)
         tabs.addTab(registry_card, "Zaufane urządzenia")
         main.addWidget(tabs, 1)
         self.adapter_status = QLabel("Brak odczytu adapterów.")
@@ -790,6 +807,7 @@ class NetworkCenterWindow(QMainWindow):
         self.refresh_button.setEnabled(False)
         self.neighbors_data = None
         self.adapters_data = None
+        self.last_discovery_result = None
         self.save_button.setEnabled(False)
         self.status.setText("Odczytuję lokalną tablicę sąsiadów…")
         self.worker = NeighborWorker(self)
@@ -844,6 +862,12 @@ class NetworkCenterWindow(QMainWindow):
             )):
                 self.adapter_table.setItem(index, column, QTableWidgetItem(value))
         self.adapter_status.setText(f"Odczytano {len(rows)} adapterów. DNS pokazuje konfigurację, nie wynik testu łączności.")
+        candidates = discovery_candidates(rows)
+        configured = sum("Aktualny DNS systemu/DHCP" in row["sources"] for row in candidates)
+        gateways = sum("Brama — DNS niepotwierdzony" in row["sources"] for row in candidates)
+        self.dns_benchmark_note.setText(
+            f"Wykryto {configured} adresów DNS z adapterów i {gateways} adresów bram. "
+            "Brama może nie obsługiwać DNS; benchmark nie zmienia konfiguracji.")
         self.update_save_state()
 
     def show_adapter_error(self, message):
@@ -1026,6 +1050,15 @@ class NetworkCenterWindow(QMainWindow):
         quality = "częściowy odczyt" if result["status"] != "COMPLETE" else "pełny odczyt"
         self.registry_note.setText(f"{quality}; {len(rows)} urządzeń, {mismatches} rozbieżności IP między listami. ")
 
+    def compare_sentinel_devices(self):
+        try:
+            result = assess_observations(self.sentinel_registry_result,
+                                         self.last_discovery_result)
+        except ValueError as error:
+            self.registry_comparison.setPlainText(str(error))
+            return
+        self.registry_comparison.setPlainText(json.dumps(result, ensure_ascii=False, indent=2))
+
     def choose_discovery_oui(self):
         path, _ = QFileDialog.getOpenFileName(self, "Wybierz lokalną bazę OUI", "", "JSON (*.json)")
         if not path:
@@ -1041,6 +1074,7 @@ class NetworkCenterWindow(QMainWindow):
         if ((self.scope_worker is not None and self.scope_worker.isRunning()) or
                 (self.discovery_worker is not None and self.discovery_worker.isRunning())):
             return
+        self.last_discovery_result = None
         self.discovery_table.setRowCount(0)
         self.discover_button.setEnabled(False)
         self.discovery_note.setText("Wykrywam lokalne podsieci…")
@@ -1074,6 +1108,7 @@ class NetworkCenterWindow(QMainWindow):
         self.discovery_worker.start()
 
     def show_discovery(self, result):
+        self.last_discovery_result = result
         rows = result.get("observed", result["responsive"])
         self.discovery_table.setRowCount(len(rows))
         for index, row in enumerate(rows):
@@ -1095,6 +1130,7 @@ class NetworkCenterWindow(QMainWindow):
                                        for row in rows if row["mac"]])
 
     def show_discovery_error(self, message):
+        self.last_discovery_result = None
         self.discovery_table.setRowCount(0)
         self.discovery_note.setText(f"Skan niedostępny: {message}")
         self.discover_button.setEnabled(True)
@@ -1192,10 +1228,22 @@ class NetworkCenterWindow(QMainWindow):
     def start_dns_benchmark(self):
         if self.dns_benchmark_worker is not None and self.dns_benchmark_worker.isRunning():
             return
-        servers = [profile["ipv4"][0] for profile in DNS_PROFILES.values()]
+        candidates = discovery_candidates(self.adapters_data or [])
+        discovered = [row["address"] for row in candidates
+                      if ((self.dns_include_system.isChecked()
+                           and "Aktualny DNS systemu/DHCP" in row["sources"])
+                          or (self.dns_include_gateway.isChecked()
+                              and "Brama — DNS niepotwierdzony" in row["sources"]))]
+        discovered_count = len(discovered)
+        discovered = discovered[:8]
+        public = [profile["ipv4"][0] for profile in DNS_PROFILES.values()]
+        servers = list(dict.fromkeys([*discovered, *public]))
         self.dns_benchmark_button.setEnabled(False)
         self.dns_benchmark_stop.setEnabled(True)
-        self.dns_benchmark_note.setText("Wysyłam wyłącznie zapytania DNS do widocznych resolverów…")
+        self.dns_benchmark_note.setText(
+            f"Wysyłam zapytania DNS do {len(servers)} adresów: "
+            f"{len(set(discovered) & set(servers))} z konfiguracji/bram oraz publiczne profile. "
+            f"Pominięto {discovered_count - len(discovered)} dalszych adresów z adapterów.")
         self.dns_benchmark_worker = DnsBenchmarkWorker(servers, self.dns_benchmark_count.value(), self)
         self.dns_benchmark_worker.loaded.connect(self.show_dns_benchmark)
         self.dns_benchmark_worker.failed.connect(self.show_dns_benchmark_error)
@@ -1763,7 +1811,9 @@ class NetworkCenterWindow(QMainWindow):
         if not path:
             return
         try:
-            save_snapshot(make_snapshot(neighbors=self.neighbors_data, adapters=self.adapters_data), path)
+            save_snapshot(make_snapshot(neighbors=self.neighbors_data,
+                                        adapters=self.adapters_data,
+                                        discovery=self.last_discovery_result), path)
         except (FileExistsError, OSError, ValueError) as error:
             QMessageBox.warning(self, "Nie zapisano migawki", str(error))
             return

@@ -6,6 +6,20 @@ projektu i nie zastępują bieżącego pliku licencji.
 
 Bieżący plik przekazania pracy i lista końcowych testów: `development/CONTINUE-HANDOFF.txt`.
 
+## Etap 2026-09-30 — DNS i migawka wykrywania
+
+Network Center dodaje do benchmarku publicznych DNS wykryte adresy z
+konfiguracji adapterów; brama jest osobną opcją z ostrzeżeniem, że może nie
+obsługiwać DNS. Ostatni wynik jawnego skanu wzbogaca zapisywaną migawkę
+urządzeń i metadane discovery, bez twierdzenia, że cache dowodzi obecności
+online. Sentinel porównuje jawny skan z pełnymi listami znanych/zaufanych:
+nowe urządzenie, zmiana IP i możliwa zmiana MAC są tylko sygnałami do
+sprawdzenia, bez blokady. Porównano kod DNS Center, LAN Radar, NetRadar i
+Sentinel ze starymi źródłami w `development/FUNCTION-PARITY-AUDIT.md`.
+227 testów uruchomionych, 226 PASS, 1 skip. Prawdziwych zapytań DNS,
+Nmap/TShark, zmian Firewalla i
+DNS/MTU nie wykonywano; nowe EXE nadal niezweryfikowane.
+
 ## Etap 2026-09-29 — kolejne odczyty Windows Toolkit
 
 System Center ma teraz 14 sekcji odczytowych Windows Toolkit. Dodano firmware,

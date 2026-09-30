@@ -109,11 +109,25 @@ odkrywania LAN i `prestige_network_center/gui.py`.
 | Porównanie dwóch migawek i oznaczenie braku obserwacji | Tak | Fixture; brak urządzenia nie jest dowodem offline |
 | Odczyt starego formatu `hosts` | Tak | Fixture |
 | Scalenie IP tego samego MAC i formatów `aa-bb`/`aa:bb` | Tak | Fixture zgodności |
-| Jawne discovery / import listy i OUI | Częściowe odpowiedniki w Network Center | Realny skan i pełny parytet komend pozostają otwarte |
+| Jawne discovery / import listy i OUI | Skan ICMP/Nmap, OUI i historia; wynik ostatniego skanu wzbogaca zapisywaną migawkę | Fixture; realny skan i pełny parytet komend pozostają otwarte |
 
-Nowe porównanie normalizuje IP i MAC bez zmiany zapisanych migawek. Nie
-potwierdzono jeszcze parytetu danych `discovery` ze starej migawki ani
-wszystkich parametrów starego CLI.
+Nowe porównanie normalizuje IP i MAC bez zmiany zapisanych migawek. Migawka
+zawiera metadane ostatniego skanu i adresy z odpowiedzi ICMP/Nmap bez MAC;
+nie oznacza braku obserwacji jako offline. Format metadanych `discovery`
+różni się od starego i pełny parytet parametrów CLI pozostaje otwarty.
+
+## DNS Center, LAN Radar, NetRadar i Sentinel → Network Center
+
+| Stare narzędzie | Potwierdzony odpowiednik w kodzie | Pozostały brak |
+|---|---|---|
+| DNS Center | Osiem profili, benchmark UDP/TCP, kandydaci z DNS adapterów i opcjonalnie bramy, odczyt adapterów oraz zmiana DNS IPv4 z kopią i cofnięciem | Stary tryb IPv6, DoH, historia benchmarków, poradniki i część komend (`flush-dns`, `system-test`, lista kopii) nie mają jeszcze potwierdzonego parytetu GUI/CLI; rzeczywisty zapis w VM niezweryfikowany |
+| LAN Radar | Cache, ograniczony skan ICMP/Nmap, reverse DNS, OUI, lokalna historia SQLite, import i tagowanie | Pełny parytet importu z flagą kompletnej obserwacji i starych komend do sprawdzenia; realna różnorodna sieć niezweryfikowana |
+| NetRadar | Parser logów, przyrostowy odczyt z rotacją, heurystyka prób TCP, metadane TCP SYN na Windows | Linux live capture i parytet wszystkich pól raportu starego CLI do sprawdzenia; rzeczywiste przechwytywanie niezweryfikowane |
+| Network Sentinel | Odczyt starego bridge/historii/list, ICMP/cache/Nmap, porównanie jawnego skanu z listami bez automatycznej blokady, ręczne TShark metadanych, reguły Firewall i ograniczona automatyczna blokada | Pełny parytet zarządzania urządzeniami, harmonogramu i autostartu, typów alertów i raportu HTML do sprawdzenia; TShark/Firewall wymagają VM |
+
+„Pełne przechwytywanie” wymaga doprecyzowania zakresu danych. Stary
+NetRadar przechwytuje tylko metadane IPv4 TCP SYN; stary Sentinel analizuje
+metadane ARP/TCP/UDP/ICMP. Nowe Centrum zachowuje analizę bez payloadu.
 
 ## System Snapshot, Security Check, Repair Report i PC Cleanup → Centra
 

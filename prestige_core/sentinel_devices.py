@@ -1,7 +1,17 @@
 """Bezpieczny odczyt list znanych i zaufanych urządzeń starego Sentinel."""
 
 import json
+import ipaddress
 from pathlib import Path
+import re
+
+
+_MAC = re.compile(r"(?:[0-9a-f]{2}:){5}[0-9a-f]{2}\Z")
+
+
+def _mac(value):
+    normalized = str(value or "").lower().replace("-", ":")
+    return normalized if _MAC.fullmatch(normalized) else ""
 
 
 def read_device_registry(path):
@@ -36,3 +46,40 @@ def correlate_devices(known, trusted):
                                      and known_by_key[key]["ip"] != trusted_by_key[key]["ip"])})
     return {"status": "UNKNOWN" if "UNKNOWN" in (known["status"], trusted["status"])
             else "COMPLETE", "devices": rows}
+
+
+def assess_observations(registry, discovery):
+    """Porównaj jawny skan z listami bez wnioskowania offline i bez blokad."""
+    if (not isinstance(registry, dict) or registry.get("status") != "COMPLETE"
+            or not isinstance(registry.get("devices"), list)
+            or not isinstance(discovery, dict)
+            or not isinstance(discovery.get("observed"), list)):
+        raise ValueError("Wymagany kompletny rejestr i wynik skanu.")
+    registered_by_mac = {_mac(row.get("mac") or row.get("key")): row
+                         for row in registry["devices"] if _mac(row.get("mac") or row.get("key"))}
+    registered_by_ip = {row["ip"]: row for row in registry["devices"] if row.get("ip")}
+    findings = []
+    for row in discovery["observed"][:256]:
+        if not isinstance(row, dict) or row.get("evidence") not in ("ICMP", "Nmap"):
+            continue
+        try:
+            ip = str(ipaddress.IPv4Address(row["ip"]))
+        except (KeyError, ValueError, TypeError):
+            continue
+        mac = _mac(row.get("mac"))
+        same_mac = registered_by_mac.get(mac) if mac else None
+        same_ip = registered_by_ip.get(ip)
+        if same_ip and mac and _mac(same_ip.get("mac") or same_ip.get("key")) not in ("", mac):
+            kind = "POSSIBLE_MAC_CHANGE"
+        elif same_mac and same_mac.get("ip") and same_mac["ip"] != ip:
+            kind = "IP_CHANGE"
+        elif not same_mac and not same_ip:
+            kind = "NEW_DEVICE"
+        else:
+            continue
+        findings.append({"type": kind, "ip": ip, "mac": mac,
+                         "evidence": row["evidence"],
+                         "note": "Obserwacja wymaga potwierdzenia; DHCP i cache mogą zmieniać adresy."})
+    return {"status": "UNKNOWN" if discovery.get("status") != "COMPLETE" else "COMPLETE",
+            "findings": findings,
+            "note": "Brak obserwacji nie dowodzi offline. Wyniki nie uruchamiają blokady."}

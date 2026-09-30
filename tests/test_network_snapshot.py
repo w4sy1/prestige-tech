@@ -7,6 +7,22 @@ from prestige_core.network_snapshot import compare_snapshots, make_snapshot, sav
 
 
 class NetworkSnapshotTests(unittest.TestCase):
+    def test_discovery_enriches_snapshot_without_online_claim(self):
+        neighbors = [{"mac": "aa:bb:cc:dd:ee:02", "ips": ["192.168.1.2"]}]
+        scan = {"scope": "192.168.1.0/24", "status": "UNKNOWN", "probed": 253,
+                "responsive": [{"ip": "192.168.1.3", "mac": "aa:bb:cc:dd:ee:02"}],
+                "nmap_found": 1, "observed": [
+                    {"ip": "192.168.1.3", "mac": "aa:bb:cc:dd:ee:02",
+                     "hostname": "host", "vendor": "Vendor", "evidence": "ICMP"},
+                    {"ip": "192.168.1.4", "mac": None, "evidence": "Nmap"},
+                ]}
+        snapshot = make_snapshot(neighbors=neighbors, adapters=[], discovery=scan)
+        self.assertEqual(snapshot["neighbors"][0]["ips"], ["192.168.1.2", "192.168.1.3"])
+        self.assertEqual(snapshot["neighbors"][0]["hostname"], "host")
+        self.assertEqual(snapshot["discovery"]["responsive_without_mac"], ["192.168.1.4"])
+        self.assertFalse(snapshot["observation_complete"])
+        self.assertEqual(neighbors[0]["ips"], ["192.168.1.2"])
+
     def test_exclusive_save_and_incomplete_observation(self):
         snapshot = make_snapshot(neighbors=[], adapters=[], captured_at="2026-09-27T00:00:00+00:00")
         self.assertFalse(snapshot["observation_complete"])

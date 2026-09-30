@@ -1,5 +1,6 @@
 """Profile DNS dla Prestige DNS Center."""
 from copy import deepcopy
+import ipaddress
 
 PROFILES = {
     "cloudflare":{"name":"Cloudflare","short":"Cloudflare","category":"Prywatność / szybkość","description":"Publiczny resolver bez filtrowania treści.","ipv4":["1.1.1.1","1.0.0.1"],"ipv6":["2606:4700:4700::1111","2606:4700:4700::1001"],"doh":"https://cloudflare-dns.com/dns-query","dot":"one.one.one.one","filtering":"Brak"},
@@ -26,6 +27,33 @@ def benchmark_targets():
         if address in seen: continue
         seen.add(address); rows.append({"key":key,"name":p["name"],"address":address})
     return rows
+
+
+def discovery_candidates(adapters):
+    """Kandydaci ze stanu adapterów; brama nie jest potwierdzonym resolverem."""
+    if not isinstance(adapters, list):
+        raise ValueError("Wymagana lista adapterów.")
+    rows = {}
+    for adapter in adapters:
+        if not isinstance(adapter, dict):
+            continue
+        for field, label in (("dns", "Aktualny DNS systemu/DHCP"),
+                             ("gateway", "Brama — DNS niepotwierdzony")):
+            values = adapter.get(field) or []
+            if not isinstance(values, list):
+                continue
+            for value in values:
+                try:
+                    address = ipaddress.ip_address(value)
+                except (ValueError, TypeError):
+                    continue
+                if address.is_unspecified or address.is_multicast or address.is_loopback:
+                    continue
+                key = str(address)
+                row = rows.setdefault(key, {"address": key, "sources": []})
+                if label not in row["sources"]:
+                    row["sources"].append(label)
+    return list(rows.values())
 
 def identify_provider(addresses):
     current={str(x).strip().lower() for x in (addresses or []) if str(x).strip()}

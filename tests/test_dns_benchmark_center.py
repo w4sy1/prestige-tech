@@ -4,10 +4,20 @@ import unittest
 from unittest.mock import patch
 
 from prestige_core.dns_benchmark import benchmark, question, summary, validate_response
-from prestige_core.dns_profiles import PROFILES, get_profile, identify_provider
+from prestige_core.dns_profiles import (PROFILES, discovery_candidates,
+                                        get_profile, identify_provider)
 
 
 class DnsBenchmarkCenterTests(unittest.TestCase):
+    def test_system_and_gateway_candidates_are_distinct_and_deduplicated(self):
+        rows = discovery_candidates([
+            {"dns": ["192.168.1.1", "1.1.1.1", "bad"], "gateway": ["192.168.1.1"]},
+            {"dns": ["1.1.1.1", "0.0.0.0"], "gateway": ["224.0.0.1"]},
+        ])
+        self.assertEqual([row["address"] for row in rows], ["192.168.1.1", "1.1.1.1"])
+        self.assertEqual(len(rows[0]["sources"]), 2)
+        self.assertEqual(rows[1]["sources"], ["Aktualny DNS systemu/DHCP"])
+
     def test_profile_copy_and_provider_identification(self):
         self.assertEqual(len(PROFILES), 8)
         profile = get_profile("cloudflare")
@@ -47,4 +57,17 @@ class DnsBenchmarkGuiTests(unittest.TestCase):
         window.use_dns_profile()
         self.assertIn("1.1.1.1", window.dns_addresses.text())
         self.assertTrue(window.dns_benchmark_button.isEnabled())
+        window.close()
+
+    def test_adapter_read_exposes_discovered_dns_without_network_probe(self):
+        os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+        from PySide6.QtWidgets import QApplication
+        from prestige_network_center.gui import NetworkCenterWindow
+        app = QApplication.instance() or QApplication([])
+        window = NetworkCenterWindow(autoload=False)
+        window.show_adapters([{"name": "Wi-Fi", "index": 3, "ipv4": ["192.168.1.2"],
+                               "gateway": ["192.168.1.1"], "dns": ["1.1.1.1"]}])
+        self.assertIn("1 adresów DNS", window.dns_benchmark_note.text())
+        self.assertTrue(window.dns_include_system.isChecked())
+        self.assertFalse(window.dns_include_gateway.isChecked())
         window.close()
