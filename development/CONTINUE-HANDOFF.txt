@@ -1,6 +1,14 @@
 PRESTIGE TECH — PLIK PRZEKAZANIA PRACY I TESTÓW
 Stan: 2026-09-30. Aktualizuj ten plik po każdym istotnym etapie.
 
+NAJNOWSZY ETAP — DNS SYSTEMOWY / HISTORIA / IMPORT LAN JSON
+Dodano odczyt wpisów DoH Windows (nie dowodzi użycia DoH), test resolvera
+systemowego z 15 s limitem i opt-in historię statystyk benchmarku DNS.
+LAN importuje listę JSON do lokalnej bazy, z oddzielnym potwierdzeniem pełnej
+obserwacji. Źródło pozostaje bez zmian; NOT_OBSERVED nie oznacza offline.
+Weryfikacja faktycznej sieci, DoH i Windows VM nadal wymaga osobnego testu.
+Suita: 235 testów, 234 PASS, 1 skip.
+
 NAJNOWSZY ETAP — DNS / MIGAWKA SIECI
 Benchmark DNS uwzględnia aktualne DNS adapterów i opcjonalnie bramę,
 zachowując osiem publicznych profili. Ostatni skan ICMP/Nmap wzbogaca

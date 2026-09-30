@@ -2,10 +2,21 @@ import tempfile
 from pathlib import Path
 import unittest
 
-from prestige_core.device_history import DeviceHistory, normalize_devices
+from prestige_core.device_history import DeviceHistory, normalize_devices, load_observation_json
 
 
 class DeviceHistoryTests(unittest.TestCase):
+    def test_load_observation_json_validates_before_recording(self):
+        with tempfile.TemporaryDirectory() as directory:
+            source = Path(directory) / "devices.json"
+            source.write_text('[{"mac":"00:11:22:33:44:55","ip":"192.0.2.5"}]', encoding="utf-8")
+            self.assertEqual(load_observation_json(source)[0]["ips"], ["192.0.2.5"])
+            with self.assertRaises(ValueError):
+                load_observation_json(source, max_bytes=4)
+            source.write_text('{"devices":[]}', encoding="utf-8")
+            with self.assertRaises(ValueError):
+                load_observation_json(source)
+
     def test_multi_ip_and_events_without_offline_inference(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "devices.sqlite"

@@ -12,6 +12,19 @@ _MAC = re.compile(r"(?:[0-9a-f]{2}:){5}[0-9a-f]{2}\Z")
 LAN_CATEGORIES = ("Moje", "Rodzina", "IoT", "Router", "Nieznane")
 
 
+def load_observation_json(path, *, max_bytes=8 * 1024 * 1024):
+    source = Path(path)
+    with source.open("rb") as stream:
+        payload = stream.read(max_bytes + 1)
+    if len(payload) > max_bytes:
+        raise ValueError("Plik obserwacji LAN przekracza limit 8 MiB.")
+    try:
+        rows = json.loads(payload.decode("utf-8-sig"))
+    except (UnicodeError, json.JSONDecodeError) as error:
+        raise ValueError("Plik obserwacji LAN nie jest poprawnym JSON UTF-8.") from error
+    return normalize_devices(rows)
+
+
 def normalize_devices(rows):
     if not isinstance(rows, list):
         raise ValueError("Wymagana lista urządzeń.")

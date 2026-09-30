@@ -1,8 +1,49 @@
 import os
+import tempfile
 import unittest
+from unittest.mock import patch
 
 
 class NetworkGuiTests(unittest.TestCase):
+    def test_lan_history_toggle_does_not_close_dns_history(self):
+        os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+        from PySide6.QtWidgets import QApplication
+        from prestige_network_center.gui import NetworkCenterWindow
+        application = QApplication.instance() or QApplication([])
+        with tempfile.TemporaryDirectory() as directory, patch.dict(os.environ, {"LOCALAPPDATA": directory}):
+            window = NetworkCenterWindow(autoload=False)
+            window.toggle_dns_history()
+            self.assertIsNotNone(window.dns_history)
+            window.toggle_local_history()
+            self.assertIsNotNone(window.device_history)
+            window.toggle_local_history()
+            self.assertIsNone(window.device_history)
+            self.assertIsNotNone(window.dns_history)
+            window.close()
+
+    def test_lan_json_import_requires_confirmation_for_complete_observation(self):
+        os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+        from PySide6.QtWidgets import QApplication, QMessageBox
+        from prestige_network_center.gui import NetworkCenterWindow
+        application = QApplication.instance() or QApplication([])
+        with tempfile.TemporaryDirectory() as directory, patch.dict(os.environ, {"LOCALAPPDATA": directory}):
+            source = os.path.join(directory, "observed.json")
+            with open(source, "w", encoding="utf-8") as stream:
+                stream.write('[{"mac":"00:11:22:33:44:55","ip":"192.0.2.5"}]')
+            window = NetworkCenterWindow(autoload=False)
+            window.toggle_local_history()
+            with patch("prestige_network_center.gui.QFileDialog.getOpenFileName", return_value=(source, "")), \
+                    patch("prestige_network_center.gui.QMessageBox.question", return_value=QMessageBox.No):
+                window.import_lan_observation()
+            self.assertEqual(window.device_history.devices()[0]["status"], "observed")
+            with open(source, "w", encoding="utf-8") as stream:
+                stream.write("[]")
+            with patch("prestige_network_center.gui.QFileDialog.getOpenFileName", return_value=(source, "")), \
+                    patch("prestige_network_center.gui.QMessageBox.question", return_value=QMessageBox.Yes):
+                window.import_lan_observation()
+            self.assertEqual(window.device_history.devices()[0]["status"], "not_observed")
+            window.close()
+
     def test_discovery_result_then_error_clears_stale_rows(self):
         os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
         from PySide6.QtWidgets import QApplication

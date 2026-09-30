@@ -21,12 +21,14 @@ from prestige_core.network_discovery import load_oui, local_scopes, scan_local_s
 from prestige_core.internet_diagnostic import diagnose
 from prestige_core.internet_context import correlate_diagnostic, read_context
 from prestige_core.nmap_profiles import PROFILES, compare_results, parse_xml, plan_profile, run_profile
-from prestige_core.device_history import DeviceHistory, LAN_CATEGORIES
+from prestige_core.device_history import DeviceHistory, LAN_CATEGORIES, load_observation_json
 from prestige_core.lan_legacy_import import import_legacy_lan
 from prestige_core.network_optimizer import inspect_adapter
 from prestige_core.network_dns_change import (WindowsDnsBackend, apply_dns_change,
                                               plan_dns_change, rollback_dns_change)
 from prestige_core.dns_benchmark import benchmark as benchmark_dns
+from prestige_core.dns_system import read_doh_state, system_dns_test
+from prestige_core.dns_history import DnsHistory
 from prestige_core.dns_profiles import (PROFILES as DNS_PROFILES,
                                         discovery_candidates, get_profile)
 from prestige_core.network_mtu_change import (WindowsMtuBackend, apply_mtu_change,
@@ -164,6 +166,22 @@ class DnsBenchmarkWorker(QThread):
         try:
             self.loaded.emit(benchmark_dns(self.servers, count=self.count,
                                            cancel_event=self.cancel_event))
+        except (OSError, ValueError, RuntimeError) as error:
+            self.failed.emit(str(error))
+
+
+class DnsSystemWorker(QThread):
+    loaded = Signal(dict)
+    failed = Signal(str)
+
+    def __init__(self, action, parent=None):
+        super().__init__(parent)
+        self.action = action
+
+    def run(self):
+        try:
+            self.loaded.emit(read_doh_state() if self.action == "doh"
+                             else system_dns_test())
         except (OSError, ValueError, RuntimeError) as error:
             self.failed.emit(str(error))
 
@@ -355,8 +373,10 @@ class NetworkCenterWindow(QMainWindow):
         self.internet_worker = None
         self.internet_context_worker = None
         self.dns_benchmark_worker = None
+        self.dns_system_worker = None
         self.nmap_worker = None
         self.device_history = None
+        self.dns_history = None
         self.optimizer_worker = None
         self.dns_change_worker = None
         self.mtu_change_worker = None
@@ -536,6 +556,25 @@ class NetworkCenterWindow(QMainWindow):
         self.dns_include_gateway = QCheckBox("Dodaj bramę (DNS niepotwierdzony)")
         dns_sources.addWidget(self.dns_include_gateway)
         dns_layout.addLayout(dns_sources)
+        dns_checks = QHBoxLayout()
+        self.dns_doh_button = QPushButton("Odczytaj status DoH Windows")
+        self.dns_doh_button.clicked.connect(lambda: self.start_dns_system("doh"))
+        dns_checks.addWidget(self.dns_doh_button)
+        self.dns_system_button = QPushButton("Test systemowego DNS")
+        self.dns_system_button.clicked.connect(lambda: self.start_dns_system("resolve"))
+        dns_checks.addWidget(self.dns_system_button)
+        dns_layout.addLayout(dns_checks)
+        dns_history_actions = QHBoxLayout()
+        self.dns_history_button = QPushButton("Włącz lokalną historię DNS")
+        self.dns_history_button.clicked.connect(self.toggle_dns_history)
+        dns_history_actions.addWidget(self.dns_history_button)
+        self.dns_history_show = QPushButton("Pokaż ostatnie wyniki")
+        self.dns_history_show.clicked.connect(self.show_dns_history)
+        dns_history_actions.addWidget(self.dns_history_show)
+        dns_layout.addLayout(dns_history_actions)
+        self.dns_history_note = QLabel("Historia wyłączona; wyniki nie są zapisywane.")
+        self.dns_history_note.setWordWrap(True)
+        dns_layout.addWidget(self.dns_history_note)
         self.dns_benchmark_note = QLabel("Wybierz profil albo porównaj osiem publicznych resolverów.")
         self.dns_benchmark_note.setWordWrap(True)
         dns_layout.addWidget(self.dns_benchmark_note)
@@ -582,6 +621,9 @@ class NetworkCenterWindow(QMainWindow):
         self.import_lan_button = QPushButton("Importuj starą bazę LAN Radar do nowego pliku")
         self.import_lan_button.clicked.connect(self.import_legacy_lan_history)
         local_history_layout.addWidget(self.import_lan_button)
+        self.import_observation_button = QPushButton("Importuj obserwację LAN z JSON")
+        self.import_observation_button.clicked.connect(self.import_lan_observation)
+        local_history_layout.addWidget(self.import_observation_button)
         self.local_devices_table = QTableWidget(0, 4)
         self.local_devices_table.setHorizontalHeaderLabels(["MAC", "Adresy IP", "Nazwa", "Kategoria"])
         self.local_devices_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
@@ -1256,6 +1298,12 @@ class NetworkCenterWindow(QMainWindow):
         successful = sum(row["successful"] > 0 for row in ranking)
         self.dns_benchmark_note.setText(
             f"Odpowiedziało {successful}/{len(ranking)} resolverów. Brak odpowiedzi może oznaczać filtrację portu 53.")
+        if self.dns_history is not None:
+            try:
+                saved = self.dns_history.record(result)
+                self.dns_history_note.setText(f"Zapisano {saved['saved']} wyników do lokalnej historii DNS.")
+            except (ValueError, sqlite3.Error) as error:
+                self.dns_history_note.setText(f"Nie zapisano historii DNS: {error}")
 
     def show_dns_benchmark_error(self, message):
         self.dns_benchmark_note.setText("Benchmark nieukończony: " + message)
@@ -1268,6 +1316,59 @@ class NetworkCenterWindow(QMainWindow):
     def finish_dns_benchmark(self):
         self.dns_benchmark_button.setEnabled(True)
         self.dns_benchmark_stop.setEnabled(False)
+
+    def start_dns_system(self, action):
+        if self.dns_system_worker is not None and self.dns_system_worker.isRunning():
+            return
+        self.dns_doh_button.setEnabled(False)
+        self.dns_system_button.setEnabled(False)
+        self.dns_benchmark_note.setText("Odczytuję systemowy stan DNS…")
+        self.dns_system_worker = DnsSystemWorker(action, self)
+        self.dns_system_worker.loaded.connect(self.show_dns_system)
+        self.dns_system_worker.failed.connect(
+            lambda message: self.dns_benchmark_note.setText(f"DNS: {message}"))
+        self.dns_system_worker.finished.connect(self.finish_dns_system)
+        self.dns_system_worker.start()
+
+    def show_dns_system(self, result):
+        self.dns_benchmark_output.setPlainText(json.dumps(result, ensure_ascii=False, indent=2))
+        self.dns_benchmark_note.setText(f"Systemowy DNS: {result['status']}.")
+
+    def finish_dns_system(self):
+        self.dns_doh_button.setEnabled(True)
+        self.dns_system_button.setEnabled(True)
+
+    def toggle_dns_history(self):
+        if self.dns_history is not None:
+            self.dns_history.close()
+            self.dns_history = None
+            self.dns_history_button.setText("Włącz lokalną historię DNS")
+            self.dns_history_note.setText("Historia wyłączona. Baza pozostała na dysku.")
+            return
+        local = os.environ.get("LOCALAPPDATA")
+        if not local:
+            self.dns_history_note.setText("Brak LOCALAPPDATA; nie utworzono bazy DNS.")
+            return
+        path = Path(local) / "PrestigeTech" / "NetworkCenter" / "dns-history.sqlite"
+        try:
+            self.dns_history = DnsHistory(path)
+        except (OSError, sqlite3.Error) as error:
+            self.dns_history_note.setText(f"Nie otwarto historii DNS: {error}")
+            return
+        self.dns_history_button.setText("Wyłącz lokalną historię DNS")
+        self.dns_history_note.setText(f"Historia aktywna: {path}. Zapisuje tylko statystyki resolverów.")
+
+    def show_dns_history(self):
+        if self.dns_history is None:
+            self.dns_history_note.setText("Najpierw włącz lokalną historię DNS.")
+            return
+        try:
+            rows = self.dns_history.recent()
+        except sqlite3.Error as error:
+            self.dns_history_note.setText(f"Nie odczytano historii DNS: {error}")
+            return
+        self.dns_benchmark_output.setPlainText(json.dumps(rows, ensure_ascii=False, indent=2))
+        self.dns_history_note.setText(f"Pokazano {len(rows)} ostatnich wyników resolverów.")
 
     def start_nmap(self):
         if self.nmap_worker is not None and self.nmap_worker.isRunning():
@@ -1355,6 +1456,36 @@ class NetworkCenterWindow(QMainWindow):
         self.local_history_note.setText(
             f"Zaimportowano {result['devices']} urządzeń i {result['events']} zdarzeń do {destination}. "
             "Źródło pozostawiono bez zmian. Ta historia jest teraz aktywna.")
+
+    def import_lan_observation(self):
+        if self.device_history is None:
+            self.local_history_note.setText("Najpierw włącz historię LAN lub zaimportuj starą bazę.")
+            return
+        source, _ = QFileDialog.getOpenFileName(self, "Obserwacja LAN z JSON", "", "JSON (*.json)")
+        if not source:
+            return
+        try:
+            rows = load_observation_json(source)
+        except (OSError, ValueError) as error:
+            self.local_history_note.setText(f"Nie zaimportowano obserwacji: {error}")
+            return
+        answer = QMessageBox.question(
+            self, "Zakres obserwacji LAN",
+            "Czy plik obejmuje całą skanowaną sieć? Wybierz Nie dla częściowej obserwacji. "
+            "Przy pełnej brakujące urządzenia zostaną oznaczone jako niezaobserwowane, "
+            "co nie dowodzi, że są offline.",
+            QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.No)
+        if answer == QMessageBox.Cancel:
+            return
+        try:
+            result = self.device_history.observe(rows, complete=answer == QMessageBox.Yes)
+            self.render_local_history()
+        except (ValueError, sqlite3.Error) as error:
+            self.local_history_note.setText(f"Nie zapisano obserwacji: {error}")
+            return
+        self.local_history_note.setText(
+            f"Zaimportowano {result['observed']} urządzeń i {len(result['events'])} zdarzeń "
+            f"({'pełna' if result['complete'] else 'częściowa'} obserwacja). Źródło pozostawiono bez zmian.")
 
     def toggle_local_history(self):
         if self.device_history is not None:
@@ -1882,11 +2013,14 @@ class NetworkCenterWindow(QMainWindow):
         if self.device_history is not None:
             self.device_history.close()
             self.device_history = None
+        if self.dns_history is not None:
+            self.dns_history.close()
+            self.dns_history = None
         for worker in (self.worker, self.adapter_worker, self.scope_worker,
                        self.optimizer_worker, self.traffic_worker,
                        self.traffic_stream_worker, self.firewall_worker,
                        self.internet_context_worker, self.dns_change_worker,
-                       self.mtu_change_worker):
+                       self.mtu_change_worker, self.dns_system_worker):
             if worker is not None and worker.isRunning():
                 self.refresh_button.setEnabled(False)
                 worker.wait(11000)

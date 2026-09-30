@@ -120,8 +120,8 @@ różni się od starego i pełny parytet parametrów CLI pozostaje otwarty.
 
 | Stare narzędzie | Potwierdzony odpowiednik w kodzie | Pozostały brak |
 |---|---|---|
-| DNS Center | Osiem profili, benchmark UDP/TCP, kandydaci z DNS adapterów i opcjonalnie bramy, odczyt adapterów oraz zmiana DNS IPv4 z kopią i cofnięciem | Stary tryb IPv6, DoH, historia benchmarków, poradniki i część komend (`flush-dns`, `system-test`, lista kopii) nie mają jeszcze potwierdzonego parytetu GUI/CLI; rzeczywisty zapis w VM niezweryfikowany |
-| LAN Radar | Cache, ograniczony skan ICMP/Nmap, reverse DNS, OUI, lokalna historia SQLite, import i tagowanie | Pełny parytet importu z flagą kompletnej obserwacji i starych komend do sprawdzenia; realna różnorodna sieć niezweryfikowana |
+| DNS Center | Osiem profili, benchmark UDP/TCP, kandydaci z DNS adapterów i opcjonalnie bramy, odczyt adapterów, stan wpisów DoH, test systemowego resolvera, opt-in historia statystyk DNS oraz zmiana DNS IPv4 z kopią i cofnięciem | Stary tryb IPv6, konfiguracja DoH, poradniki i część komend (`flush-dns`, lista kopii) nie mają jeszcze potwierdzonego parytetu GUI/CLI; rzeczywisty odczyt DoH i zapis DNS w VM niezweryfikowane |
+| LAN Radar | Cache, ograniczony skan ICMP/Nmap, reverse DNS, OUI, lokalna historia SQLite, import starej bazy i listy JSON (w tym jawnie kompletnej obserwacji) oraz tagowanie | Pozostałe stare komendy do sprawdzenia; realna różnorodna sieć niezweryfikowana |
 | NetRadar | Parser logów, przyrostowy odczyt z rotacją, heurystyka prób TCP, metadane TCP SYN na Windows | Linux live capture i parytet wszystkich pól raportu starego CLI do sprawdzenia; rzeczywiste przechwytywanie niezweryfikowane |
 | Network Sentinel | Odczyt starego bridge/historii/list, ICMP/cache/Nmap, porównanie jawnego skanu z listami bez automatycznej blokady, ręczne TShark metadanych, reguły Firewall i ograniczona automatyczna blokada | Pełny parytet zarządzania urządzeniami, harmonogramu i autostartu, typów alertów i raportu HTML do sprawdzenia; TShark/Firewall wymagają VM |
 

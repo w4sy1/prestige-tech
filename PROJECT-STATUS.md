@@ -6,6 +6,16 @@ projektu i nie zastępują bieżącego pliku licencji.
 
 Bieżący plik przekazania pracy i lista końcowych testów: `development/CONTINUE-HANDOFF.txt`.
 
+## Etap 2026-09-30 — DNS Center i import obserwacji LAN
+
+Network Center ma odczyt konfiguracji DoH Windows, ograniczony czasowo test
+systemowego resolvera DNS oraz opcjonalną lokalną historię statystyk benchmarku
+w SQLite. Import listy urządzeń LAN z JSON obsługuje oznaczenie obserwacji jako
+pełnej wyłącznie po potwierdzeniu; brak urządzenia w takiej liście oznacza
+„niezaobserwowane”, a nie offline. Testy wykonano na danych symulowanych;
+rzeczywiste DoH, DNS, sieć i VM pozostają niezweryfikowane.
+235 testów uruchomionych: 234 PASS, 1 skip.
+
 ## Etap 2026-09-30 — DNS i migawka wykrywania
 
 Network Center dodaje do benchmarku publicznych DNS wykryte adresy z

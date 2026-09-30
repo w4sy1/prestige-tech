@@ -1,5 +1,11 @@
 # Migracja modułów do Centrów — stan 2026-09-29
 
+Aktualizacja 2026-09-30: Network / DNS odczytuje stan rejestracji DoH,
+wykonuje test systemowego resolvera z limitem czasu i na życzenie zapisuje
+statystyki benchmarku w SQLite. Network / Urządzenia importuje listę JSON
+jako częściową lub potwierdzoną pełną obserwację. Testy rzeczywistego DoH,
+DNS i sieci nadal otwarte; wiersze poniżej opisują również wcześniejszy stan.
+
 Najnowszy etap: lokalne wykrywanie pokazuje obok odpowiedzi ICMP także
 przefiltrowane wpisy tablicy sąsiadów z odrębnym oznaczeniem
 „Cache — dostępność nieznana”. Nie dowodzi to, że host jest online.
@@ -27,10 +33,10 @@ program nadal ma własną pozycję, a nie brak pozycji nowego Center.
 
 | Stary moduł | Center / sekcja | Status nowego odpowiednika | Test nowego odpowiednika | EXE Center | Dashboard |
 |---|---|---|---|---|---|
-| DNS Benchmark / DNS Center | Network / DNS | Profile publicznych resolverów, kandydaci z DNS adapterów i opcjonalnie bramy, pomiar UDP/TCP, ranking i przerwanie w Core/GUI; IPv6/DoH i pozostałe komendy starego Center do audytu | Fixture/GUI PASS; rzeczywistych resolverów nie testowano | Nie | Legacy |
+| DNS Benchmark / DNS Center | Network / DNS | Profile publicznych resolverów, kandydaci z DNS adapterów i opcjonalnie bramy, pomiar UDP/TCP, ranking, przerwanie, odczyt DoH Windows, test systemowego DNS i opt-in historia statystyk w Core/GUI; konfiguracja IPv6/DoH i pozostałe komendy do audytu | Fixture/GUI PASS; rzeczywistych resolverów i DoH nie testowano | Nie | Legacy |
 | Network Optimizer | Network / Optymalizacja | Odczyt DNS/MTU/TCP/zasilania/powiązań/cache oraz zmiany DNS IPv4 i MTU 576–1500 z nową kopią JSON, weryfikacją i warunkowym cofnięciem w Core/GUI | Fixture DNS/MTU i lokalne plany PASS; zapis/cofnięcie w VM niezweryfikowane, jumbo MTU poza zakresem | Nie | Legacy |
 | Internet Diagnostic | Network / Internet | ICMP/DNS, opcjonalna trasa i MTU oraz lokalny kontekst DHCP/interfejsów/tras/DNS/Wi-Fi; wynik ma korelację z sygnałem i bramą, z zaznaczeniem niepewności | Fixture/GUI i lokalny odczyt kontekstu PASS; wcześniejsze 2 próbki ICMP do 1.1.1.1 i DNS PASS | Nie | Legacy |
-| LAN Radar | Network / Urządzenia | Cache, adaptery, ograniczony skan ICMP, opcjonalny reverse DNS i lokalna baza OUI, opt-in historia SQLite, import starej bazy do nowego pliku oraz tagowanie urządzeń; pełny parytet nadal brak | Core/GUI fixture PASS; realny skan własnego Wi-Fi /24: 253 sondy, 1 odpowiedź, 0 błędów sond | Nie | Legacy |
+| LAN Radar | Network / Urządzenia | Cache, adaptery, ograniczony skan ICMP, opcjonalny reverse DNS i lokalna baza OUI, opt-in historia SQLite, import starej bazy do nowego pliku i listy JSON z jawną pełną obserwacją oraz tagowanie urządzeń; pełny parytet nadal brak | Core/GUI fixture PASS; realny skan własnego Wi-Fi /24: 253 sondy, 1 odpowiedź, 0 błędów sond (wcześniejszy etap) | Nie | Legacy |
 | NetRadar | Network / Ruch | Odczyt logów Windows/JSONL/Linux, przyrostowe śledzenie rosnącego logu z rotacją, heurystyka prób portów i ograniczony Windows TCP SYN metadata capture bez payloadu; brak pełnego Deep Capture | Fixture/GUI PASS; realnego przechwytywania nie testowano | Nie | Legacy |
 | Network Snapshot | Network / Historia | Zapis/porównanie migawek, historia obserwacji; porównanie ze starym formatem hosts, normalizacja MAC i scalenie IP tego samego urządzenia oraz zmian nazw i producenta. Ostatni skan wzbogaca zapisywaną migawkę o dane hostów i metadane discovery | Core/GUI fixture PASS; pełny parytet discovery/CLI i realny skan niezweryfikowane | Nie | Legacy |
 | Nmap Profiles | Network / Porty | Sześć ograniczonych profili, plan, wykonanie, parser i porównanie XML w Core/GUI | Fixture/GUI PASS; Nmap niedostępny lokalnie | Nie | Legacy |
