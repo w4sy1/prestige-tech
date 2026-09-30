@@ -13,7 +13,9 @@ pracy. 19 wciąż istniejących osobnych repozytoriów `prestige-*` zapisano
 lokalnie jako lustra Git, paczki bieżących plików oraz komplet 114 załączników
 z 19 wydań. Po weryfikacji kopii usunięto te 19 repozytoriów z GitHuba.
 `w4sy1/prestige-tech` i `w4sy1/prestige-tech-dashboard` pozostają. Lokalne
-katalogi źródłowe oraz istniejące elementy Dashboardu nie zostały usunięte.
+katalogi źródłowe zachowano. Katalog GUI Dashboardu ograniczono do 10 nowych
+Centrów bez zmiany układu i motywu; historyczny launcher CLI i stare EXE
+w dawnych wydaniach pozostają jako materiały archiwalne.
 Archiwum: `C:\Users\01dwa\Documents\PrestigeTech-Legacy-Archive-2026-09-30`.
 Historyczne wpisy poniżej opisują stan sprzed tej decyzji.
 
