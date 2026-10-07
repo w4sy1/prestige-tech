@@ -2,6 +2,8 @@
 
 Aktualny kod nowych Centrów jest w tym repozytorium. [Prestige Tech Dashboard](https://github.com/w4sy1/prestige-tech-dashboard) pozostaje osobnym projektem i uruchamia Centra ze źródeł sąsiedniego repozytorium. Nowe pliki EXE Centrów nie są jeszcze zweryfikowane.
 
+Pełny wykaz modułów, funkcji, plików kodu i ostatnich zmian: [CENTERS-CODE-AND-FUNCTIONS.md](CENTERS-CODE-AND-FUNCTIONS.md).
+
 | Centrum | Uruchomienie ze źródeł |
 |---|---|
 | Network Center | `python network_center.py` |
