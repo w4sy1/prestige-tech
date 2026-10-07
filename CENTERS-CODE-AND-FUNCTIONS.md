@@ -124,3 +124,27 @@ Każdy launcher można uruchomić z katalogu głównego repozytorium po zainstal
 - **2026-09-30:** 19 starych osobnych repozytoriów zapisano lokalnie i usunięto z GitHuba; katalog GUI Dashboardu ograniczono do 10 Centrów. Archiwum: `C:\Users\01dwa\Documents\PrestigeTech-Legacy-Archive-2026-09-30`.
 - Kod Centrów i dokumentacja są w `w4sy1/prestige-tech`, Dashboard w `w4sy1/prestige-tech-dashboard`. **Nowych EXE Centrów nadal nie uznano za zweryfikowane.**
 - Aktualną licencję własnego kodu określa [LICENSE](LICENSE): **Prestige Tech Free Use License**.
+
+## Plan rozbudowy kodu `.py` — dwa style Dashboardu
+
+Ustalenie z 2026-10-07: obecny niebieski Dashboard zostaje. Drugi styl ma prostszą hierarchię **stan komputera → Centra → konkretne działania**, z kartami, ikonami i krótkim opisem. Oba style mają korzystać z tego samego katalogu 10 Centrów, tych samych danych, operacji i ustawień; wybór stylu jest prezentacją, nie osobną kopią logiki. Wskazany czat zawiera opis, ale nie udostępnia grafik referencyjnych, więc dokładny wygląd drugiego stylu nie jest jeszcze specyfikowany piksel po pikselu.
+
+Technicznie warstwę stylów można przełączać przez arkusz stylów aplikacji Qt, a wybór użytkownika zapisać przez `QSettings`; oba mechanizmy są opisane w [dokumentacji Qt Style Sheets](https://doc.qt.io/qtforpython-6/overviews/qtwidgets-stylesheet-syntax.html) i [QSettings](https://doc.qt.io/qtforpython-6/PySide6/QtCore/QSettings.html). To propozycja implementacji, jeszcze nie gotowy przełącznik.
+
+Wszystkie pozycje „Do dopisania” poniżej to **propozycje, nie gotowe funkcje**. Priorytet: kod źródłowy Python, testy jednostkowe i testy na danych symulowanych. Testy na urządzeniu, sieci produkcyjnej i fizycznym dysku oraz pakowanie EXE są późniejszym etapem.
+
+| Moduł | Funkcje już w kodzie — skrót | Do dopisania w `.py` |
+|---|---|---|
+| **Dashboard** | Katalog 10 Centrów, strona główna, moduły, aktualizacje, narzędzia systemowe, raporty, ustawienia i poradnik; obecny niebieski styl | Drugi styl z trzema poziomami informacji; przełącznik stylu w ustawieniach z zapamiętaniem wyboru; wspólne modele kart i statusów bez dublowania akcji; możliwość powrotu do obecnego stylu |
+| **Network Center** | LAN, Internet/Wi-Fi, DNS benchmark i historia, sześć profili Nmap, migawki, DNS IPv4/MTU z kopią, analiza ruchu, ograniczony Sentinel | Katalog planów DNS IPv6 i bezpieczne cofanie; zarządzanie znanymi/zaufanymi urządzeniami Sentinel; harmonogram odczytowych skanów z limitem i wyraźną zgodą; raport HTML z oznaczeniem źródeł danych i niepewności |
+| **Monitor Center** | Baseline i hash plików, ACL/ADS, polling i natywne zdarzenia, dziennik, SQLite, manifesty i podpisy Ed25519 | Oś czasu zmian z filtrowaniem; zapis profili obserwacji i wykluczeń; wyraźna sygnalizacja utraconych zdarzeń/niepełnego skanu; porównanie dwóch okresów bez zmiany baseline |
+| **Registry Manager** | Odczyty ręczne i ADMX, audyt, dziewięć wąskich zmian HKCU z planem/kopią/cofnięciem | Katalog zmian definiowanych pojedynczo i weryfikowanych testami; eksport różnicy przed/po; kontrola zależności od edycji Windows i wersji ADMX; podgląd wszystkich kroków rollbacku przed zapisem |
+| **Storage & Recovery** | Dyski i obrazowanie, kopie/manifest/SHA-256, odtwarzanie, ACL/VSS, zestawy PrestigeUSB i rollback | Dziennik akwizycji z checkpointami i kontrolą wznowienia; raport źródło–cel–hash bez twierdzenia o fizycznej blokadzie zapisu; kontrola, że cel obrazu nie wskazuje źródła; widok wersji kopii i zajętości miejsca przed operacją |
+| **Android Center** | ADB Diagnostic, lista aplikacji, uprawnienia/AppOps, role, Device Admin | Porównanie dwóch migawek urządzenia lub aplikacji; profil wielu urządzeń z jednoznacznym wyborem serialu; raport zmian uprawnień; analiza wcześniej zapisanego wyniku ADB bez telefonu |
+| **Security Center** | Security Check, Malware Triage, File Inspector, eksport i AI/raport | Wspólna oś ustaleń z pochodzeniem dowodów; porównanie dwóch audytów Windows; pakiet materiału diagnostycznego z redakcją danych osobowych; priorytety działań z oznaczeniem `UNKNOWN` zamiast automatycznego werdyktu |
+| **System Center** | Migawki, diagnostyka Windows, SFC/DISM i naprawy sieci z planem, PC Cleanup z kwarantanną | Właściciel/podpis procesu w diagnostyce; porównanie stanu przed i po naprawie; plan zależności i restartu; wspólny dziennik wykonanych czynności dla Report Center |
+| **Termux Center** | Pięć profili Setup, osiem kategorii Toolkit, `pkg`, konfiguracja środowiska, hash i archiwum `tar` | Odczytowy „health check” środowiska; porównanie planu z faktycznie dostępnymi pakietami; eksport stanu konfiguracji z ukryciem sekretów; raport błędów z jasnymi krokami cofnięcia |
+| **AI Center** | Lokalna analiza regułowa, podgląd danych, opcjonalne zewnętrzne AI, JSON/PDF | Śledzenie źródła każdej tezy do wyniku Centrum; automatyczna redakcja danych w podglądzie; limit rozmiaru i szacowanie zakresu wysyłki; tryb „tylko lokalnie” zapamiętywany w ustawieniach |
+| **Report Center** | Formularz i eksport HTML/JSON/TXT/PDF, częściowe wstawianie wyników System/Security | Import wyników wszystkich Centrów przez wspólny format; lista załączników z SHA-256; szablony raportu zależne od typu sprawy; przegląd brakujących pól i pochodzenia danych przed zapisem |
+
+Wdrożenie tych propozycji wymaga osobnego sprawdzenia pozycja po pozycji. Nie należy zwiększać liczników funkcji ani ogłaszać pełnego zakresu na podstawie samej tabeli.
