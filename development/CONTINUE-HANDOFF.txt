@@ -1,6 +1,17 @@
 PRESTIGE TECH — PLIK PRZEKAZANIA PRACY I TESTÓW
 Stan: 2026-10-08. Aktualizuj ten plik po każdym istotnym etapie.
 
+ETAP 2026-10-09: Network Center ma zapis profilu własnej podsieci oraz kod
+codziennego, odczytowego skanu ICMP w Harmonogramie zadań Windows. Zadanie
+rejestruje się wyłącznie po potwierdzeniu w GUI; nie używa Nmap/port scan i
+nie blokuje hostów. Zmiana adaptera/IP/podsieci powoduje SKIPPED. Wynik
+COMPLETE aktualizuje punkt odniesienia i lokalny dziennik nowych obserwacji,
+zmian IP i możliwej zmiany MAC. PARTIAL nie aktualizuje punktu odniesienia.
+GUI pokazuje ostatni wynik i historię. Ręczny Nmap pokazuje ostrożne wskazówki
+dla otwartych portów. 333 testy, 332 PASS, 1 skip. Nie instalowano zadania ani
+nie skanowano realnej sieci. Linux cron/systemd i pełna pasywna inwentaryzacja
+pozostają do zrobienia. Nie nazywać tego pełnym Fing ani IDS.
+
 ETAP 2026-10-09: Dodano kod jawnego nocnego przeglądu przez Harmonogram
 zadań Windows: python -m prestige_core.daily_schedule plan, a instalacja
 lub usunięcie wymaga --confirm. Wygenerowany skrypt ma testy bez uruchamiania

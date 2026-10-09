@@ -6,6 +6,23 @@ projektu i nie zastępują bieżącego pliku licencji.
 
 Bieżący plik przekazania pracy i lista końcowych testów: `development/CONTINUE-HANDOFF.txt`.
 
+## Etap 2026-10-09 — trwały, odczytowy monitoring sieci
+
+Network Center pozwala po ręcznym wyborze własnej podsieci zapisać lokalny
+profil i jawnie zarejestrować codzienny skan ICMP w Harmonogramie zadań Windows.
+Zadanie działa tylko po zalogowaniu użytkownika, nie używa Nmap, nie skanuje
+portów i nie blokuje urządzeń. Przed skanem ponownie sprawdza IP, adapter i
+podsieć; po zmianie sieci zapisuje SKIPPED. Pełny skan tworzy lokalny punkt
+odniesienia i później sygnalizuje nowe odpowiedzi, zmianę IP lub możliwą
+zmianę MAC. Niepełny wynik nie nadpisuje punktu odniesienia. GUI pokazuje
+ostatni wynik i historię alertów. Ręczny skan Nmap opisuje, co sprawdzić
+przy otwartych portach, bez diagnozowania włamania.
+
+Testy kodu i GUI: 333 uruchomione, 332 OK, 1 pominięty. Nie rejestrowano
+zadania ani nie skanowano realnej sieci w tym etapie. Trwały monitoring jest
+na razie tylko dla Windows; brak usługi Linux cron/systemd, rzeczywistych
+powiadomień systemowych i pełnej inwentaryzacji pasywnej jak Fing.
+
 ## Etap 2026-10-09 — kod nocnego przeglądu
 
 `python -m prestige_core.daily_schedule plan` pokazuje plan odczytowego

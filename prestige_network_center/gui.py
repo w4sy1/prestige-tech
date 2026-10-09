@@ -19,9 +19,12 @@ from prestige_core.network import read_adapters, read_neighbors
 from prestige_core.network_snapshot import (compare_snapshots, make_snapshot, save_snapshot,
                                             snapshot_from_json_list)
 from prestige_core.network_discovery import load_oui, local_scopes, scan_local_scope
+from prestige_core.network_watch import default_directory as network_watch_directory, make_profile as make_network_watch_profile, save_profile as save_network_watch_profile, _read as read_network_watch_file, read_event_history as read_network_watch_history
+from prestige_core.network_watch_schedule import schedule_plan as network_watch_schedule_plan, install as install_network_watch, remove as remove_network_watch
 from prestige_core.internet_diagnostic import diagnose
 from prestige_core.internet_context import correlate_diagnostic, read_context
 from prestige_core.nmap_profiles import PROFILES, compare_results, parse_xml, plan_profile, run_profile
+from prestige_core.port_guidance import explain_hosts
 from prestige_core.device_history import DeviceHistory, LAN_CATEGORIES, load_observation_json
 from prestige_core.lan_legacy_import import import_legacy_lan
 from prestige_core.network_optimizer import inspect_adapter
@@ -537,6 +540,23 @@ class NetworkCenterWindow(QMainWindow):
         schedule_stop.clicked.connect(self.stop_discovery_schedule)
         schedule.addWidget(schedule_stop)
         discovery_layout.addLayout(schedule)
+        watch_actions = QHBoxLayout()
+        watch_save = QPushButton("Zapisz profil monitoringu sieci")
+        watch_save.clicked.connect(self.save_network_watch_profile)
+        watch_actions.addWidget(watch_save)
+        watch_install = QPushButton("Włącz codzienny monitoring")
+        watch_install.clicked.connect(self.install_network_watch_schedule)
+        watch_actions.addWidget(watch_install)
+        watch_remove = QPushButton("Wyłącz codzienny monitoring")
+        watch_remove.clicked.connect(self.remove_network_watch_schedule)
+        watch_actions.addWidget(watch_remove)
+        watch_latest = QPushButton("Pokaż ostatni wynik")
+        watch_latest.clicked.connect(self.show_network_watch_latest)
+        watch_actions.addWidget(watch_latest)
+        watch_history = QPushButton("Historia alertów")
+        watch_history.clicked.connect(self.show_network_watch_history)
+        watch_actions.addWidget(watch_history)
+        discovery_layout.addLayout(watch_actions)
         self.discovery_oui_button = QPushButton("Wczytaj lokalną bazę OUI")
         self.discovery_oui_button.clicked.connect(self.choose_discovery_oui)
         discovery_options.addWidget(self.discovery_oui_button)
@@ -1464,6 +1484,82 @@ class NetworkCenterWindow(QMainWindow):
         self.discovery_timer.start(self.schedule_minutes.value() * 60 * 1000)
         self.discovery_note.setText(f"Harmonogram aktywny: {self.scheduled_remaining} skanów ICMP.")
 
+    def save_network_watch_profile(self):
+        scope = self.last_discovery_scope
+        if scope is None:
+            self.discovery_note.setText("Najpierw wykonaj ręczny skan i wybierz własną podsieć.")
+            return
+        try:
+            profile = make_network_watch_profile(scope["scope"], scope["ip"], scope["index"])
+            path = save_network_watch_profile(profile, network_watch_directory())
+        except (OSError, ValueError, RuntimeError, KeyError) as error:
+            self.discovery_note.setText(f"Nie zapisano profilu monitoringu: {error}")
+            return
+        self.discovery_note.setText(f"Zapisano profil {profile['scope']} w {path}. Bez automatycznych blokad.")
+
+    def install_network_watch_schedule(self):
+        try:
+            plan = network_watch_schedule_plan()
+        except (OSError, ValueError, RuntimeError, KeyError) as error:
+            self.discovery_note.setText(f"Najpierw zapisz profil monitoringu: {error}")
+            return
+        answer = QMessageBox.question(
+            self, "Codzienny monitoring sieci",
+            f"Włączyć codzienny skan ICMP sieci {plan['directory']} o {plan['time']}?\n"
+            "Działa tylko po zalogowaniu do Windows. Nie używa Nmap, nie skanuje portów "
+            "i nie blokuje urządzeń. Wynik jest zapisany lokalnie.",
+            QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        if answer != QMessageBox.Yes:
+            return
+        try:
+            install_network_watch(plan)
+        except (OSError, ValueError, RuntimeError) as error:
+            self.discovery_note.setText(f"Nie włączono monitoringu: {error}")
+            return
+        self.discovery_note.setText("Codzienny monitoring zarejestrowany. Pierwszy wynik pojawi się po uruchomieniu zadania.")
+
+    def remove_network_watch_schedule(self):
+        if QMessageBox.question(self, "Wyłączyć monitoring?",
+                                "Usunąć zadanie codziennego skanu? Historia pozostanie na dysku.",
+                                QMessageBox.Yes | QMessageBox.No, QMessageBox.No) != QMessageBox.Yes:
+            return
+        try:
+            remove_network_watch_schedule()
+        except (OSError, RuntimeError) as error:
+            self.discovery_note.setText(f"Nie wyłączono monitoringu: {error}")
+            return
+        self.discovery_note.setText("Codzienny monitoring wyłączony. Zapisany profil i wyniki pozostały.")
+
+    def show_network_watch_latest(self):
+        try:
+            report = read_network_watch_file(network_watch_directory() / "latest.json")
+            if report.get("schema_version") != 1 or not isinstance(report.get("events"), list):
+                raise ValueError("Nieprawidłowy wynik monitoringu.")
+        except (OSError, ValueError, RuntimeError) as error:
+            self.discovery_note.setText(f"Brak poprawnego wyniku monitoringu: {error}")
+            return
+        lines = [f"{item.get('type')}: {item.get('ip')} — {item.get('note')}"
+                 for item in report["events"][:20]]
+        message = ("Skan pominięty: " + str(report.get("reason") or "Nieznana przyczyna.")) \
+            if report.get("status") == "SKIPPED" else (
+                "\n".join(lines) or "Brak nowych zmian w tym pomiarze.")
+        QMessageBox.information(self, "Ostatni monitoring sieci",
+                                f"Czas: {report.get('timestamp')}\nStan: {report.get('status')}\n"
+                                f"Odpowiedziało: {report.get('observed_count')}\n\n"
+                                + message
+                                + "\n\nTo obserwacje, nie potwierdzenie ataku.")
+
+    def show_network_watch_history(self):
+        try:
+            rows = read_network_watch_history(network_watch_directory(), limit=30)
+        except (OSError, ValueError, RuntimeError) as error:
+            self.discovery_note.setText(f"Nie odczytano historii alertów: {error}")
+            return
+        lines = [f"{row.get('timestamp')} — {row.get('type')} — {row.get('ip')}"
+                 for row in rows]
+        QMessageBox.information(self, "Historia alertów sieci",
+                                "\n".join(lines) if lines else "Brak zapisanych alertów.")
+
     def stop_discovery_schedule(self):
         self.discovery_timer.stop()
         self.scheduled_scope = None
@@ -1734,6 +1830,12 @@ class NetworkCenterWindow(QMainWindow):
             lines.append(f"{address}: {row['status']}")
             for port, value in sorted(row["ports"].items()):
                 lines.append(f"  {port}: {value['state']}")
+        guidance = explain_hosts(hosts)
+        if guidance["findings"]:
+            lines.append("\nCo sprawdzić:")
+            lines.extend(f"{row['host']} {row['port']}: {row['advice']}"
+                         for row in guidance["findings"][:30])
+        lines.append(guidance["note"])
         self.nmap_output.setPlainText("\n".join(lines) or "Brak hostów w wyniku.")
         self.nmap_note.setText(f"Skan ukończony. XML: {result['xml']}")
 

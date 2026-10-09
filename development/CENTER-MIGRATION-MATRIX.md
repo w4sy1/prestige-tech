@@ -1,5 +1,12 @@
 # Migracja modułów do Centrów — stan 2026-09-29
 
+Aktualizacja 2026-10-09: Network / Sentinel ma opcjonalny zapis profilu
+własnej podsieci i kod codziennego odczytowego skanu ICMP w Harmonogramie
+Windows. Porównuje tylko pełne wyniki, zapisuje ostatni wynik i historię
+alertów. Ręczny Nmap opisuje obserwowane otwarte porty bez orzekania o ataku.
+Testy syntetyczne PASS; nie testowano realnej sieci ani wyzwalacza zadania.
+Brak Linux cron/systemd, powiadomień systemowych i pełnej pasywnej obserwacji.
+
 Aktualizacja 2026-09-30: Network / DNS odczytuje stan rejestracji DoH,
 wykonuje test systemowego resolvera z limitem czasu i na życzenie zapisuje
 statystyki benchmarku w SQLite. Network / Urządzenia importuje listę JSON
