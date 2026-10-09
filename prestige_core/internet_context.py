@@ -20,6 +20,22 @@ def parse_wifi(text):
     if "signal_percent" in result:
         result["estimated_rssi_dbm"] = result["signal_percent"] / 2 - 100
         result["rssi_kind"] = "estimate_from_signal_quality_not_direct_measurement"
+    auth = re.findall(r"(?:Authentication|Uwierzytelnianie)\s*:\s*([^\r\n]+)", text, re.I)
+    cipher = re.findall(r"(?:Cipher|Szyfrowanie)\s*:\s*([^\r\n]+)", text, re.I)
+    if len(auth) == len(cipher) == 1:
+        result["authentication"] = auth[0].strip()
+        result["cipher"] = cipher[0].strip()
+    auth_value = result.get("authentication", "").casefold()
+    cipher_value = result.get("cipher", "").casefold()
+    if auth_value in ("open", "otwarta") or cipher_value in ("none", "brak", "wep", "tkip"):
+        result["security_status"] = "REVIEW"
+        result["security_note"] = "Ta sieć może nie chronić połączenia; sprawdź ustawienia routera."
+    elif ("wpa2" in auth_value or "wpa3" in auth_value) and cipher_value in ("aes", "ccmp", "gcmp"):
+        result["security_status"] = "KNOWN_ENCRYPTION"
+        result["security_note"] = "Odczytano szyfrowanie Wi-Fi; nie sprawdzono hasła routera."
+    else:
+        result["security_status"] = "UNKNOWN"
+        result["security_note"] = "Nie udało się ocenić zabezpieczenia Wi-Fi z tego odczytu."
     return result
 
 

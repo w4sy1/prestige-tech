@@ -14,6 +14,7 @@ from prestige_core.security_check import audit_windows, load_evidence
 from prestige_core.security_rules import audit
 from prestige_core.security_compare import compare_audits
 from prestige_core.link_check import inspect_link
+from prestige_core.browser_notifications import collect_notification_permissions
 from prestige_core.malware_triage import triage_windows
 from prestige_core.malware_rules import analyze
 from prestige_core.ui_theme import APP_QSS, COLORS
@@ -47,6 +48,8 @@ class SecurityWorker(QThread):
                 result = triage_windows(self.seconds, scan_paths=(self.path,))
             elif self.action == "triage_offline":
                 result = analyze(load_evidence(self.path))
+            elif self.action == "notifications":
+                result = collect_notification_permissions()
             else:
                 raise ValueError("Nieznana operacja Security Center.")
             self.loaded.emit({"action": self.action, "data": result})
@@ -98,6 +101,9 @@ class SecurityCenterWindow(QMainWindow):
         self.link_check_button = QPushButton("Sprawdź adres")
         self.link_check_button.clicked.connect(self.check_link)
         link_controls.addWidget(self.link_check_button)
+        self.notifications_button = QPushButton("Strony z powiadomieniami")
+        self.notifications_button.clicked.connect(lambda: self._start("notifications"))
+        link_controls.addWidget(self.notifications_button)
         main.addLayout(link_controls)
         export_controls = QHBoxLayout()
         self.export_file_button = QPushButton("Eksport analizy")
@@ -228,6 +234,7 @@ class SecurityCenterWindow(QMainWindow):
         self.triage_button.setEnabled(False)
         self.triage_folder_button.setEnabled(False)
         self.triage_offline_button.setEnabled(False)
+        self.notifications_button.setEnabled(False)
         self.status.setText("Trwa odczyt…")
         self.worker = SecurityWorker(action, path, self.strings_checkbox.isChecked(),
                                      self.triage_seconds.value(), self)
@@ -243,6 +250,7 @@ class SecurityCenterWindow(QMainWindow):
         self.triage_button.setEnabled(True)
         self.triage_folder_button.setEnabled(True)
         self.triage_offline_button.setEnabled(True)
+        self.notifications_button.setEnabled(True)
 
     def show_result(self, result):
         try:
@@ -259,6 +267,10 @@ class SecurityCenterWindow(QMainWindow):
             self.last_audit = data
             self.export_audit_button.setEnabled(True)
             self.status.setText(f"Audyt zakończony: {data['unknown_checks']} kontroli UNKNOWN, wynik {data['risk_score']}/100.")
+        elif result["action"] == "notifications":
+            self.status.setText(f"Odczytano {data['profiles_read']} profili; "
+                                f"stron z pozwoleniem: {len(data['allowed_sites'])}; "
+                                f"błędy: {data['errors']}. Ustawienia zmień w przeglądarce.")
         else:
             self.status.setText(f"Triage zakończony: {len(data['alerts'])} alertów, "
                                 f"{len(data['unknown_sections'])} sekcji UNKNOWN. Alert nie jest werdyktem malware.")

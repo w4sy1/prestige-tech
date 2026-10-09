@@ -1515,10 +1515,11 @@ class NetworkCenterWindow(QMainWindow):
 
     def show_internet_context(self, result):
         self.internet_trace_output.setPlainText(json.dumps(result, ensure_ascii=False, indent=2))
+        wifi_note = result.get("wifi", {}).get("security_note", "Brak danych o zabezpieczeniu Wi-Fi.")
         self.internet_result.setText(
             f"{result['status']}: {len(result['interfaces'])} interfejsów, "
             f"{len(result['links'])} łączy, {len(result['dns_servers'])} resolverów. "
-            "To odczyt konfiguracji, bez pomiaru połączenia.")
+            f"To odczyt konfiguracji, bez pomiaru połączenia. {wifi_note}")
 
     def start_internet_diagnostic(self):
         if self.internet_worker is not None and self.internet_worker.isRunning():

@@ -22,6 +22,17 @@ class InternetContextTest(unittest.TestCase):
         self.assertEqual(result["estimated_rssi_dbm"], -65)
         self.assertIn("estimate", result["rssi_kind"])
 
+    def test_open_wifi_warns_and_missing_security_stays_unknown(self):
+        open_network = parse_wifi("Authentication : Open\nCipher : None\nSignal : 70%")
+        self.assertEqual(open_network["security_status"], "REVIEW")
+        self.assertEqual(parse_wifi("Signal : 70%")["security_status"], "UNKNOWN")
+        protected = parse_wifi("Uwierzytelnianie : WPA2-Personal\nSzyfrowanie : AES")
+        self.assertEqual(protected["security_status"], "KNOWN_ENCRYPTION")
+        self.assertIn("nie sprawdzono hasła", protected["security_note"])
+        mixed = parse_wifi("Authentication : Open\nCipher : None\n"
+                           "Authentication : WPA2-Personal\nCipher : AES")
+        self.assertEqual(mixed["security_status"], "UNKNOWN")
+
     def test_read_context_normalizes_single_interface_and_dns(self):
         payload = {"gateway": "192.168.1.1", "interfaces": {
             "Description": "Ethernet", "DNSServerSearchOrder": ["1.1.1.1", "bad"]},

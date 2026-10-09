@@ -6,6 +6,19 @@ projektu i nie zastępują bieżącego pliku licencji.
 
 Bieżący plik przekazania pracy i lista końcowych testów: `development/CONTINUE-HANDOFF.txt`.
 
+## Etap 2026-10-09 — odczytowe funkcje pomocy w Centrach
+
+System Center odczytuje stan usługi drukowania i liczbę zadań, inwentaryzuje
+urządzenia dźwięku oraz zapisuje jednorazowy przegląd do małego JSON. Nie
+rozpoznaje jeszcze wyciszenia ani domyślnego wyjścia audio. Program
+`python -m prestige_core.daily_checks --out KATALOG` umożliwia uruchomienie
+tego przeglądu przez zewnętrzny harmonogram; sam nie rejestruje zadania w
+Windows i nie wykonuje napraw. Security Center lokalnie odczytuje zezwolenia
+na powiadomienia w profilach Chrome/Edge, nie zmieniając ich. Network Center
+oznacza odczytane słabe zabezpieczenia bieżącego Wi-Fi, lecz nie testuje hasła
+routera. Report Center przygotowuje do podglądu i lokalnego zapisu prosty
+raport dla bliskiej osoby z ostatnich 7 dni; niczego nie wysyła.
+
 ## Etap 2026-10-09 — pomoc w codziennych problemach
 
 Rozbudowana koncepcja prostego systemu pomocy i mapa wszystkich nowych

@@ -31,8 +31,27 @@ class SystemHelpGuiTests(unittest.TestCase):
         try:
             window.problem_choice.setCurrentIndex(1)
             window.show_problem_plan()
-            self.assertIn("Automatyczny pomiar tego problemu nie jest jeszcze dostępny",
+            self.assertIn("Sprawdź teraz",
                           window.result.toPlainText())
+            window.show_result({"action": "audio", "diagnostic": {
+                "status": "COMPLETE", "devices": [], "mute": "UNKNOWN",
+                "default_output": "UNKNOWN", "system_changed": False}})
+            self.assertIn('"mute": "UNKNOWN"', window.result.toPlainText())
+        finally:
+            window.close()
+
+    def test_daily_result_names_saved_report_without_claiming_repair(self):
+        os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+        from PySide6.QtWidgets import QApplication
+        from prestige_system.gui import SystemCenterWindow
+        app = QApplication.instance() or QApplication([])
+        window = SystemCenterWindow()
+        try:
+            window.show_result({"action": "daily", "path": "report.json",
+                                "diagnostic": {"indicator": {"label": "Warto sprawdzić"},
+                                               "system_changed": False, "checks": {}}})
+            self.assertIn("report.json", window.status.text())
+            self.assertIn('"system_changed": false', window.result.toPlainText())
         finally:
             window.close()
 

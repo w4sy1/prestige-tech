@@ -16,6 +16,8 @@ from prestige_core.ui_theme import APP_QSS, COLORS
 from prestige_report.gui import ReportDialog
 from prestige_core.report_prefill import summarize_center_result
 from prestige_core.senior_assistant import check_disk_space, help_plan
+from prestige_core.system_help_checks import read_audio_devices, read_printer_state
+from prestige_core.daily_checks import default_report_dir, run_daily_checks, save_daily_report
 from prestige_ai.gui import AiDialog
 
 
@@ -40,6 +42,14 @@ class SnapshotWorker(QThread):
                     load_snapshot(self.paths[0]), load_snapshot(self.paths[1]))}
             elif self.action == "toolkit":
                 result = {"action": "toolkit", "diagnostic": collect_toolkit()}
+            elif self.action == "audio":
+                result = {"action": "audio", "diagnostic": read_audio_devices()}
+            elif self.action == "printer":
+                result = {"action": "printer", "diagnostic": read_printer_state()}
+            elif self.action == "daily":
+                diagnostic = run_daily_checks(("disk", "printer", "audio"))
+                path = save_daily_report(diagnostic, default_report_dir())
+                result = {"action": "daily", "diagnostic": diagnostic, "path": str(path)}
             else:
                 raise ValueError("Nieznana operacja System Center.")
             self.loaded.emit(result)
@@ -134,6 +144,9 @@ class SystemCenterWindow(QMainWindow):
         self.toolkit_button = QPushButton("Diagnostyka Windows Toolkit")
         self.toolkit_button.clicked.connect(lambda: self._start("toolkit", ()))
         controls.addWidget(self.toolkit_button)
+        self.daily_button = QPushButton("Sprawdź podstawowy stan")
+        self.daily_button.clicked.connect(lambda: self._start("daily", ()))
+        controls.addWidget(self.daily_button)
         self.help_button = QPushButton("?")
         self.help_button.clicked.connect(self.show_help)
         controls.addWidget(self.help_button)
@@ -153,6 +166,9 @@ class SystemCenterWindow(QMainWindow):
         self.problem_plan_button = QPushButton("Pokaż, co sprawdzić")
         self.problem_plan_button.clicked.connect(self.show_problem_plan)
         problem_controls.addWidget(self.problem_plan_button)
+        self.problem_check_button = QPushButton("Sprawdź teraz")
+        self.problem_check_button.clicked.connect(self.start_problem_check)
+        problem_controls.addWidget(self.problem_check_button)
         main.addLayout(problem_controls)
         repair_controls = QHBoxLayout()
         self.repair_operation = QComboBox()
@@ -216,9 +232,18 @@ class SystemCenterWindow(QMainWindow):
             except (OSError, ValueError) as error:
                 lines.extend(("", f"Nie udało się odczytać wolnego miejsca: {error}"))
         else:
-            lines.extend(("", "To plan. Automatyczny pomiar tego problemu nie jest jeszcze dostępny."))
+            lines.extend(("", "Wybierz «Sprawdź teraz», aby odczytać dostępny stan bez zmiany ustawień."))
         self.result.setPlainText("\n".join(lines))
         self.status.setText("Pokazano plan bez zmiany ustawień i bez usuwania plików.")
+
+    def start_problem_check(self):
+        problem_id = self.problem_choice.currentData()
+        if problem_id == "low_disk_space":
+            self.show_problem_plan()
+        elif problem_id == "no_sound":
+            self._start("audio", ())
+        elif problem_id == "printer_unavailable":
+            self._start("printer", ())
 
     def choose_capture(self):
         destination, _ = QFileDialog.getSaveFileName(self, "Nowy plik migawki", "system-snapshot.json", "JSON (*.json)")
@@ -239,6 +264,7 @@ class SystemCenterWindow(QMainWindow):
         self.capture_button.setEnabled(False)
         self.compare_button.setEnabled(False)
         self.toolkit_button.setEnabled(False)
+        self.daily_button.setEnabled(False)
         self.status.setText("Trwa odczyt…")
         self.worker = SnapshotWorker(action, paths, self)
         self.worker.loaded.connect(self.show_result)
@@ -409,6 +435,7 @@ class SystemCenterWindow(QMainWindow):
         self.capture_button.setEnabled(True)
         self.compare_button.setEnabled(True)
         self.toolkit_button.setEnabled(True)
+        self.daily_button.setEnabled(True)
 
     def show_result(self, data):
         try:
@@ -420,6 +447,14 @@ class SystemCenterWindow(QMainWindow):
         elif data["action"] == "compare":
             unknown = sum(row["status"] == "UNKNOWN" for row in data["comparison"]["sections"].values())
             self.status.setText(f"Porównano migawki; sekcje UNKNOWN: {unknown}.")
+        elif data["action"] in ("audio", "printer"):
+            diagnostic = data["diagnostic"]
+            self.status.setText("Odczyt ukończony." if diagnostic["status"] == "COMPLETE"
+                                else "Nie udało się potwierdzić stanu — sprawdź szczegóły.")
+        elif data["action"] == "daily":
+            diagnostic = data["diagnostic"]
+            self.status.setText(f"Przegląd zapisany: {data['path']}. "
+                                f"Wynik: {diagnostic['indicator']['label']}.")
         else:
             sections = data["diagnostic"]["sections"]
             unknown = sum(row["status"] == "UNKNOWN" for row in sections.values())

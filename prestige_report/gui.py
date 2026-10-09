@@ -14,6 +14,7 @@ from prestige_core.report_service import LABELS, render, template, validate
 from prestige_core.report_service import missing_fields
 from prestige_core.report_attachments import attachment_manifest
 from prestige_core.report_evidence import import_center_json
+from prestige_core.family_summary import build_family_summary, render_family_text, save_family_text
 from prestige_core.ui_theme import APP_QSS, center_header
 
 
@@ -108,6 +109,9 @@ class ReportDialog(QDialog):
         import_button = QPushButton("Importuj wynik Centrum JSON")
         import_button.clicked.connect(self.import_center_result)
         evidence_actions.addWidget(import_button)
+        family_button = QPushButton("Raport stanu dla bliskiej osoby")
+        family_button.clicked.connect(self.create_family_summary)
+        evidence_actions.addWidget(family_button)
         self.generate_button = QPushButton("Zapisz HTML / JSON / TXT / PDF")
         self.generate_button.clicked.connect(self.generate)
         actions.addWidget(self.generate_button)
@@ -125,6 +129,30 @@ class ReportDialog(QDialog):
                 if isinstance(value, str):
                     self.fields[name].setPlainText(value)
             self.status.setText("Wstawiono podsumowanie wyniku Centrum. Uzupełnij dane klienta i test końcowy; sprawdź treść przed zapisem.")
+
+    def create_family_summary(self):
+        directory = QFileDialog.getExistingDirectory(self, "Katalog zapisanych przeglądów komputera")
+        if not directory:
+            return
+        try:
+            summary = build_family_summary(directory)
+        except (OSError, ValueError) as error:
+            self.status.setText("Nie przygotowano raportu: " + str(error))
+            return
+        preview = render_family_text(summary)
+        if QMessageBox.question(self, "Sprawdź treść raportu", preview + "\nZapisać ten raport?",
+                                QMessageBox.Yes | QMessageBox.No, QMessageBox.No) != QMessageBox.Yes:
+            return
+        destination, _ = QFileDialog.getSaveFileName(self, "Nowy raport dla bliskiej osoby",
+                                                     "stan-komputera.txt", "Tekst (*.txt)")
+        if not destination:
+            return
+        try:
+            saved = save_family_text(summary, destination)
+        except (OSError, ValueError) as error:
+            self.status.setText("Nie zapisano raportu: " + str(error))
+            return
+        self.status.setText(f"Zapisano lokalnie: {saved}. Raportu nie wysłano.")
 
     def record(self):
         values = self.form_values()

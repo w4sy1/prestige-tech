@@ -1,6 +1,18 @@
 PRESTIGE TECH — PLIK PRZEKAZANIA PRACY I TESTÓW
 Stan: 2026-10-08. Aktualizuj ten plik po każdym istotnym etapie.
 
+ETAP 2026-10-09: System Center ma odczyt drukarki, urządzeń dźwięku i
+jednorazowy przegląd zapisywany w JSON. daily_checks.py działa też jako CLI,
+ale nie rejestruje jeszcze nocnego harmonogramu i nie wykonuje napraw.
+Security Center odczytuje lokalne pozwolenia na powiadomienia Chrome/Edge.
+Network Center ocenia odczytane szyfrowanie Wi-Fi (brak testu hasła routera).
+Report Center tworzy lokalny raport stanu dla bliskiej osoby z podglądem przed
+zapisem; brak wysyłki na telefon. Nie deklarować pełnego ukończenia tych
+funkcji bez brakujących integracji i testów na odpowiednim Windows.
+Po tym etapie: 322 testy Centrów uruchomione, 321 OK, 1 pominięty. Odczyt
+rzeczywistej drukarki/audio, przeglądarki i routera nadal nie był testowany
+na docelowym sprzęcie; testy używają kontrolowanych wyników i GUI offscreen.
+
 ETAP 2026-10-09 — POMOC DLA UŻYTKOWNIKA: nazwy funkcji uproszczono.
 Mapa wszystkich nowych pomysłów, Centrów i warunków ukończenia jest w
 development/USER-HELP-DESIGN.md. prestige_core/senior_assistant.py zawiera
