@@ -6,14 +6,35 @@ projektu i nie zastępują bieżącego pliku licencji.
 
 Bieżący plik przekazania pracy i lista końcowych testów: `development/CONTINUE-HANDOFF.txt`.
 
+## Etap 2026-10-09 — kod nocnego przeglądu
+
+`python -m prestige_core.daily_schedule plan` pokazuje plan odczytowego
+przeglądu. Rejestracja lub usunięcie zadania Windows wymaga osobnego
+polecenia `install --confirm` albo `remove --confirm`; zadania nie
+instalowano na komputerze użytkownika. Zadanie działa z uprawnieniami
+bieżącego użytkownika po zalogowaniu, ma limit pięciu minut i nie wykonuje
+napraw. Test jednostkowy sprawdza wygenerowany skrypt bez zmiany Harmonogramu.
+Rzeczywiste uruchomienie o wyznaczonej godzinie pozostaje niezweryfikowane.
+
+## Etap 2026-10-09 — wersje kopii i ważne strony
+
+Storage & Recovery pokazuje listę bezpośrednich wersji kopii z liczbą plików
+i stanem zapisu. Lista nie sprawdza sum; przywracanie nadal wymaga osobnego
+wyboru i odtwarza do nowego folderu. Dashboard ma w obu stylach lokalne
+skróty do maksymalnie sześciu stron HTTPS, z pełnym adresem i potwierdzeniem
+przed otwarciem oraz możliwością usunięcia. Testy: Centra 327 uruchomionych,
+326 OK, 1 pominięty; Dashboard 21 OK. Nie wykonywano rzeczywistego
+odtwarzania danych ani otwierania stron banków w przeglądarce.
+
 ## Etap 2026-10-09 — odczytowe funkcje pomocy w Centrach
 
 System Center odczytuje stan usługi drukowania i liczbę zadań, inwentaryzuje
 urządzenia dźwięku oraz zapisuje jednorazowy przegląd do małego JSON. Nie
 rozpoznaje jeszcze wyciszenia ani domyślnego wyjścia audio. Program
 `python -m prestige_core.daily_checks --out KATALOG` umożliwia uruchomienie
-tego przeglądu przez zewnętrzny harmonogram; sam nie rejestruje zadania w
-Windows i nie wykonuje napraw. Security Center lokalnie odczytuje zezwolenia
+tego przeglądu przez harmonogram; zadanie można teraz jawnie zarejestrować
+osobnym poleceniem, ale nie wykonuje ono napraw. Security Center lokalnie
+odczytuje zezwolenia
 na powiadomienia w profilach Chrome/Edge, nie zmieniając ich. Network Center
 oznacza odczytane słabe zabezpieczenia bieżącego Wi-Fi, lecz nie testuje hasła
 routera. Report Center przygotowuje do podglądu i lokalnego zapisu prosty

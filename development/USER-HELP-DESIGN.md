@@ -139,7 +139,7 @@ ale nie samodzielnie zatwierdza naprawy ani nie diagnozuje oszustwa z pewności�
 |---|---|---|---|
 | Pomoc z Internetem | Network Center | Pomiar rozróżnia router, DNS i Internet; po planie wynik jest zmierzony ponownie | Częściowo: istnieje prowadzony pomiar i plan |
 | Znane urządzenia | Network Center / Sentinel | Użytkownik oznacza urządzenie; ponowny odczyt zachowuje oznaczenie | Częściowo: istnieje lokalny rejestr zaufania |
-| Sprawdzenie komputera | System Center / Dashboard | Harmonogram wykonuje tylko odczyt, zapisuje pominięty test i przyczynę | Częściowo: jednorazowy przegląd i zapis JSON; harmonogram do zrobienia |
+| Sprawdzenie komputera | System Center / Dashboard | Harmonogram wykonuje tylko odczyt, zapisuje pominięty test i przyczynę | Częściowo: przegląd JSON i kod jawnej rejestracji zadania Windows; harmonogramu nie instalowano ani nie testowano na żywo |
 | Pomoc z dźwiękiem | System Center | Pokazuje rzeczywiste wyciszenie i wyjście audio; nie zmienia ustawień bez potwierdzenia | Częściowo: odczyt urządzeń; wyciszenie i wyjście pozostają UNKNOWN |
 | Pomoc z drukarką | System Center | Odczytuje usługę i kolejkę; po ewentualnym restarcie sprawdza stan ponownie | Częściowo: odczyt usługi, drukarek i liczby zadań; naprawa do zrobienia |
 | Zwolnij miejsce | System Center / Storage & Recovery | Lista pokazuje ścieżki i bajty, nie obejmuje Dokumentów ani Pobranych bez wyboru | Częściowo: istnieje analiza i kontrolowane czyszczenie |
@@ -148,8 +148,8 @@ ale nie samodzielnie zatwierdza naprawy ani nie diagnozuje oszustwa z pewności�
 | Bezpieczne logowanie | Security Center | Hasła nie trafiają do logów ani AI; można sprawdzić powtórzenia lokalnie | Do zrobienia; własny sejf wymaga audytu |
 | Bezpieczeństwo Wi-Fi | Network Center / Sentinel | Otwarta sieć daje ostrzeżenie; nieznany host nie jest nazywany intruzem | Częściowo: odczyt szyfrowania bieżącego Wi-Fi; hasła routera nie sprawdzono |
 | Czytelny ekran | Dashboard / System Center | Każdą zmianę skali i kontrastu można cofnąć | Do zrobienia |
-| Skróty do ważnych stron | Dashboard | Użytkownik widzi pełny adres i może usunąć skrót | Do zrobienia |
-| Kopie moich plików | Storage & Recovery / Monitor | Odtworzenie jest sprawdzone bez nadpisania oryginału | Częściowo: istnieją kopie i wersjonowanie |
+| Skróty do ważnych stron | Dashboard | Użytkownik widzi pełny adres i może usunąć skrót | Kod i GUI w obu stylach; otwarcie w realnej przeglądarce do sprawdzenia |
+| Kopie moich plików | Storage & Recovery / Monitor | Odtworzenie jest sprawdzone bez nadpisania oryginału | Częściowo: kopie, lista wersji i odtwarzanie do nowego folderu; ciągły harmonogram do zrobienia |
 | Chronione dokumenty | Storage & Recovery / Security Center | Dane nie opuszczają komputera bez zgody; dostęp da się odzyskać | Do zrobienia |
 | Wezwij pomoc | Distant / Report Center | Zrzut jest opcjonalny; sesja ma zgodę, kod jednorazowy i natychmiastowe zakończenie | Do zrobienia |
 | Raport dla bliskiej osoby | Report Center | Zakres danych i odbiorca są zatwierdzone; raport nie zawiera haseł | Częściowo: lokalny podgląd i zapis; brak wysyłki na telefon |

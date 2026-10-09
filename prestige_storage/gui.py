@@ -19,6 +19,7 @@ from prestige_core.usb_inventory import read_usb_devices
 from prestige_core.backup import backup, known_folders, plan, restore, verify
 from prestige_core.backup.vss import backup as vss_backup
 from prestige_core.backup.vss import recover as recover_vss
+from prestige_core.backup.versions import list_versions
 from prestige_core.usb import plan_prepare as plan_usb_prepare, prepare as prepare_usb, verify as verify_usb
 from prestige_core.usb import update as update_usb, rollback as rollback_usb
 from prestige_core.ui_theme import APP_QSS, COLORS
@@ -239,6 +240,9 @@ class StorageWindow(QMainWindow):
         self.restore_button = QPushButton("Odtwórz do nowego folderu")
         self.restore_button.clicked.connect(self.start_restore)
         backup_actions.addWidget(self.restore_button)
+        versions_button = QPushButton("Pokaż wersje kopii")
+        versions_button.clicked.connect(self.show_backup_versions)
+        backup_actions.addWidget(versions_button)
         backup_layout.addLayout(backup_actions)
         self.report_button = QPushButton("Ostatnia utworzona kopia → Repair Report")
         self.report_button.setEnabled(False)
@@ -415,6 +419,23 @@ class StorageWindow(QMainWindow):
             "Istniejące pliki nie będą nadpisywane.")
         if answer == QMessageBox.Yes:
             self._run_backup_operation("restore", source, destination)
+
+    def show_backup_versions(self):
+        parent = QFileDialog.getExistingDirectory(self, "Katalog zawierający wersje kopii")
+        if not parent:
+            return
+        try:
+            overview = list_versions(parent, limit=15)
+        except (OSError, ValueError) as error:
+            self.show_backup_error(str(error))
+            return
+        lines = [f"{row['name']} — {row['file_count']} plików; "
+                 f"{'zapis kompletny' if row['complete'] else 'zapis niepełny'}; "
+                 f"{row['modified_utc']}"
+                 for row in overview["versions"]]
+        message = "\n".join(lines) if lines else "Nie znaleziono kopii w tym katalogu."
+        self.status.setText(f"Wersje: {overview['total_found']}; nieczytelne: {overview['unreadable']}.")
+        QMessageBox.information(self, "Wersje kopii", message + "\n\n" + overview["note"])
 
     def start_vss_recover(self):
         journal, _ = QFileDialog.getOpenFileName(

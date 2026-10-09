@@ -1,9 +1,21 @@
 PRESTIGE TECH — PLIK PRZEKAZANIA PRACY I TESTÓW
 Stan: 2026-10-08. Aktualizuj ten plik po każdym istotnym etapie.
 
+ETAP 2026-10-09: Dodano kod jawnego nocnego przeglądu przez Harmonogram
+zadań Windows: python -m prestige_core.daily_schedule plan, a instalacja
+lub usunięcie wymaga --confirm. Wygenerowany skrypt ma testy bez uruchamiania
+zadania na komputerze użytkownika. Nie ma automatycznych napraw. Harmonogram
+działa w sesji zalogowanego użytkownika; realny wyzwalacz wymaga testu.
+
+ETAP 2026-10-09: Storage & Recovery pokazuje listę wersji kopii bez
+potwierdzania integralności samym widokiem. Dashboard w obu stylach ma
+lokalne skróty HTTPS z pełnym adresem przed otwarciem i usuwaniem.
+Testy: Centra 327 (326 OK, 1 skip), Dashboard 21 OK. Dalsze otwarte:
+ciągły harmonogram kopii, test realnego przywrócenia i przeglądarka.
+
 ETAP 2026-10-09: System Center ma odczyt drukarki, urządzeń dźwięku i
 jednorazowy przegląd zapisywany w JSON. daily_checks.py działa też jako CLI,
-ale nie rejestruje jeszcze nocnego harmonogramu i nie wykonuje napraw.
+oraz ma osobny kod jawnej rejestracji nocnego zadania; nie wykonuje napraw.
 Security Center odczytuje lokalne pozwolenia na powiadomienia Chrome/Edge.
 Network Center ocenia odczytane szyfrowanie Wi-Fi (brak testu hasła routera).
 Report Center tworzy lokalny raport stanu dla bliskiej osoby z podglądem przed
