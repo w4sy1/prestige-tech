@@ -1,6 +1,7 @@
 """Pierwsza karta System Center: migawka Windows i porównanie dwóch plików."""
 
 import json
+import os
 from pathlib import Path
 import uuid
 
@@ -18,6 +19,7 @@ from prestige_core.report_prefill import summarize_center_result
 from prestige_core.senior_assistant import check_disk_space, help_plan
 from prestige_core.system_help_checks import read_audio_devices, read_printer_state
 from prestige_core.daily_checks import default_report_dir, run_daily_checks, save_daily_report
+from prestige_core.system_optimization import audit_windows as audit_optimization
 from prestige_ai.gui import AiDialog
 
 
@@ -50,6 +52,8 @@ class SnapshotWorker(QThread):
                 diagnostic = run_daily_checks(("disk", "printer", "audio"))
                 path = save_daily_report(diagnostic, default_report_dir())
                 result = {"action": "daily", "diagnostic": diagnostic, "path": str(path)}
+            elif self.action == "optimization":
+                result = {"action": "optimization", "diagnostic": audit_optimization()}
             else:
                 raise ValueError("Nieznana operacja System Center.")
             self.loaded.emit(result)
@@ -144,6 +148,12 @@ class SystemCenterWindow(QMainWindow):
         self.toolkit_button = QPushButton("Diagnostyka Windows Toolkit")
         self.toolkit_button.clicked.connect(lambda: self._start("toolkit", ()))
         controls.addWidget(self.toolkit_button)
+        self.optimization_button = QPushButton("Sprawdź spowolnienia i autostart")
+        self.optimization_button.clicked.connect(lambda: self._start("optimization", ()))
+        controls.addWidget(self.optimization_button)
+        self.startup_settings_button = QPushButton("Otwórz ustawienia autostartu")
+        self.startup_settings_button.clicked.connect(self.open_startup_settings)
+        controls.addWidget(self.startup_settings_button)
         self.daily_button = QPushButton("Sprawdź podstawowy stan")
         self.daily_button.clicked.connect(lambda: self._start("daily", ()))
         controls.addWidget(self.daily_button)
@@ -236,6 +246,15 @@ class SystemCenterWindow(QMainWindow):
         self.result.setPlainText("\n".join(lines))
         self.status.setText("Pokazano plan bez zmiany ustawień i bez usuwania plików.")
 
+    def open_startup_settings(self):
+        if os.name != "nt":
+            self.status.setText("Ustawienia autostartu są dostępne w Windows.")
+            return
+        try:
+            os.startfile("ms-settings:startupapps")
+        except OSError as error:
+            self.status.setText(f"Nie otwarto ustawień autostartu: {error}")
+
     def start_problem_check(self):
         problem_id = self.problem_choice.currentData()
         if problem_id == "low_disk_space":
@@ -264,6 +283,7 @@ class SystemCenterWindow(QMainWindow):
         self.capture_button.setEnabled(False)
         self.compare_button.setEnabled(False)
         self.toolkit_button.setEnabled(False)
+        self.optimization_button.setEnabled(False)
         self.daily_button.setEnabled(False)
         self.status.setText("Trwa odczyt…")
         self.worker = SnapshotWorker(action, paths, self)
@@ -435,6 +455,7 @@ class SystemCenterWindow(QMainWindow):
         self.capture_button.setEnabled(True)
         self.compare_button.setEnabled(True)
         self.toolkit_button.setEnabled(True)
+        self.optimization_button.setEnabled(True)
         self.daily_button.setEnabled(True)
 
     def show_result(self, data):
@@ -455,6 +476,9 @@ class SystemCenterWindow(QMainWindow):
             diagnostic = data["diagnostic"]
             self.status.setText(f"Przegląd zapisany: {data['path']}. "
                                 f"Wynik: {diagnostic['indicator']['label']}.")
+        elif data["action"] == "optimization":
+            self.status.setText(f"Audyt bez zmian systemu: {len(data['diagnostic']['findings'])} wskazówek. "
+                                "Nie wyłączono aktualizacji, ochrony ani telemetrii.")
         else:
             sections = data["diagnostic"]["sections"]
             unknown = sum(row["status"] == "UNKNOWN" for row in sections.values())
@@ -471,6 +495,8 @@ class SystemCenterWindow(QMainWindow):
                                 "Migawka odczytuje stan Windows bez zmian systemu. Zapis tworzy wyłącznie nowy plik. "
                                 "UNKNOWN oznacza niedostępny odczyt, a nie brak problemu. Porównanie procesów i wolnego "
                                 "miejsca może wykazać zwykłe zmiany w czasie. Plik migawki może zawierać prywatne dane. "
+                                "Audyt spowolnień tylko odczytuje autostart, Edge, aktualizacje i wolne miejsce; "
+                                "nie wyłącza ochrony ani usług. Ustawienia autostartu otwierają panel Windows. "
                                 "PC Cleanup najpierw skanuje i pokazuje plan. Kwarantanna jest dostępna tylko dla "
                                 "zatwierdzonych TEMP/cache; Downloads, logi i Kosz są do analizy. Diagnostyka aktualizacji "
                                 "czyta historię, usługi, polityki i sygnały restartu bez wyszukiwania nowych aktualizacji. Przed przeniesieniem "

@@ -6,6 +6,26 @@ projektu i nie zastępują bieżącego pliku licencji.
 
 Bieżący plik przekazania pracy i lista końcowych testów: `development/CONTINUE-HANDOFF.txt`.
 
+## Etap 2026-10-09 — optymalizacja i rozszerzenie Security Center
+
+System Center ma odczytowy audyt autostartu, procesów Edge, zasad pracy w tle,
+wolnego miejsca oraz stanu usługi aktualizacji i ochrony. Pokazuje wskazówki
+i otwiera systemową stronę aplikacji startowych; niczego sam nie wyłącza.
+Aktualizacje i Defender nie są traktowane jako „śmieci”. PC Cleanup nadal
+stosuje podgląd i kontrolowaną kwarantannę tylko zatwierdzonych lokalizacji.
+Security Center czyta metadane ZIP/TAR bez ekstrakcji, oznacza ścieżki
+uciekające z archiwum, linki, szyfrowanie, nazwy wykonywalne i duże proporcje
+rozpakowania. Po osobnym potwierdzeniu może zapytać VirusTotal o SHA-256
+wybranego pliku z kluczem VT_API_KEY; nie wysyła pliku. Malware Triage
+przedstawia mapę sprawdzonych miejsc autostartu, procesów, WMI, sterowników,
+przeglądarek i konfiguracji. Firmware pozostaje UNKNOWN bez zaufanego wzorca.
+Skan portów jest już w Network Center (Nmap) i audycie Security Center;
+nie był w tym etapie uruchamiany na realnej sieci.
+
+Testy kodu i GUI: 340 uruchomionych, 339 OK, 1 pominięty. Zewnętrznego
+VirusTotal ani zmian systemowych nie uruchamiano. Pełny moduł kontrolowanych zmian optymalizacyjnych z kopią,
+cofnięciem i testami na VM pozostaje otwarty.
+
 ## Etap 2026-10-09 — trwały, odczytowy monitoring sieci
 
 Network Center pozwala po ręcznym wyborze własnej podsieci zapisać lokalny

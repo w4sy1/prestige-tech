@@ -15,6 +15,9 @@ from prestige_core.security_rules import audit
 from prestige_core.security_compare import compare_audits
 from prestige_core.link_check import inspect_link
 from prestige_core.browser_notifications import collect_notification_permissions
+from prestige_core.archive_inspector import inspect_archive
+from prestige_core.virustotal_lookup import lookup_file
+from prestige_core.persistence_overview import overview as persistence_overview
 from prestige_core.malware_triage import triage_windows
 from prestige_core.malware_rules import analyze
 from prestige_core.ui_theme import APP_QSS, COLORS
@@ -50,6 +53,10 @@ class SecurityWorker(QThread):
                 result = analyze(load_evidence(self.path))
             elif self.action == "notifications":
                 result = collect_notification_permissions()
+            elif self.action == "archive":
+                result = inspect_archive(self.path)
+            elif self.action == "virustotal":
+                result = lookup_file(self.path)
             else:
                 raise ValueError("Nieznana operacja Security Center.")
             self.loaded.emit({"action": self.action, "data": result})
@@ -150,6 +157,14 @@ class SecurityCenterWindow(QMainWindow):
         self.triage_offline_button.clicked.connect(self.choose_triage_offline)
         triage_controls.addWidget(self.triage_offline_button)
         main.addLayout(triage_controls)
+        extra_controls = QHBoxLayout()
+        self.archive_button = QPushButton("Sprawdź archiwum bez rozpakowania")
+        self.archive_button.clicked.connect(self.choose_archive)
+        extra_controls.addWidget(self.archive_button)
+        self.vt_button = QPushButton("Sprawdź SHA-256 w VirusTotal")
+        self.vt_button.clicked.connect(self.choose_virustotal)
+        extra_controls.addWidget(self.vt_button)
+        main.addLayout(extra_controls)
         self.raw_evidence = QCheckBox("Pokaż surowe dane Triage (alerty i korelacje również mogą zawierać prywatne ścieżki)")
         main.addWidget(self.raw_evidence)
         self.status = QLabel("Wybierz plik do odczytu.")
@@ -220,6 +235,22 @@ class SecurityCenterWindow(QMainWindow):
         if path:
             self._start("triage_offline", path)
 
+    def choose_archive(self):
+        path, _ = QFileDialog.getOpenFileName(self, "Archiwum ZIP lub TAR", "",
+                                               "Archiwa (*.zip *.tar *.tar.gz *.tgz *.tar.xz);;Wszystkie pliki (*)")
+        if path:
+            self._start("archive", path)
+
+    def choose_virustotal(self):
+        path, _ = QFileDialog.getOpenFileName(self, "Plik do sprawdzenia po SHA-256")
+        if not path:
+            return
+        if QMessageBox.question(self, "Zapytanie VirusTotal",
+                                "Wysłać SHA-256 wybranego pliku do VirusTotal? Sam plik nie będzie wysyłany. "
+                                "Wymagany klucz VT_API_KEY w środowisku. Hash może ujawnić, jaki plik posiadasz.",
+                                QMessageBox.Yes | QMessageBox.No, QMessageBox.No) == QMessageBox.Yes:
+            self._start("virustotal", path)
+
     def _start(self, action, path=None):
         if self.worker is not None and self.worker.isRunning():
             return
@@ -235,6 +266,8 @@ class SecurityCenterWindow(QMainWindow):
         self.triage_folder_button.setEnabled(False)
         self.triage_offline_button.setEnabled(False)
         self.notifications_button.setEnabled(False)
+        self.archive_button.setEnabled(False)
+        self.vt_button.setEnabled(False)
         self.status.setText("Trwa odczyt…")
         self.worker = SecurityWorker(action, path, self.strings_checkbox.isChecked(),
                                      self.triage_seconds.value(), self)
@@ -251,6 +284,8 @@ class SecurityCenterWindow(QMainWindow):
         self.triage_folder_button.setEnabled(True)
         self.triage_offline_button.setEnabled(True)
         self.notifications_button.setEnabled(True)
+        self.archive_button.setEnabled(True)
+        self.vt_button.setEnabled(True)
 
     def show_result(self, result):
         try:
@@ -271,9 +306,16 @@ class SecurityCenterWindow(QMainWindow):
             self.status.setText(f"Odczytano {data['profiles_read']} profili; "
                                 f"stron z pozwoleniem: {len(data['allowed_sites'])}; "
                                 f"błędy: {data['errors']}. Ustawienia zmień w przeglądarce.")
+        elif result["action"] == "archive":
+            self.status.setText(f"Odczytano {data['entries_shown']} wpisów bez rozpakowania. "
+                                "To nie jest skan antywirusowy.")
+        elif result["action"] == "virustotal":
+            self.status.setText("Odczytano raport VirusTotal dla SHA-256. Pliku nie wysłano; "
+                                "brak wykryć nie gwarantuje bezpieczeństwa.")
         else:
             self.status.setText(f"Triage zakończony: {len(data['alerts'])} alertów, "
                                 f"{len(data['unknown_sections'])} sekcji UNKNOWN. Alert nie jest werdyktem malware.")
+            data = {**data, "gdzie_sprawdzono": persistence_overview(data)}
             if not self.raw_evidence.isChecked():
                 data = {key: value for key, value in data.items() if key != "evidence"}
         self.result.setPlainText(json.dumps(data, ensure_ascii=False, indent=2))
@@ -340,7 +382,11 @@ class SecurityCenterWindow(QMainWindow):
                                 "Audyt Windows obejmuje 21 kategorii i zgłasza UNKNOWN przy braku danych. Wynik nie jest "
                                 "prawdopodobieństwem infekcji. Malware Triage próbkuje CPU/GPU i koreluje procesy z "
                                 "autostartem oraz połączeniami. Jego alerty wymagają ręcznej oceny. Skan folderu nie "
-                                "uruchamia znalezionych plików. Offline JSON wymaga danych kontroli, nie końcowego raportu.")
+                                "uruchamia znalezionych plików. Archiwum ZIP/TAR czytane jest bez rozpakowania; "
+                                "nagłówki i nazwy nie potwierdzają bezpieczeństwa treści. VirusTotal otrzymuje tylko "
+                                "SHA-256 po zgodzie i może rozpoznać posiadany plik. Mapa autostartu nie dowodzi infekcji; "
+                                "integralności BIOS/UEFI nie da się potwierdzić tym odczytem. "
+                                "Offline JSON wymaga danych kontroli, nie końcowego raportu.")
 
     def closeEvent(self, event):
         if self.worker is not None and self.worker.isRunning():

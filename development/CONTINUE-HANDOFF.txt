@@ -1,6 +1,17 @@
 PRESTIGE TECH — PLIK PRZEKAZANIA PRACY I TESTÓW
 Stan: 2026-10-08. Aktualizuj ten plik po każdym istotnym etapie.
 
+ETAP 2026-10-09: System Center ma odczytowy audyt spowolnień (autostart,
+Edge, zasady pracy w tle, aktualizacje, ochrona, wolne miejsce) i przycisk
+ustawień autostartu Windows. Nie wyłącza usług, aktualizacji ani telemetrii.
+Security Center czyta metadane ZIP/TAR bez ekstrakcji i oznacza ryzykowne
+nazwy/linki. VirusTotal jest opcjonalny: po potwierdzeniu wysyła tylko SHA-256,
+klucz z VT_API_KEY, bez pliku. Triage pokazuje mapę sprawdzonych lokalizacji
+persistence; integralność BIOS/UEFI jest UNKNOWN. Ręczny skan portów był już
+w Network Center i audycie Security. Nie testowano rzeczywistego VT ani
+archiwów złośliwych; pełne zmiany optymalizacyjne z rollbackiem są otwarte.
+Testy: 340 uruchomionych, 339 PASS, 1 skip; GUI offscreen PASS.
+
 ETAP 2026-10-09: Network Center ma zapis profilu własnej podsieci oraz kod
 codziennego, odczytowego skanu ICMP w Harmonogramie zadań Windows. Zadanie
 rejestruje się wyłącznie po potwierdzeniu w GUI; nie używa Nmap/port scan i
