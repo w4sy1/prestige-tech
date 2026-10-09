@@ -10,7 +10,7 @@ from .file_extended import collect_extended, metadata_complete
 
 
 def scan_files(root, *, max_files=10000, cancel_event=None, previous=None,
-               force_rehash=False, extended=False):
+               force_rehash=False, extended=False, exclude_paths=()):
     """Hashuj zwykłe pliki, pomijaj symlinki, zachowaj błędy jako UNKNOWN."""
     root = Path(root)
     if root.is_symlink():
@@ -20,6 +20,14 @@ def scan_files(root, *, max_files=10000, cancel_event=None, previous=None,
         raise ValueError("Wymagany katalog źródłowy.")
     if max_files < 1:
         raise ValueError("Limit plików musi być dodatni.")
+    excluded = []
+    for value in exclude_paths:
+        path = Path(value)
+        if (path.is_absolute() or not path.parts or any(part in (".", "..") for part in path.parts)
+                or ":" in str(path)):
+            raise ValueError("Wykluczenia muszą być względnymi ścieżkami podfolderów.")
+        excluded.append(path.as_posix())
+    excluded = tuple(sorted(set(excluded)))
     rows = []
     errors = []
     if previous is not None and previous.get("root") != str(root):
@@ -43,6 +51,9 @@ def scan_files(root, *, max_files=10000, cancel_event=None, previous=None,
                 pending.clear()
                 break
             relative = str(Path(entry.path).relative_to(root))
+            normalized = Path(relative).as_posix()
+            if any(normalized == prefix or normalized.startswith(prefix + "/") for prefix in excluded):
+                continue
             try:
                 if entry.is_symlink():
                     errors.append({"path": relative, "error": "Pominięto dowiązanie symboliczne."})
@@ -85,7 +96,7 @@ def scan_files(root, *, max_files=10000, cancel_event=None, previous=None,
         "files": sorted(rows, key=lambda row: row["path"]),
         "errors": sorted(errors, key=lambda row: row["path"]),
         "complete": not errors,
-        "options": {"extended": extended},
+        "options": {"extended": extended, "exclude_paths": list(excluded)},
     }
 
 
@@ -102,6 +113,8 @@ def compare_files(earlier, later):
     after_extended = later.get("options", {}).get("extended", False)
     if before_extended != after_extended:
         return {"status": "UNKNOWN", "reason": "Migawki mają różne tryby ACL/ADS."}
+    if earlier.get("options", {}).get("exclude_paths", []) != later.get("options", {}).get("exclude_paths", []):
+        return {"status": "UNKNOWN", "reason": "Migawki mają różne wykluczenia podfolderów."}
     if before_extended:
         if any(not metadata_complete(row.get("extended"))
                for row in earlier["files"] + later["files"]):

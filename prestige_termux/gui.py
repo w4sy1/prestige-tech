@@ -10,7 +10,11 @@ from PySide6.QtWidgets import (QCheckBox, QComboBox, QFileDialog, QFormLayout, Q
                                QPushButton, QVBoxLayout, QWidget)
 
 from prestige_core import termux_setup, termux_toolkit
+from prestige_core.termux_health import health_check
+from prestige_core.termux_packages import compare_profile_packages
+from prestige_core.report_live import summarize_live_result
 from prestige_core.ui_theme import APP_QSS, center_header
+from prestige_report.gui import ReportDialog
 
 
 class TermuxWorker(QThread):
@@ -39,6 +43,8 @@ class TermuxCenterWindow(QMainWindow):
         self.setMinimumSize(650, 500)
         self.setStyleSheet(APP_QSS)
         self.worker = None
+        self.last_health = None
+        self.report_dialog = None
         root = QWidget()
         self.setCentralWidget(root)
         layout = QVBoxLayout(root)
@@ -77,16 +83,32 @@ class TermuxCenterWindow(QMainWindow):
         form.addRow("", self.apply)
         layout.addLayout(form)
         controls = QHBoxLayout()
+        secondary_controls = QHBoxLayout()
         self.run_button = QPushButton("Uruchom / pokaż plan")
         self.run_button.clicked.connect(self.start)
         controls.addWidget(self.run_button)
+        health_button = QPushButton("Sprawdź środowisko")
+        health_button.clicked.connect(self.show_health)
+        controls.addWidget(health_button)
+        self.save_health_button = QPushButton("Zapisz stan JSON")
+        self.save_health_button.setEnabled(False)
+        self.save_health_button.clicked.connect(self.save_health)
+        secondary_controls.addWidget(self.save_health_button)
+        packages_button = QPushButton("Porównaj pakiety profilu")
+        packages_button.clicked.connect(self.show_profile_packages)
+        controls.addWidget(packages_button)
         self.file_button = QPushButton("Wybierz plik")
         self.file_button.clicked.connect(self.choose_file)
-        controls.addWidget(self.file_button)
+        secondary_controls.addWidget(self.file_button)
         self.help_button = QPushButton("?")
         self.help_button.clicked.connect(self.show_help)
-        controls.addWidget(self.help_button)
+        secondary_controls.addWidget(self.help_button)
         layout.addLayout(controls)
+        layout.addLayout(secondary_controls)
+        self.report_button = QPushButton("Ostatni odczyt środowiska → Repair Report")
+        self.report_button.setEnabled(False)
+        self.report_button.clicked.connect(self.open_report)
+        layout.addWidget(self.report_button)
         self.status = QLabel("Wybierz operację.")
         self.status.setWordWrap(True)
         layout.addWidget(self.status)
@@ -112,6 +134,49 @@ class TermuxCenterWindow(QMainWindow):
         path, _ = QFileDialog.getOpenFileName(self, "Plik do obliczenia SHA-256")
         if path:
             self.file.setText(path)
+
+    def show_health(self):
+        result = health_check()
+        self.last_health = result
+        self.save_health_button.setEnabled(True)
+        self.report_button.setEnabled(True)
+        self.result.setPlainText(json.dumps(result, ensure_ascii=False, indent=2))
+        self.status.setText(f"Środowisko Termux: {result['status']}.")
+
+    def save_health(self):
+        if self.last_health is None:
+            return
+        path, _ = QFileDialog.getSaveFileName(self, "Nowy odczyt stanu Termux", "termux-health.json",
+                                              "JSON (*.json)")
+        if not path:
+            return
+        try:
+            with Path(path).open("x", encoding="utf-8") as stream:
+                json.dump(self.last_health, stream, ensure_ascii=False, indent=2)
+                stream.write("\n")
+        except (OSError, TypeError, ValueError) as error:
+            self.status.setText("Nie zapisano stanu: " + str(error))
+            return
+        self.status.setText("Zapisano odczytowy stan Termux: " + path)
+
+    def open_report(self):
+        if self.last_health is None:
+            return
+        try:
+            prefill = summarize_live_result("Termux", self.last_health)
+        except ValueError as error:
+            self.status.setText("Nie przekazano wyniku do raportu: " + str(error))
+            return
+        self.report_dialog = ReportDialog(self, prefill=prefill)
+        self.report_dialog.show()
+
+    def show_profile_packages(self):
+        try:
+            result = compare_profile_packages(self.profile.currentText())
+            self.result.setPlainText(json.dumps(result, ensure_ascii=False, indent=2))
+            self.status.setText(f"Profil {result['profile']}: brakujących pakietów {len(result['missing'])}.")
+        except (OSError, ValueError, RuntimeError) as error:
+            self.status.setText(f"Nie porównano pakietów: {error}")
 
     def start(self):
         if self.worker is not None and self.worker.isRunning():

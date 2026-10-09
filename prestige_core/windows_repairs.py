@@ -33,6 +33,31 @@ def plan_repair(operation):
             "note": "Brak gwarantowanego cofnięcia. Wymaga kopii diagnostycznej i świadomej zgody."}
 
 
+def list_repair_journals(directory, *, limit=100):
+    """Zwróć metadane lokalnych dzienników bez treści diagnostyki i poleceń."""
+    folder = Path(directory)
+    if not folder.is_dir():
+        raise ValueError("Wybierz katalog dzienników napraw.")
+    rows = []
+    for path in sorted(folder.glob("prestige-repair-*.json"), reverse=True):
+        if len(rows) >= limit:
+            break
+        try:
+            if path.stat().st_size > 16 * 1024 * 1024:
+                continue
+            data = json.loads(path.read_text(encoding="utf-8-sig"))
+            if (not isinstance(data, dict) or data.get("schema_version") != 1
+                    or data.get("operation") not in OPERATIONS):
+                continue
+            rows.append({"file": str(path), "operation": data["operation"],
+                         "created_utc": data.get("created_utc"),
+                         "status": data.get("status", "UNKNOWN"),
+                         "exit_code": data.get("exit_code")})
+        except (OSError, ValueError, UnicodeError):
+            continue
+    return rows
+
+
 def _is_admin():
     try:
         return bool(ctypes.windll.shell32.IsUserAnAdmin())

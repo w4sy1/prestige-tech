@@ -9,6 +9,9 @@ import uuid
 
 SOURCE = "https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-gppref/a6ca3a17-1971-4b22-bf3b-e1a5d5c50fca"
 ADVANCED = r"Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
+PERSONALIZE = r"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize"
+DWM = r"Software\Microsoft\Windows\DWM"
+PERSONALIZE_SOURCE = "https://learn.microsoft.com/en-us/windows/apps/develop/settings/settings-common"
 
 
 @dataclass(frozen=True)
@@ -32,6 +35,21 @@ OPERATIONS = (
     ChangeOperation("REG-WRITE-008", "Pokaż kolory plików NTFS", ADVANCED, "ShowCompColor", 1),
     ChangeOperation("REG-WRITE-009", "Otwieraj okna folderów w osobnym procesie", ADVANCED,
                     "SeparateProcess", 1),
+    ChangeOperation("REG-WRITE-010", "Pokaż chronione pliki systemowe", ADVANCED,
+                    "ShowSuperHidden", 1),
+    ChangeOperation("REG-WRITE-011", "Pokaż ikonę typu na miniaturach", ADVANCED,
+                    "ShowTypeOverlay", 1),
+    ChangeOperation("REG-WRITE-016", "Pokaż pasek stanu Eksploratora", ADVANCED,
+                    "ShowStatusBar", 1, (0, 1),
+                    "https://learn.microsoft.com/en-us/windows/apps/develop/settings/settings-common"),
+    ChangeOperation("REG-WRITE-017", "Włącz jasny motyw aplikacji", PERSONALIZE,
+                    "AppsUseLightTheme", 1, (0, 1), PERSONALIZE_SOURCE),
+    ChangeOperation("REG-WRITE-018", "Włącz jasny motyw interfejsu Windows", PERSONALIZE,
+                    "SystemUsesLightTheme", 1, (0, 1), PERSONALIZE_SOURCE),
+    ChangeOperation("REG-WRITE-019", "Wyłącz efekt przezroczystości", PERSONALIZE,
+                    "EnableTransparency", 0, (0, 1), PERSONALIZE_SOURCE),
+    ChangeOperation("REG-WRITE-020", "Pokaż kolor akcentu na paskach tytułu okien", DWM,
+                    "ColorPrevalence", 1, (0, 1), PERSONALIZE_SOURCE),
 )
 
 
@@ -130,9 +148,7 @@ def apply_change(operation_id, backup_path, *, accept_changes=False, registry=No
     return {"status": "APPLIED", "operation": operation.id, "backup": str(path)}
 
 
-def rollback_change(backup_path, *, accept_changes=False, registry=None, platform=None):
-    if not accept_changes:
-        raise ValueError("Wymagana jawna zgoda na cofnięcie.")
+def _rollback_record(backup_path):
     path = Path(backup_path)
     record = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(record, dict) or record.get("schema_version") != 1:
@@ -146,6 +162,35 @@ def rollback_change(backup_path, *, accept_changes=False, registry=None, platfor
             or record["previous"] == operation.target
             or record.get("status") not in ("APPLIED", "RECOVERY_NEEDED")):
         raise ValueError("Kopia nie odpowiada zatwierdzonej operacji.")
+    return path, record, operation
+
+
+def preview_rollback_change(backup_path, *, registry=None, platform=None):
+    path, record, operation = _rollback_record(backup_path)
+    registry = _reg(registry, platform)
+    current = _read(registry, operation)
+    return {"status": "PLAN" if current == operation.target else "REFUSED",
+            "operation": operation.id, "hive": "HKCU", "key": operation.key,
+            "name": operation.name, "current": current,
+            "expected": operation.target, "restore": record["previous"],
+            "backup": str(path), "change_needed": current == operation.target}
+
+
+def export_change_diff(backup_path, destination, *, registry=None, platform=None):
+    preview = preview_rollback_change(backup_path, registry=registry, platform=platform)
+    report = {"schema_version": 1, "operation": preview["operation"],
+              "hive": preview["hive"], "key": preview["key"], "name": preview["name"],
+              "before": preview["restore"], "applied": preview["expected"],
+              "current": preview["current"], "status": preview["status"],
+              "note": "Bieżący odczyt jest chwilowy; eksport nie zmienia rejestru."}
+    _save_new(destination, report)
+    return report
+
+
+def rollback_change(backup_path, *, accept_changes=False, registry=None, platform=None):
+    if not accept_changes:
+        raise ValueError("Wymagana jawna zgoda na cofnięcie.")
+    path, record, operation = _rollback_record(backup_path)
     registry = _reg(registry, platform)
     if _read(registry, operation) != operation.target:
         raise ValueError("Wartość zmieniła się od wykonania operacji; odmowa nadpisania.")

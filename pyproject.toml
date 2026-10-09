@@ -27,4 +27,4 @@ py-modules = ["network_center", "monitor", "registry_manager", "storage_center",
 include = ["prestige_core*", "prestige_network_center*", "prestige_monitor*", "prestige_registry*", "prestige_storage*", "prestige_android*", "prestige_security*", "prestige_system*", "prestige_report*", "prestige_termux*", "prestige_ai*", "prestige_cli*"]
 
 [tool.setuptools.package-data]
-prestige_core = ["assets/DejaVuSans.ttf", "assets/FONT-LICENSE.txt"]
+prestige_core = ["assets/DejaVuSans.ttf", "assets/FONT-LICENSE.txt", "assets/pro-public.pem"]

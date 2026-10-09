@@ -1,5 +1,23 @@
 # Registry Manager — licznik operacji (2026-09-28)
 
+Aktualizacja 2026-10-08: katalog zmian HKCU ma teraz 20 pozycji, po dodaniu
+ShowSuperHidden, ShowTypeOverlay, czterech polityk HKCU, ShowStatusBar oraz
+trzech ustawień motywu/przezroczystości i koloru pasków tytułu.
+GUI opisuje ich skutki prostym językiem,
+oznacza poziom i FREE/PRO. Kod weryfikuje podpisany klucz PRO offline, ale
+publiczny klucz wydawcy i warunki płatnego wydania nie są jeszcze gotowe.
+Użytkownik potwierdził cel 200/200/200 zmian. Nadal pozostaje 580 operacji
+do indywidualnego opracowania i testów. Nowe 012/013 mają kopię także dla
+nieistniejącej wartości, warunkowe cofnięcie oraz odmowę na niewspieranej edycji.
+Sprawdzono je na fixture, bez rzeczywistego zapisu na Windows.
+Polityki REG-WRITE-012–015 są według dokumentacji Microsoft wspierane w
+Windows Pro/Enterprise/Education; na tym komputerze plan bez trybu
+eksperymentalnego odmówił z powodu innej edycji. Na życzenie użytkownika
+tryb eksperymentalny pozwala wykonać plan/zapis mimo braku oficjalnego
+wsparcia, ale pozostaje domyślnie wyłączony i nie stanowi potwierdzenia efektu.
+REG-WRITE-016–020 mają poprawny lokalny odczyt DWORD; nie wykonywano
+rzeczywistego zapisu i cofnięcia.
+
 Aktualny katalog na tym komputerze: **500 odrębnych odczytów** — 29 ręcznie
 opisanych niżej oraz 471 wyprowadzonych z 33 lokalnych szablonów Microsoft
 `C:\Windows\PolicyDefinitions\*.admx`. Parser przyjmuje tylko bezpośrednio

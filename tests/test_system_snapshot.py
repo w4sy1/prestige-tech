@@ -3,7 +3,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from prestige_core.system_snapshot import (QUERIES, compare, load_snapshot,
+from prestige_core.system_snapshot import (QUERIES, REQUIRED_SECTIONS, compare, load_snapshot,
                                            save_snapshot, validate_snapshot)
 
 
@@ -15,6 +15,14 @@ def snapshot(**overrides):
 
 
 class SystemSnapshotTests(unittest.TestCase):
+    def test_new_hardware_sections_preserve_old_snapshot_compatibility(self):
+        self.assertTrue({"cpu", "gpu", "bios", "physical_disks", "smart"} <= set(QUERIES))
+        older = snapshot()
+        for name in set(QUERIES) - REQUIRED_SECTIONS:
+            del older["sections"][name]
+        self.assertIs(validate_snapshot(older), older)
+        self.assertEqual(compare(older, snapshot())["sections"]["smart"]["status"], "UNKNOWN")
+
     def test_save_compare_identity_and_no_overwrite(self):
         with tempfile.TemporaryDirectory() as directory:
             before = snapshot(programs={"status": "OK", "data": [

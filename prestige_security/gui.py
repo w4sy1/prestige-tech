@@ -1,6 +1,7 @@
 """GUI pierwszej funkcji Security Center: inspekcja pliku bez wykonania."""
 
 import json
+from pathlib import Path
 
 from PySide6.QtCore import QThread, Signal
 from PySide6.QtWidgets import (QCheckBox, QFileDialog, QFrame, QHBoxLayout, QLabel, QSpinBox,
@@ -11,6 +12,7 @@ from prestige_core.file_inspector import inspect_file
 from prestige_core.file_inspector_report import build_file_report, export_file_report
 from prestige_core.security_check import audit_windows, load_evidence
 from prestige_core.security_rules import audit
+from prestige_core.security_compare import compare_audits
 from prestige_core.malware_triage import triage_windows
 from prestige_core.malware_rules import analyze
 from prestige_core.ui_theme import APP_QSS, COLORS
@@ -62,6 +64,7 @@ class SecurityCenterWindow(QMainWindow):
         self.report_dialog = None
         self.report_prefill = None
         self.file_result = None
+        self.last_audit = None
         self.ai_dialog = None
         root = QWidget()
         self.setCentralWidget(root)
@@ -96,6 +99,10 @@ class SecurityCenterWindow(QMainWindow):
         self.export_pdf_button.setEnabled(False)
         self.export_pdf_button.clicked.connect(self.export_file_pdf)
         export_controls.addWidget(self.export_pdf_button)
+        self.export_audit_button = QPushButton("Zapisz audyt JSON")
+        self.export_audit_button.setEnabled(False)
+        self.export_audit_button.clicked.connect(self.export_audit)
+        export_controls.addWidget(self.export_audit_button)
         export_controls.addStretch()
         main.addLayout(export_controls)
         audit_controls = QHBoxLayout()
@@ -105,6 +112,9 @@ class SecurityCenterWindow(QMainWindow):
         self.offline_button = QPushButton("Analizuj zapisany JSON Security Check")
         self.offline_button.clicked.connect(self.choose_offline_audit)
         audit_controls.addWidget(self.offline_button)
+        compare_button = QPushButton("Porównaj dwa audyty JSON")
+        compare_button.clicked.connect(self.compare_offline_audits)
+        audit_controls.addWidget(compare_button)
         self.ai_button = QPushButton("Analiza AI")
         self.ai_button.clicked.connect(self.open_ai)
         audit_controls.addWidget(self.ai_button)
@@ -156,6 +166,20 @@ class SecurityCenterWindow(QMainWindow):
         if path:
             self._start("offline", path)
 
+    def compare_offline_audits(self):
+        first, _ = QFileDialog.getOpenFileName(self, "Wcześniejszy odczyt Security Check", "", "JSON (*.json)")
+        if not first:
+            return
+        second, _ = QFileDialog.getOpenFileName(self, "Późniejszy odczyt Security Check", "", "JSON (*.json)")
+        if not second:
+            return
+        try:
+            result = compare_audits(audit(load_evidence(first)), audit(load_evidence(second)))
+            self.result.setPlainText(json.dumps(result, ensure_ascii=False, indent=2))
+            self.status.setText(f"Porównanie audytów: {result['status']}.")
+        except (OSError, ValueError, KeyError) as error:
+            self.status.setText(f"Nie porównano audytów: {error}")
+
     def start_triage(self):
         self._start("triage")
 
@@ -173,8 +197,10 @@ class SecurityCenterWindow(QMainWindow):
         if self.worker is not None and self.worker.isRunning():
             return
         self.file_result = None
+        self.last_audit = None
         self.export_file_button.setEnabled(False)
         self.export_pdf_button.setEnabled(False)
+        self.export_audit_button.setEnabled(False)
         self.choose_button.setEnabled(False)
         self.audit_button.setEnabled(False)
         self.offline_button.setEnabled(False)
@@ -209,6 +235,8 @@ class SecurityCenterWindow(QMainWindow):
             self.export_pdf_button.setEnabled(True)
             self.status.setText(f"Analiza zakończona: {data['name']}")
         elif result["action"] in ("audit", "offline"):
+            self.last_audit = data
+            self.export_audit_button.setEnabled(True)
             self.status.setText(f"Audyt zakończony: {data['unknown_checks']} kontroli UNKNOWN, wynik {data['risk_score']}/100.")
         else:
             self.status.setText(f"Triage zakończony: {len(data['alerts'])} alertów, "
@@ -220,10 +248,28 @@ class SecurityCenterWindow(QMainWindow):
     def show_error(self, message):
         self.report_prefill = None
         self.file_result = None
+        self.last_audit = None
         self.export_file_button.setEnabled(False)
         self.export_pdf_button.setEnabled(False)
+        self.export_audit_button.setEnabled(False)
         self.status.setText("Nie ukończono analizy.")
         self.result.setPlainText(message)
+
+    def export_audit(self):
+        if self.last_audit is None:
+            return
+        path, _ = QFileDialog.getSaveFileName(self, "Nowy wynik audytu Security", "security-audit.json",
+                                              "JSON (*.json)")
+        if not path:
+            return
+        try:
+            with Path(path).open("x", encoding="utf-8") as stream:
+                json.dump(self.last_audit, stream, ensure_ascii=False, indent=2)
+                stream.write("\n")
+        except (OSError, ValueError, TypeError) as error:
+            self.status.setText("Nie zapisano audytu: " + str(error))
+            return
+        self.status.setText("Zapisano audyt: " + path)
 
     def export_file_report(self):
         if self.file_result is None:

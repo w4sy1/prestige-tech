@@ -5,6 +5,40 @@ from unittest.mock import patch
 
 
 class NetworkGuiTests(unittest.TestCase):
+    def test_guided_internet_flow_prepares_safe_diagnosis_and_plan(self):
+        os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+        from PySide6.QtWidgets import QApplication
+        from prestige_network_center.gui import NetworkCenterWindow
+        application = QApplication.instance() or QApplication([])
+        window = NetworkCenterWindow(autoload=False)
+        with patch.object(window, "start_internet_diagnostic") as start:
+            window.start_guided_internet_diagnostic()
+            start.assert_called_once_with()
+        self.assertEqual(window.internet_target.text(), "1.1.1.1")
+        self.assertEqual(window.internet_count.value(), 3)
+        self.assertFalse(window.internet_trace.isChecked())
+        self.assertFalse(window.internet_mtu.isChecked())
+        self.assertTrue(window.internet_http.isChecked())
+        window.show_guided_internet_plan()
+        self.assertIn('"flush-dns"', window.network_repair_output.toPlainText())
+        window.close()
+
+    def test_network_repair_requires_confirmation_and_uses_fixed_plan(self):
+        os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+        from PySide6.QtWidgets import QApplication, QMessageBox
+        from prestige_network_center.gui import NetworkCenterWindow
+        application = QApplication.instance() or QApplication([])
+        window = NetworkCenterWindow(autoload=False)
+        window.show_network_repair_plan()
+        self.assertIn('"flush-dns"', window.network_repair_output.toPlainText())
+        with tempfile.TemporaryDirectory() as directory, \
+                patch("prestige_network_center.gui.QFileDialog.getExistingDirectory", return_value=directory), \
+                patch("prestige_network_center.gui.QMessageBox.question", return_value=QMessageBox.No), \
+                patch("prestige_network_center.gui.NetworkRepairWorker") as worker:
+            window.start_network_repair()
+            worker.assert_not_called()
+        window.close()
+
     def test_imported_snapshot_gui_does_not_overwrite_existing_file(self):
         os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
         from PySide6.QtWidgets import QApplication

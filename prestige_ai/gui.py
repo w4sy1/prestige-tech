@@ -3,13 +3,15 @@
 import json
 from pathlib import Path
 
-from PySide6.QtCore import QThread, Signal
-from PySide6.QtWidgets import (QDialog, QFileDialog, QHBoxLayout, QLabel, QLineEdit,
+from PySide6.QtCore import QSettings, QThread, Signal
+from PySide6.QtWidgets import (QCheckBox, QDialog, QFileDialog, QHBoxLayout, QLabel, QLineEdit,
                                QMessageBox, QPlainTextEdit, QPushButton, QVBoxLayout)
 
-from prestige_core.ai_service import external, local, preview
+from prestige_core.ai_service import external, local, local_many, preview
 from prestige_core.pdf_export import export_pdf
 from prestige_core.ui_theme import APP_QSS, center_header
+from prestige_core.report_live import summarize_live_result
+from prestige_report.gui import ReportDialog
 
 
 class AiWorker(QThread):
@@ -25,6 +27,8 @@ class AiWorker(QThread):
         try:
             if self.action == "local":
                 result = local(self.source)
+            elif self.action == "local-many":
+                result = local_many(self.source)
             elif self.action == "preview":
                 result = preview(self.source, self.model)
             elif self.action == "external":
@@ -49,6 +53,8 @@ class AiDialog(QDialog):
         self.preview_source = None
         self.preview_model = None
         self.last_result = None
+        self.report_dialog = None
+        self.preferences = QSettings("PrestigeTech", "AiDiagnosticAssistant")
         layout = QVBoxLayout(self)
         layout.addWidget(center_header("AI Diagnostic Assistant", "Raport JSON z dowolnego Centrum. Tryb lokalny niczego nie wysyła."))
         row = QHBoxLayout()
@@ -66,10 +72,17 @@ class AiDialog(QDialog):
         self.model.textChanged.connect(self.clear_preview)
         model_row.addWidget(self.model)
         layout.addLayout(model_row)
+        self.local_only = QCheckBox("Tylko lokalnie — zablokuj wysyłkę do zewnętrznego AI")
+        self.local_only.setChecked(self.preferences.value("local_only", True, type=bool))
+        self.local_only.toggled.connect(self.set_local_only)
+        layout.addWidget(self.local_only)
         actions = QHBoxLayout()
         self.local_button = QPushButton("Analiza lokalna")
         self.local_button.clicked.connect(lambda: self.start("local"))
         actions.addWidget(self.local_button)
+        self.many_button = QPushButton("Połącz raporty lokalnie")
+        self.many_button.clicked.connect(self.start_many)
+        actions.addWidget(self.many_button)
         self.preview_button = QPushButton("Pokaż dane do wysłania")
         self.preview_button.clicked.connect(lambda: self.start("preview"))
         actions.addWidget(self.preview_button)
@@ -91,12 +104,17 @@ class AiDialog(QDialog):
         self.help_button.clicked.connect(self.show_help)
         exports.addWidget(self.help_button)
         layout.addLayout(exports)
+        self.report_button = QPushButton("Ostatnia analiza → Repair Report")
+        self.report_button.setEnabled(False)
+        self.report_button.clicked.connect(self.open_report)
+        layout.addWidget(self.report_button)
         self.status = QLabel("Wybierz raport. Podgląd musi poprzedzać wysłanie.")
         self.status.setWordWrap(True)
         layout.addWidget(self.status)
         self.output = QPlainTextEdit()
         self.output.setReadOnly(True)
         layout.addWidget(self.output, 1)
+        self.set_buttons(True)
 
     def choose_source(self):
         path, _ = QFileDialog.getOpenFileName(self, "Raport Centrum", "", "JSON (*.json)")
@@ -106,6 +124,16 @@ class AiDialog(QDialog):
     def clear_preview(self):
         self.preview_payload = self.preview_source = self.preview_model = None
         self.external_button.setEnabled(False)
+        self.last_result = None
+        self.json_button.setEnabled(False)
+        self.pdf_button.setEnabled(False)
+        self.report_button.setEnabled(False)
+
+    def set_local_only(self, enabled):
+        self.preferences.setValue("local_only", enabled)
+        self.clear_preview()
+        self.preview_button.setEnabled(not enabled)
+        self.model.setEnabled(not enabled)
 
     def start(self, action):
         if self.worker is not None and self.worker.isRunning():
@@ -114,10 +142,17 @@ class AiDialog(QDialog):
         if not source:
             self.show_error("Wybierz raport JSON.")
             return
+        if self.local_only.isChecked() and action != "local":
+            self.show_error("Tryb tylko lokalnie blokuje podgląd wysyłki i zewnętrzne AI.")
+            return
         if action == "external" and (self.preview_payload is None
                                      or source != self.preview_source or model != self.preview_model):
             self.show_error("Najpierw pokaż aktualne dane do wysłania.")
             return
+        self.last_result = None
+        self.json_button.setEnabled(False)
+        self.pdf_button.setEnabled(False)
+        self.report_button.setEnabled(False)
         self.set_buttons(False)
         self.status.setText("Trwa analiza…")
         self.worker = AiWorker(action, source, model, self.preview_payload, self)
@@ -126,15 +161,34 @@ class AiDialog(QDialog):
         self.worker.finished.connect(lambda: self.set_buttons(True))
         self.worker.start()
 
+    def start_many(self):
+        if self.worker is not None and self.worker.isRunning():
+            return
+        paths, _ = QFileDialog.getOpenFileNames(self, "Wybierz 2–10 raportów Centrów", "", "JSON (*.json)")
+        if not paths:
+            return
+        self.clear_preview()
+        self.set_buttons(False)
+        self.status.setText("Łączę raporty lokalnie; dane nie opuszczają komputera…")
+        self.worker = AiWorker("local-many", paths, "", parent=self)
+        self.worker.loaded.connect(self.show_result)
+        self.worker.failed.connect(self.show_error)
+        self.worker.finished.connect(lambda: self.set_buttons(True))
+        self.worker.start()
+
     def set_buttons(self, enabled):
+        self.local_only.setEnabled(enabled)
         self.source.setEnabled(enabled)
         self.model.setEnabled(enabled)
         self.local_button.setEnabled(enabled)
-        self.preview_button.setEnabled(enabled)
-        self.external_button.setEnabled(enabled and self.preview_payload is not None)
+        self.many_button.setEnabled(enabled)
+        self.preview_button.setEnabled(enabled and not self.local_only.isChecked())
+        self.model.setEnabled(enabled and not self.local_only.isChecked())
+        self.external_button.setEnabled(enabled and not self.local_only.isChecked()
+                                        and self.preview_payload is not None)
 
     def confirm_external(self):
-        if self.preview_payload is None:
+        if self.local_only.isChecked() or self.preview_payload is None:
             return
         answer = QMessageBox.question(self, "Zewnętrzne AI",
                                       "Wyślij pokazane metryki do OpenAI? Może to generować koszt API. "
@@ -155,11 +209,27 @@ class AiDialog(QDialog):
             self.last_result = result
             self.json_button.setEnabled(True)
             self.pdf_button.setEnabled(True)
+            self.report_button.setEnabled(True)
         self.output.setPlainText(json.dumps(result, ensure_ascii=False, indent=2, default=str))
 
     def show_error(self, message):
+        self.last_result = None
+        self.json_button.setEnabled(False)
+        self.pdf_button.setEnabled(False)
+        self.report_button.setEnabled(False)
         self.status.setText("Analiza nieukończona.")
         self.output.setPlainText(message)
+
+    def open_report(self):
+        if self.last_result is None:
+            return
+        try:
+            prefill = summarize_live_result("AI", self.last_result)
+        except ValueError as error:
+            self.status.setText("Nie przekazano wyniku do raportu: " + str(error))
+            return
+        self.report_dialog = ReportDialog(self, prefill=prefill)
+        self.report_dialog.show()
 
     def save_json(self):
         if self.last_result is None:
@@ -189,6 +259,7 @@ class AiDialog(QDialog):
     def show_help(self):
         QMessageBox.information(self, "Pomoc — AI Diagnostic Assistant",
                                 "LOCAL MODE analizuje raport lokalnie regułami. Wynik jest wskazówką, nie diagnozą. "
+                                "Można połączyć 2–10 raportów tylko lokalnie; wspólne metryki nie dowodzą przyczyny. "
                                 "Podgląd pokazuje pełne żądanie zewnętrzne; alerty opisowe są z niego usuwane. "
                                 "Wysyłka wymaga OPENAI_API_KEY w środowisku i osobnego potwierdzenia. "
                                 "Zmiana raportu lub modelu wymaga nowego podglądu. Raport może zawierać dane prywatne.")

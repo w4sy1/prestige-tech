@@ -33,6 +33,47 @@ ConvertTo-Json -InputObject $rows -Depth 4''')
     return {'schema_version':1,'kind':'recycle-bin','analysis_only':True,'items':rows or [],
         'clean_allowed':False,'note':'Analiza kosza. Trwałe opróżnianie wymaga osobnego planu i jawnej zgody w Windows Toolkit; brak rollbacku.'}
 
+
+def scan_usage(root, *, max_files=100000, top_limit=20):
+    """Odczyt zajętości bez podążania za symlinkami; nigdy nie daje prawa do czyszczenia."""
+    root = Path(root).resolve(strict=True)
+    if not root.is_dir() or not 1 <= max_files <= 1000000 or not 1 <= top_limit <= 100:
+        raise ValueError('Nieprawidłowy katalog lub limit analizy.')
+    stack = [root]
+    count = total = 0
+    visited_dirs = 0
+    largest = []
+    errors = 0
+    while stack and count < max_files and visited_dirs < max_files:
+        folder = stack.pop()
+        visited_dirs += 1
+        try:
+            with os.scandir(folder) as entries:
+                for entry in entries:
+                    try:
+                        if entry.is_symlink():
+                            continue
+                        if entry.is_dir(follow_symlinks=False):
+                            stack.append(Path(entry.path))
+                        elif entry.is_file(follow_symlinks=False):
+                            size = entry.stat(follow_symlinks=False).st_size
+                            count += 1
+                            total += size
+                            largest.append({'path':str(Path(entry.path).relative_to(root)), 'size':size})
+                            largest.sort(key=lambda row:row['size'], reverse=True)
+                            del largest[top_limit:]
+                            if count >= max_files:
+                                break
+                    except OSError:
+                        errors += 1
+        except OSError:
+            errors += 1
+    return {'schema_version':1,'kind':'disk-usage','root':str(root),
+            'file_count':count,'total_bytes':total,'largest_files':largest,
+            'errors':errors,'complete':not stack and count < max_files and visited_dirs < max_files and errors == 0,
+            'clean_allowed':False,
+            'note':'Odczyt wskazanego katalogu. Wynik nie upoważnia do usuwania plików.'}
+
 def can_clean(root,relative):
     root=Path(root).resolve()
     if root in temp_roots():return True

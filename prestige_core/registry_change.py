@@ -4,6 +4,8 @@ import json
 import os
 from pathlib import Path
 
+from .registry_transactions import _set_status
+
 
 KEY = r"Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
 VALUE = "HideFileExt"
@@ -35,7 +37,7 @@ def _set(registry, value):
 def _backup(path, previous):
     record = {"schema_version": 1, "operation": OPERATION_ID, "hive": "HKCU",
               "key": KEY, "name": VALUE, "type": "REG_DWORD", "previous": previous,
-              "applied": 0, "source": SOURCE}
+              "applied": 0, "source": SOURCE, "status": "PREPARED"}
     with Path(path).open("x", encoding="utf-8") as stream:
         json.dump(record, stream, ensure_ascii=False, indent=2)
         stream.write("\n")
@@ -52,16 +54,20 @@ def show_file_extensions(backup_path, *, accept_changes=False, registry=None, pl
     previous = _current(registry, registry.KEY_READ)
     if previous == 0:
         return {"status": "ALREADY_SET", "backup": None}
-    _backup(backup_path, previous)
+    record = _backup(backup_path, previous)
     try:
         _set(registry, 0)
         if _current(registry, registry.KEY_READ) != 0:
             raise RuntimeError("Weryfikacja zmiany rejestru nie powiodła się.")
+        _set_status(backup_path, record, "APPLIED")
     except BaseException:
         try:
-            _set(registry, previous)
-        except OSError:
-            pass
+            if _current(registry, registry.KEY_READ) == 0:
+                _set(registry, previous)
+            status = "ROLLED_BACK" if _current(registry, registry.KEY_READ) == previous else "RECOVERY_NEEDED"
+            _set_status(backup_path, record, status)
+        except (OSError, ValueError, RuntimeError):
+            _set_status(backup_path, record, "RECOVERY_NEEDED")
         raise
     return {"status": "APPLIED", "backup": str(backup_path)}
 
@@ -76,7 +82,8 @@ def rollback_file_extensions(backup_path, *, accept_changes=False, registry=None
             or record.get("operation") != OPERATION_ID or record.get("hive") != "HKCU"
             or record.get("key") != KEY or record.get("name") != VALUE
             or record.get("type") != "REG_DWORD" or record.get("applied") != 0
-            or record.get("previous") != 1):
+            or record.get("previous") != 1
+            or record.get("status", "APPLIED") not in ("APPLIED", "RECOVERY_NEEDED")):
         raise ValueError("Nieprawidłowa kopia dla tej operacji.")
     current = _current(registry, registry.KEY_READ)
     if current != record["applied"]:
@@ -84,4 +91,5 @@ def rollback_file_extensions(backup_path, *, accept_changes=False, registry=None
     _set(registry, record["previous"])
     if _current(registry, registry.KEY_READ) != record["previous"]:
         raise RuntimeError("Weryfikacja cofnięcia nie powiodła się.")
+    _set_status(backup_path, record, "ROLLED_BACK")
     return {"status": "ROLLED_BACK", "backup": str(backup_path)}

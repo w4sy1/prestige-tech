@@ -1,4 +1,5 @@
 import tempfile
+import json
 from pathlib import Path
 import unittest
 
@@ -46,10 +47,12 @@ class RegistryChangeTests(unittest.TestCase):
             result = show_file_extensions(backup, accept_changes=True, registry=fake, platform="nt")
             self.assertEqual(result["status"], "APPLIED")
             self.assertTrue(backup.is_file())
+            self.assertEqual(json.loads(backup.read_text(encoding="utf-8"))["status"], "APPLIED")
             self.assertEqual(fake.value, 0)
             self.assertEqual(rollback_file_extensions(backup, accept_changes=True,
                                                       registry=fake, platform="nt")["status"], "ROLLED_BACK")
             self.assertEqual(fake.value, 1)
+            self.assertEqual(json.loads(backup.read_text(encoding="utf-8"))["status"], "ROLLED_BACK")
 
     def test_no_overwrite_and_changed_value_refuses_rollback(self):
         with tempfile.TemporaryDirectory() as directory:

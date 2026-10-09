@@ -1,6 +1,6 @@
 # PRESTIGE TECH — kod i funkcje Centrów
 
-Stan dokumentu: **2026-10-07**. Źródło: bieżący kod repozytorium `prestige-tech`, [status projektu](PROJECT-STATUS.md), [historyczna macierz migracji](development/CENTER-MIGRATION-MATRIX.md) i [plik przekazania](development/CONTINUE-HANDOFF.txt). Dokument opisuje **10 Centrów widocznych w Dashboardzie**, a nie stare samodzielne repozytoria. „W kodzie” oznacza zaimplementowaną ścieżkę; nie oznacza jeszcze potwierdzenia na każdym urządzeniu ani gotowego EXE.
+Stan dokumentu: **2026-10-08**. Źródło: bieżący kod repozytorium `prestige-tech`, [status projektu](PROJECT-STATUS.md), [historyczna macierz migracji](development/CENTER-MIGRATION-MATRIX.md) i [plik przekazania](development/CONTINUE-HANDOFF.txt). Dokument opisuje **10 Centrów widocznych w Dashboardzie**, a nie stare samodzielne repozytoria. „W kodzie” oznacza zaimplementowaną ścieżkę; nie oznacza jeszcze potwierdzenia na każdym urządzeniu ani gotowego EXE.
 
 ## Mapa kodu
 
@@ -10,14 +10,14 @@ Każdy launcher można uruchomić z katalogu głównego repozytorium po zainstal
 |---|---|---|---|
 | Network Center | `network_center.py` | `prestige_network_center/gui.py` | `prestige_core/network*.py`, `dns_*.py`, `internet_*.py`, `nmap_profiles.py`, `traffic_*.py`, `sentinel_*.py`, `device_history.py` |
 | Monitor Center | `monitor.py` | `prestige_monitor/gui.py` | `file_snapshot.py`, `watch_state*.py`, `native_*.py`, `event_history.py`, `hash*.py`, `baseline_*.py` |
-| Registry Manager | `registry_manager.py` | `prestige_registry/gui.py` | `registry_read.py`, `registry_admx.py`, `registry_audit.py`, `registry_change.py`, `registry_transactions.py` |
+| Registry Manager | `registry_manager.py` | `prestige_registry/gui.py` | `registry_read.py`, `registry_admx.py`, `registry_audit.py`, `registry_change.py`, `registry_transactions.py`, `registry_policy_changes.py` |
 | Storage & Recovery | `storage_center.py` | `prestige_storage/gui.py` | `storage_inventory.py`, `physical_imaging.py`, `backup/`, `usb/` |
 | Android Center | `android_center.py` | `prestige_android/gui.py` | `android_adb.py` |
 | Security Center | `security_center.py` | `prestige_security/gui.py` | `security_*.py`, `malware_*.py`, `file_inspector*.py`, `file_extended.py` |
 | System Center | `system_center.py` | `prestige_system/gui.py` | `system_snapshot.py`, `windows_toolkit.py`, `windows_repairs.py`, `pc_cleanup.py`, `cleanup_runtime.py` |
 | Termux Center | `termux_center_gui.py` | `prestige_termux/gui.py` | `termux_setup.py`, `termux_toolkit.py`, `termux_configuration.py`, `termux_runtime.py` |
 | AI Center | `ai_center.py` | `prestige_ai/gui.py` | `ai_service.py`, `ai_rules.py`, `ai_normalization.py`, `ai_remote.py`, `ai_providers.py` |
-| Report Center | `report_center.py` | `prestige_report/gui.py` | `report_service.py`, `report_prefill.py`, `pdf_export.py` |
+| Report Center | `report_center.py` | `prestige_report/gui.py` | `report_service.py`, `report_prefill.py`, `report_evidence.py`, `report_live.py`, `pdf_export.py` |
 
 ## 1. Network Center
 
@@ -48,7 +48,7 @@ Każdy launcher można uruchomić z katalogu głównego repozytorium po zainstal
 
 - Wyszukiwanie po ID/nazwie/kategorii, odczyt wybranej pozycji i odczytowy audyt całego katalogu.
 - **29 ręcznych odczytów** i dodatkowe odczyty z lokalnych szablonów ADMX. Na wcześniej sprawdzonym komputerze katalog osiągnął **500 odrębnych odczytów**, z których większość dotyczyła nieustawionych zasad albo nieistniejących kluczy.
-- Dziewięć wąskich zmian HKCU Explorer, w tym obsługa widoczności rozszerzeń plików, z planem, kopią i cofnięciem; przepływ zmian był sprawdzany na atrapach.
+- Dwadzieścia zmian HKCU, w tym ustawienia Eksploratora, wyglądu oraz cztery polityki użytkownika, z planem, kopią i cofnięciem; przepływ zmian był sprawdzany na atrapach. Polityki 012–015 są blokowane na niewspieranej edycji Windows, chyba że użytkownik włączy sesyjny tryb eksperymentalny. GUI pokazuje opisy prostym językiem oraz FREE/PRO; wydanie PRO wymaga jeszcze klucza wydawcy i warunków licencyjnych.
 
 **Granice:** 500 odczytów **nie oznacza 500 zmian rejestru**. Liczba pozycji ADMX zależy od instalacji Windows; zapis i rollback na prawdziwym systemie wymagają osobnego testu.
 
@@ -115,17 +115,28 @@ Każdy launcher można uruchomić z katalogu głównego repozytorium po zainstal
 
 - Dane zlecenia, diagnoza, wykonane czynności, wynik końcowy i inne pola formularza; walidacja oraz zapis HTML, JSON, TXT i PDF.
 - Ostatni udany wynik System lub Security Center może wstawić krótkie podsumowanie do formularza, bez automatycznego uzupełniania danych klienta i testu końcowego.
+- Rozpoznane zapisane JSON z dziewięciu Centrów można dołączyć po podglądzie; formularz dopisuje neutralny opis czynności i sprawdza SHA-256 źródła przed zapisem. Diagnozę oraz test końcowy wypełnia technik.
+- Network, Monitor, Registry, Storage, Android, Termux i AI Center mogą otworzyć formularz z neutralnym opisem wybranego bieżącego wyniku bez tworzenia pliku pośredniego. System i Security miały wcześniejsze wejścia do Report.
 
-**Granice:** automatyczne zasilanie raportu wynikami wszystkich pozostałych Centrów nie jest ukończone.
+**Granice:** automatyczne przekazywanie bieżących wyników do raportu nie jest ukończone. Nie każde Centrum ma własny przycisk eksportu rozpoznawanego JSON.
 
 ## Historia ostatnich zmian i stan wydania
 
+- **2026-10-08:** Drugi widok strony głównej Dashboardu (bez potwierdzenia 1:1); lista kopii DNS, filtry zdarzeń Monitora, migawki Android offline, porównanie zakresu audytów Security, metadane dzienników System, odczyt środowiska Termux, tryb AI tylko lokalnie oraz manifest SHA-256 odniesień do plików Report. Pozostałe pozycje tabeli wymagają wdrożenia lub pełnego audytu.
+- **2026-10-07:** Network Center ma plan, zapis i warunkowe cofanie DNS IPv6 z oddzielną kopią i wyborem rodziny w GUI. Logika i smoke źródłowego GUI przeszły testy; rzeczywisty zapis wymaga testu administratora na Windows.
 - **2026-09-30:** Network Center otrzymał odczyt wpisów DoH Windows, test systemowego DNS z limitem czasu, opcjonalną historię DNS, import obserwacji LAN JSON i migawkę z listy JSON bez nadpisywania. Ostatnio zapisana suita repozytorium: **237 testów, 236 zaliczonych, 1 pominięty**.
 - **2026-09-30:** 19 starych osobnych repozytoriów zapisano lokalnie i usunięto z GitHuba; katalog GUI Dashboardu ograniczono do 10 Centrów. Archiwum: `C:\Users\01dwa\Documents\PrestigeTech-Legacy-Archive-2026-09-30`.
 - Kod Centrów i dokumentacja są w `w4sy1/prestige-tech`, Dashboard w `w4sy1/prestige-tech-dashboard`. **Nowych EXE Centrów nadal nie uznano za zweryfikowane.**
 - Aktualną licencję własnego kodu określa [LICENSE](LICENSE): **Prestige Tech Free Use License**.
 
 ## Plan rozbudowy kodu `.py` — dwa style Dashboardu
+
+Aktualizacja 2026-10-08: do kodu dodano opcjonalny test HEAD HTTP/HTTPS w
+Internet Diagnostic, odczyty CPU/GPU/BIOS/dysków/SMART w System Snapshot,
+odczytową analizę zajętości i dużych plików w PC Cleanup, listę obecnych
+urządzeń USB PnP z VID/PID oraz lokalne połączenie 2–10 raportów w AI Center.
+Poniższa tabela ma charakter historycznego planu; stan bieżący opisuje
+`PROJECT-STATUS.md`. Distant i pełny iDiagnostics nie są ukończone.
 
 Ustalenie z 2026-10-07: obecny niebieski Dashboard zostaje. Drugi styl ma prostszą hierarchię **stan komputera → Centra → konkretne działania**, z kartami, ikonami i krótkim opisem. Oba style mają korzystać z tego samego katalogu 10 Centrów, tych samych danych, operacji i ustawień; wybór stylu jest prezentacją, nie osobną kopią logiki. Wskazany czat zawiera opis, ale nie udostępnia grafik referencyjnych, więc dokładny wygląd drugiego stylu nie jest jeszcze specyfikowany piksel po pikselu.
 
@@ -136,15 +147,15 @@ Wszystkie pozycje „Do dopisania” poniżej to **propozycje, nie gotowe funkcj
 | Moduł | Funkcje już w kodzie — skrót | Do dopisania w `.py` |
 |---|---|---|
 | **Dashboard** | Katalog 10 Centrów, strona główna, moduły, aktualizacje, narzędzia systemowe, raporty, ustawienia i poradnik; obecny niebieski styl | Drugi styl z trzema poziomami informacji; przełącznik stylu w ustawieniach z zapamiętaniem wyboru; wspólne modele kart i statusów bez dublowania akcji; możliwość powrotu do obecnego stylu |
-| **Network Center** | LAN, Internet/Wi-Fi, DNS benchmark i historia, sześć profili Nmap, migawki, DNS IPv4/MTU z kopią, analiza ruchu, ograniczony Sentinel | Katalog planów DNS IPv6 i bezpieczne cofanie; zarządzanie znanymi/zaufanymi urządzeniami Sentinel; harmonogram odczytowych skanów z limitem i wyraźną zgodą; raport HTML z oznaczeniem źródeł danych i niepewności |
-| **Monitor Center** | Baseline i hash plików, ACL/ADS, polling i natywne zdarzenia, dziennik, SQLite, manifesty i podpisy Ed25519 | Oś czasu zmian z filtrowaniem; zapis profili obserwacji i wykluczeń; wyraźna sygnalizacja utraconych zdarzeń/niepełnego skanu; porównanie dwóch okresów bez zmiany baseline |
-| **Registry Manager** | Odczyty ręczne i ADMX, audyt, dziewięć wąskich zmian HKCU z planem/kopią/cofnięciem | Katalog zmian definiowanych pojedynczo i weryfikowanych testami; eksport różnicy przed/po; kontrola zależności od edycji Windows i wersji ADMX; podgląd wszystkich kroków rollbacku przed zapisem |
+| **Network Center** | LAN, Internet/Wi-Fi, DNS benchmark i historia, sześć profili Nmap, migawki, DNS IPv4/IPv6 i MTU z kopią, analiza ruchu, Sentinel: zmiana zaufania z kopią/cofnięciem, sesyjny harmonogram ICMP i raport LAN HTML | Pełna obsługa list znanych urządzeń Sentinel; przegląd i audyt harmonogramu po wielu sesjach; parytet wszystkich funkcji starego Sentinel |
+| **Monitor Center** | Baseline i hash plików, ACL/ADS, polling i natywne zdarzenia, dziennik, SQLite, manifesty i podpisy Ed25519; filtry osi czasu, profile skanu/pollingu z wykluczeniami oraz porównanie okresów | Pełna sygnalizacja utraconych zdarzeń/niepełnego skanu we wszystkich trybach; spójne wykluczenia w obserwatorze natywnym lub jawne utrzymanie tego ograniczenia |
+| **Registry Manager** | Odczyty ręczne i ADMX, audyt, 20 zmian HKCU z planem/kopią/cofnięciem, podgląd rollbacku i eksport różnicy JSON dla dotychczasowych zmian | Cel 200/200/200 zmian; indywidualna weryfikacja działania i wersji Windows; pełny wspólny eksport różnicy dla nowych polityk |
 | **Storage & Recovery** | Dyski i obrazowanie, kopie/manifest/SHA-256, odtwarzanie, ACL/VSS, zestawy PrestigeUSB i rollback | Dziennik akwizycji z checkpointami i kontrolą wznowienia; raport źródło–cel–hash bez twierdzenia o fizycznej blokadzie zapisu; kontrola, że cel obrazu nie wskazuje źródła; widok wersji kopii i zajętości miejsca przed operacją |
 | **Android Center** | ADB Diagnostic, lista aplikacji, uprawnienia/AppOps, role, Device Admin | Porównanie dwóch migawek urządzenia lub aplikacji; profil wielu urządzeń z jednoznacznym wyborem serialu; raport zmian uprawnień; analiza wcześniej zapisanego wyniku ADB bez telefonu |
-| **Security Center** | Security Check, Malware Triage, File Inspector, eksport i AI/raport | Wspólna oś ustaleń z pochodzeniem dowodów; porównanie dwóch audytów Windows; pakiet materiału diagnostycznego z redakcją danych osobowych; priorytety działań z oznaczeniem `UNKNOWN` zamiast automatycznego werdyktu |
+| **Security Center** | Security Check, Malware Triage, File Inspector, eksport i AI/raport, porównanie audytów i zapis audytu JSON | Wspólna oś ustaleń z pochodzeniem dowodów; pakiet materiału diagnostycznego z redakcją danych osobowych; priorytety działań z oznaczeniem `UNKNOWN` zamiast automatycznego werdyktu |
 | **System Center** | Migawki, diagnostyka Windows, SFC/DISM i naprawy sieci z planem, PC Cleanup z kwarantanną | Właściciel/podpis procesu w diagnostyce; porównanie stanu przed i po naprawie; plan zależności i restartu; wspólny dziennik wykonanych czynności dla Report Center |
-| **Termux Center** | Pięć profili Setup, osiem kategorii Toolkit, `pkg`, konfiguracja środowiska, hash i archiwum `tar` | Odczytowy „health check” środowiska; porównanie planu z faktycznie dostępnymi pakietami; eksport stanu konfiguracji z ukryciem sekretów; raport błędów z jasnymi krokami cofnięcia |
+| **Termux Center** | Pięć profili Setup, osiem kategorii Toolkit, `pkg`, konfiguracja środowiska, hash i archiwum `tar`, odczyt stanu z eksportem JSON oraz porównanie pakietów profilu z `dpkg-query` | Eksport pełnej konfiguracji z ukryciem sekretów; raport błędów z jasnymi krokami cofnięcia |
 | **AI Center** | Lokalna analiza regułowa, podgląd danych, opcjonalne zewnętrzne AI, JSON/PDF | Śledzenie źródła każdej tezy do wyniku Centrum; automatyczna redakcja danych w podglądzie; limit rozmiaru i szacowanie zakresu wysyłki; tryb „tylko lokalnie” zapamiętywany w ustawieniach |
-| **Report Center** | Formularz i eksport HTML/JSON/TXT/PDF, częściowe wstawianie wyników System/Security | Import wyników wszystkich Centrów przez wspólny format; lista załączników z SHA-256; szablony raportu zależne od typu sprawy; przegląd brakujących pól i pochodzenia danych przed zapisem |
+| **Report Center** | Formularz i eksport HTML/JSON/TXT/PDF, częściowe wstawianie wyników System/Security, import rozpoznanych JSON z dziewięciu Centrów i manifest SHA-256 odniesień | Automatyczne przekazywanie bieżących wyników; eksport z GUI tam, gdzie go brakuje; szablony raportu zależne od typu sprawy |
 
 Wdrożenie tych propozycji wymaga osobnego sprawdzenia pozycja po pozycji. Nie należy zwiększać liczników funkcji ani ogłaszać pełnego zakresu na podstawie samej tabeli.

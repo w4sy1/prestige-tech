@@ -64,9 +64,13 @@ def _same(left, right):
 
 
 def plan_dns_change(index, servers, backend):
+    return _plan_dns_change(index, servers, backend, _servers, _state)
+
+
+def _plan_dns_change(index, servers, backend, validate_servers, validate_state):
     index = _index(index)
-    desired_servers = _servers(servers)
-    original = _state(backend.snapshot(index))
+    desired_servers = validate_servers(servers)
+    original = validate_state(backend.snapshot(index))
     if original["index"] != index:
         raise RuntimeError("System zwrócił inny interfejs niż wybrany.")
     desired = {"index": index, "automatic": desired_servers is None,
@@ -76,28 +80,34 @@ def plan_dns_change(index, servers, backend):
 
 
 def apply_dns_change(index, servers, backup_path, backend):
-    plan = plan_dns_change(index, servers, backend)
+    return _apply_dns_change(index, servers, backup_path, backend,
+                             _servers, _state, "network-dns-ipv4")
+
+
+def _apply_dns_change(index, servers, backup_path, backend, validate_servers,
+                      validate_state, operation):
+    plan = _plan_dns_change(index, servers, backend, validate_servers, validate_state)
     if not plan["change_needed"]:
         return {"status": "UNCHANGED", **plan}
     backup = Path(backup_path)
     if backup.exists() or not backup.parent.is_dir():
         raise FileExistsError("Kopia musi być nowym plikiem w istniejącym katalogu.")
-    record = {"schema_version": 1, "operation": "network-dns-ipv4",
+    record = {"schema_version": 1, "operation": operation,
               "id": uuid.uuid4().hex, "created_utc": datetime.now(timezone.utc).isoformat(),
               **plan, "status": "PREPARED"}
     _save_new(backup, record)
     try:
         backend.set_dns(index, plan["desired"]["servers"] if not plan["desired"]["automatic"] else None)
-        current = _state(backend.snapshot(index))
+        current = validate_state(backend.snapshot(index))
         if not _same(current, plan["desired"]):
             raise RuntimeError("Zmiana DNS nie została potwierdzona odczytem.")
     except Exception as error:
         record["status"] = "RECOVERY_NEEDED"
         try:
-            current = _state(backend.snapshot(index))
+            current = validate_state(backend.snapshot(index))
             if _same(current, plan["desired"]):
                 backend.set_dns(index, None if plan["original"]["automatic"] else plan["original"]["servers"])
-                if _same(_state(backend.snapshot(index)), plan["original"]):
+                if _same(validate_state(backend.snapshot(index)), plan["original"]):
                     record["status"] = "ROLLED_BACK_AFTER_ERROR"
         except Exception:
             pass
@@ -109,15 +119,20 @@ def apply_dns_change(index, servers, backup_path, backend):
 
 
 def rollback_dns_change(backup_path, backend, *, apply=False):
+    return _rollback_dns_change(backup_path, backend, apply=apply,
+                                state=_state, operation="network-dns-ipv4")
+
+
+def _rollback_dns_change(backup_path, backend, *, apply, state, operation):
     record = json.loads(Path(backup_path).read_text(encoding="utf-8"))
     if (not isinstance(record, dict) or record.get("schema_version") != 1
-            or record.get("operation") != "network-dns-ipv4"
+            or record.get("operation") != operation
             or record.get("status") not in ("APPLIED", "PREPARED", "RECOVERY_NEEDED")):
         raise ValueError("Kopia DNS nie opisuje zmiany możliwej do cofnięcia.")
-    original, desired = _state(record["original"]), _state(record["desired"])
+    original, desired = state(record["original"]), state(record["desired"])
     if original["index"] != desired["index"]:
         raise ValueError("Kopia DNS wskazuje różne interfejsy.")
-    current = _state(backend.snapshot(original["index"]))
+    current = state(backend.snapshot(original["index"]))
     if _same(current, original):
         return {"status": "ALREADY_RESTORED"}
     if not _same(current, desired):
@@ -126,7 +141,7 @@ def rollback_dns_change(backup_path, backend, *, apply=False):
         return {"status": "PLAN", "backup_status": record["status"],
                 "current": current, "restore": original}
     backend.set_dns(original["index"], None if original["automatic"] else original["servers"])
-    if not _same(_state(backend.snapshot(original["index"])), original):
+    if not _same(state(backend.snapshot(original["index"])), original):
         raise RuntimeError("Nie potwierdzono przywrócenia DNS.")
     record["status"] = "ROLLED_BACK"
     _update(backup_path, record)

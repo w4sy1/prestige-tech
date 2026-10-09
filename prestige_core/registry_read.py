@@ -116,9 +116,17 @@ def read_operation(operation, *, registry=None, platform=None, catalog=OPERATION
         rows = [{**row, "name": f"{scope}: {row['name']}"}
                 for scope, result in results for row in result["rows"]]
         status = "OK" if any(result["status"] == "OK" for _, result in results) else "Niedostępne"
+        reasons = {result.get("reason_code") for _, result in results}
+        reason_code = ("PARTIAL" if status == "OK" and len(reasons) > 1
+                       else "ACCESS_DENIED" if "ACCESS_DENIED" in reasons
+                       else "NOT_SET" if status != "OK" else "OK")
+        reason = (None if status == "OK" else
+                  "Brak uprawnień do odczytu jednej z gałęzi; nie zmieniono systemu."
+                  if reason_code == "ACCESS_DENIED" else
+                  "Zasada nie jest ustawiona; to nie oznacza awarii.")
         return {"operation": operation.id, "status": status,
-                "reason": None if status == "OK" else "Zasada nieustawiona w HKCU ani HKLM.",
-                "rows": rows}
+                "reason": reason,
+                "reason_code": reason_code, "rows": rows}
     hive = {"HKCU": registry.HKEY_CURRENT_USER,
             "HKLM": registry.HKEY_LOCAL_MACHINE}[operation.hive]
     try:
@@ -143,7 +151,18 @@ def read_operation(operation, *, registry=None, platform=None, catalog=OPERATION
                     rows.append({"name": name, "value": str(value), "type": data_type, "status": "OK"})
                     index += 1
     except FileNotFoundError:
-        return {"operation": operation.id, "status": "Niedostępne", "reason": "Klucz nie istnieje.", "rows": []}
+        return {"operation": operation.id, "status": "Niedostępne",
+                "reason": "Ustawienie nie jest skonfigurowane; to nie oznacza awarii.",
+                "reason_code": "KEY_NOT_FOUND", "rows": []}
     except PermissionError:
-        return {"operation": operation.id, "status": "Niedostępne", "reason": "Odmowa dostępu.", "rows": []}
-    return {"operation": operation.id, "status": "OK", "reason": None, "rows": rows}
+        return {"operation": operation.id, "status": "Niedostępne",
+                "reason": "Brak uprawnień do odczytu; nie zmieniono systemu.",
+                "reason_code": "ACCESS_DENIED", "rows": []}
+    if operation.values is not None and rows and all(row["status"] != "OK" for row in rows):
+        return {"operation": operation.id, "status": "Niedostępne",
+                "reason": "Wartość nie jest ustawiona; to nie oznacza awarii.",
+                "reason_code": "VALUE_NOT_SET", "rows": rows}
+    reason_code = ("PARTIAL" if any(row["status"] != "OK" for row in rows)
+                   else "EMPTY_KEY" if not rows else "OK")
+    return {"operation": operation.id, "status": "OK", "reason": None,
+            "reason_code": reason_code, "rows": rows}

@@ -27,6 +27,13 @@ from prestige_core.lan_legacy_import import import_legacy_lan
 from prestige_core.network_optimizer import inspect_adapter
 from prestige_core.network_dns_change import (WindowsDnsBackend, apply_dns_change,
                                               plan_dns_change, rollback_dns_change)
+from prestige_core.network_dns_ipv6_change import (WindowsIpv6DnsBackend, apply_ipv6_dns_change,
+                                                   plan_ipv6_dns_change, rollback_ipv6_dns_change)
+from prestige_core.network_dns_backups import list_dns_backups
+from prestige_core.network_report import export_network_report
+from prestige_core.windows_repairs import plan_repair, run_repair, list_repair_journals
+from prestige_core.report_live import summarize_live_result
+from prestige_report.gui import ReportDialog
 from prestige_core.dns_benchmark import benchmark as benchmark_dns
 from prestige_core.dns_system import read_doh_state, system_dns_test
 from prestige_core.dns_history import DnsHistory
@@ -40,6 +47,7 @@ from prestige_core.traffic_capture import capture_syn
 from prestige_core.sentinel_deep_capture import capture as deep_capture, list_interfaces
 from prestige_core.sentinel_status import read_sentinel_events, read_sentinel_status
 from prestige_core.sentinel_history import read_device_history
+from prestige_core.sentinel_trust import change_trust, rollback_trust
 from prestige_core.sentinel_devices import (assess_observations, correlate_devices,
                                             read_device_registry)
 from prestige_core.sentinel_firewall import WindowsFirewallBackend, change_block
@@ -121,16 +129,17 @@ class InternetWorker(QThread):
     loaded = Signal(dict)
     failed = Signal(str)
 
-    def __init__(self, target, gateway, count, traceroute, mtu, parent=None):
+    def __init__(self, target, gateway, count, traceroute, mtu, http, parent=None):
         super().__init__(parent)
         self.target, self.gateway, self.count = target, gateway, count
-        self.traceroute, self.mtu = traceroute, mtu
+        self.traceroute, self.mtu, self.http = traceroute, mtu, http
         self.cancel_event = Event()
 
     def run(self):
         try:
             result = diagnose(self.target, gateway=self.gateway, count=self.count,
                               traceroute=self.traceroute, test_mtu=self.mtu,
+                              test_http=self.http,
                               cancel_event=self.cancel_event)
             if result["status"] == "COMPLETE" and not self.cancel_event.is_set():
                 try:
@@ -220,23 +229,44 @@ class OptimizerWorker(QThread):
             self.failed.emit(str(error))
 
 
+class NetworkRepairWorker(QThread):
+    loaded = Signal(dict)
+    failed = Signal(str)
+
+    def __init__(self, operation, directory, parent=None):
+        super().__init__(parent)
+        self.operation, self.directory = operation, directory
+
+    def run(self):
+        try:
+            self.loaded.emit(run_repair(self.operation, self.directory,
+                                        accept_no_rollback=True))
+        except (OSError, ValueError, RuntimeError, PermissionError) as error:
+            self.failed.emit(str(error))
+
+
 class DnsChangeWorker(QThread):
     loaded = Signal(dict)
     failed = Signal(str)
 
-    def __init__(self, action, *, index=None, servers=None, backup=None, parent=None):
+    def __init__(self, action, *, index=None, servers=None, backup=None, family="IPv4", parent=None):
         super().__init__(parent)
         self.action, self.index, self.servers, self.backup = action, index, servers, backup
+        self.family = family
 
     def run(self):
         try:
-            backend = WindowsDnsBackend()
+            ipv6 = self.family == "IPv6"
+            backend = WindowsIpv6DnsBackend() if ipv6 else WindowsDnsBackend()
             if self.action == "plan":
-                result = {"status": "PLAN", **plan_dns_change(self.index, self.servers, backend)}
+                plan = plan_ipv6_dns_change if ipv6 else plan_dns_change
+                result = {"status": "PLAN", **plan(self.index, self.servers, backend)}
             elif self.action == "apply":
-                result = apply_dns_change(self.index, self.servers, self.backup, backend)
+                apply = apply_ipv6_dns_change if ipv6 else apply_dns_change
+                result = apply(self.index, self.servers, self.backup, backend)
             elif self.action == "rollback":
-                result = rollback_dns_change(self.backup, backend, apply=True)
+                rollback = rollback_ipv6_dns_change if ipv6 else rollback_dns_change
+                result = rollback(self.backup, backend, apply=True)
             else:
                 raise ValueError("Nieprawidłowa operacja DNS.")
             self.loaded.emit(result)
@@ -379,6 +409,7 @@ class NetworkCenterWindow(QMainWindow):
         self.device_history = None
         self.dns_history = None
         self.optimizer_worker = None
+        self.network_repair_worker = None
         self.dns_change_worker = None
         self.mtu_change_worker = None
         self.traffic_worker = None
@@ -393,10 +424,17 @@ class NetworkCenterWindow(QMainWindow):
         self.auto_firewall_worker = None
         self.auto_firewall_address = None
         self.sentinel_registry_result = None
+        self.sentinel_registry_folder = None
         self.protection_policy = None
         self.neighbors_data = None
         self.adapters_data = None
         self.last_discovery_result = None
+        self.report_dialog = None
+        self.last_discovery_scope = None
+        self.scheduled_scope = None
+        self.scheduled_remaining = 0
+        self.discovery_timer = QTimer(self)
+        self.discovery_timer.timeout.connect(self.run_scheduled_discovery)
         self.discovery_oui = {}
 
         root = QWidget()
@@ -453,6 +491,7 @@ class NetworkCenterWindow(QMainWindow):
         header.addWidget(self.refresh_button)
         main.addLayout(header)
         tabs = QTabWidget()
+        self.tabs = tabs
         card = QFrame()
         card.setObjectName("Card")
         card_layout = QVBoxLayout(card)
@@ -480,6 +519,24 @@ class NetworkCenterWindow(QMainWindow):
         discovery_options.addWidget(self.discovery_names)
         self.discovery_nmap = QCheckBox("Nmap -sn (opcjonalnie, do 45 s)")
         discovery_options.addWidget(self.discovery_nmap)
+        schedule = QHBoxLayout()
+        self.schedule_minutes = QSpinBox()
+        self.schedule_minutes.setRange(15, 120)
+        self.schedule_minutes.setValue(30)
+        self.schedule_minutes.setSuffix(" min między skanami")
+        schedule.addWidget(self.schedule_minutes)
+        self.schedule_runs = QSpinBox()
+        self.schedule_runs.setRange(1, 12)
+        self.schedule_runs.setValue(3)
+        self.schedule_runs.setSuffix(" skany")
+        schedule.addWidget(self.schedule_runs)
+        schedule_start = QPushButton("Włącz harmonogram ICMP")
+        schedule_start.clicked.connect(self.start_discovery_schedule)
+        schedule.addWidget(schedule_start)
+        schedule_stop = QPushButton("Wyłącz harmonogram")
+        schedule_stop.clicked.connect(self.stop_discovery_schedule)
+        schedule.addWidget(schedule_stop)
+        discovery_layout.addLayout(schedule)
         self.discovery_oui_button = QPushButton("Wczytaj lokalną bazę OUI")
         self.discovery_oui_button.clicked.connect(self.choose_discovery_oui)
         discovery_options.addWidget(self.discovery_oui_button)
@@ -487,6 +544,10 @@ class NetworkCenterWindow(QMainWindow):
         self.discovery_note = QLabel("Nie wykonano skanu ICMP.")
         self.discovery_note.setWordWrap(True)
         discovery_layout.addWidget(self.discovery_note)
+        self.report_button = QPushButton("Ostatni skan LAN → Repair Report")
+        self.report_button.setEnabled(False)
+        self.report_button.clicked.connect(self.open_discovery_report)
+        discovery_layout.addWidget(self.report_button)
         self.discovery_table = QTableWidget(0, 5)
         self.discovery_table.setHorizontalHeaderLabels(["IP", "MAC z cache", "Nazwa", "Producent", "Dowód"])
         self.discovery_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
@@ -497,6 +558,9 @@ class NetworkCenterWindow(QMainWindow):
         internet_card.setObjectName("Card")
         internet_layout = QVBoxLayout(internet_card)
         internet_layout.addWidget(QLabel("Pomiar świadomie wskazanego adresu IP; brama zostanie pobrana z adaptera."))
+        self.internet_help_button = QPushButton("Mam problem z Internetem — zacznij diagnozę")
+        self.internet_help_button.clicked.connect(self.start_guided_internet_diagnostic)
+        internet_layout.addWidget(self.internet_help_button)
         internet_actions = QHBoxLayout()
         self.internet_target = QLineEdit()
         self.internet_target.setPlaceholderText("IPv4 lub IPv6 celu")
@@ -509,6 +573,8 @@ class NetworkCenterWindow(QMainWindow):
         internet_actions.addWidget(self.internet_trace)
         self.internet_mtu = QCheckBox("MTU IPv4")
         internet_actions.addWidget(self.internet_mtu)
+        self.internet_http = QCheckBox("HTTP/HTTPS do example.com")
+        internet_actions.addWidget(self.internet_http)
         self.internet_button = QPushButton("Zbadaj połączenie")
         self.internet_button.clicked.connect(self.start_internet_diagnostic)
         internet_actions.addWidget(self.internet_button)
@@ -523,6 +589,10 @@ class NetworkCenterWindow(QMainWindow):
         self.internet_result = QLabel("Nie wykonano pomiaru.")
         self.internet_result.setWordWrap(True)
         internet_layout.addWidget(self.internet_result)
+        self.internet_plan_button = QPushButton("Zobacz bezpieczny plan naprawy")
+        self.internet_plan_button.setEnabled(False)
+        self.internet_plan_button.clicked.connect(self.show_guided_internet_plan)
+        internet_layout.addWidget(self.internet_plan_button)
         self.internet_trace_output = QPlainTextEdit()
         self.internet_trace_output.setReadOnly(True)
         self.internet_trace_output.setPlaceholderText("Wynik opcjonalnego traceroute pojawi się tutaj.")
@@ -657,6 +727,12 @@ class NetworkCenterWindow(QMainWindow):
         optimizer_layout.addLayout(optimizer_actions)
         dns_actions = QHBoxLayout()
         self.dns_addresses = QLineEdit()
+        self.dns_family = QComboBox()
+        self.dns_family.addItems(["IPv4", "IPv6"])
+        self.dns_family.currentTextChanged.connect(
+            lambda family: self.dns_addresses.setPlaceholderText(
+                f"DNS {family}, oddzielone przecinkiem; puste = automatycznie"))
+        dns_actions.addWidget(self.dns_family)
         self.dns_addresses.setPlaceholderText("DNS IPv4, oddzielone przecinkiem; puste = automatycznie")
         dns_actions.addWidget(self.dns_addresses)
         self.dns_plan_button = QPushButton("Plan DNS")
@@ -669,6 +745,9 @@ class NetworkCenterWindow(QMainWindow):
         self.dns_rollback_button.clicked.connect(lambda: self.start_dns_change("rollback"))
         dns_actions.addWidget(self.dns_rollback_button)
         optimizer_layout.addLayout(dns_actions)
+        backups_button = QPushButton("Lista kopii DNS")
+        backups_button.clicked.connect(self.show_dns_backups)
+        optimizer_layout.addWidget(backups_button)
         mtu_actions = QHBoxLayout()
         self.mtu_value = QSpinBox()
         self.mtu_value.setRange(576, 1500)
@@ -691,6 +770,31 @@ class NetworkCenterWindow(QMainWindow):
         self.optimizer_output.setReadOnly(True)
         optimizer_layout.addWidget(self.optimizer_output, 1)
         tabs.addTab(optimizer_card, "Optymalizacja")
+        repair_card = QFrame()
+        repair_card.setObjectName("Card")
+        repair_layout = QVBoxLayout(repair_card)
+        repair_layout.addWidget(QLabel("Naprawy Windows: wymagają administratora, zapisują dziennik i nie mają gwarantowanego cofnięcia."))
+        repair_actions = QHBoxLayout()
+        self.network_repair_operation = QComboBox()
+        for operation, label in (("flush-dns", "Wyczyść cache DNS"),
+                                 ("dhcp-renew", "Odnów DHCP"),
+                                 ("winsock-reset", "Reset Winsock")):
+            self.network_repair_operation.addItem(label, operation)
+        repair_actions.addWidget(self.network_repair_operation)
+        self.network_repair_plan_button = QPushButton("Pokaż plan")
+        self.network_repair_plan_button.clicked.connect(self.show_network_repair_plan)
+        repair_actions.addWidget(self.network_repair_plan_button)
+        self.network_repair_run_button = QPushButton("Wykonaj po potwierdzeniu")
+        self.network_repair_run_button.clicked.connect(self.start_network_repair)
+        repair_actions.addWidget(self.network_repair_run_button)
+        repair_layout.addLayout(repair_actions)
+        journals_button = QPushButton("Odczytaj dzienniki napraw")
+        journals_button.clicked.connect(self.show_network_repair_journals)
+        repair_layout.addWidget(journals_button)
+        self.network_repair_output = QPlainTextEdit()
+        self.network_repair_output.setReadOnly(True)
+        repair_layout.addWidget(self.network_repair_output, 1)
+        tabs.addTab(repair_card, "Naprawa sieci")
         traffic_card = QFrame()
         traffic_card.setObjectName("Card")
         traffic_layout = QVBoxLayout(traffic_card)
@@ -826,10 +930,25 @@ class NetworkCenterWindow(QMainWindow):
         self.registry_table.setHorizontalHeaderLabels(["Klucz", "IP", "Nazwa", "Znane", "Zaufane"])
         self.registry_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.registry_table.setEditTriggers(QTableWidget.NoEditTriggers)
+        self.registry_table.setSelectionBehavior(QTableWidget.SelectRows)
         registry_layout.addWidget(self.registry_table, 1)
+        trust_actions = QHBoxLayout()
+        trust_button = QPushButton("Zaufaj wybranemu")
+        trust_button.clicked.connect(lambda: self.change_selected_trust(True))
+        trust_actions.addWidget(trust_button)
+        untrust_button = QPushButton("Usuń zaufanie")
+        untrust_button.clicked.connect(lambda: self.change_selected_trust(False))
+        trust_actions.addWidget(untrust_button)
+        undo_trust_button = QPushButton("Cofnij z kopii")
+        undo_trust_button.clicked.connect(self.undo_trust_change)
+        trust_actions.addWidget(undo_trust_button)
+        registry_layout.addLayout(trust_actions)
         self.registry_compare_button = QPushButton("Porównaj listy z ostatnim skanem")
         self.registry_compare_button.clicked.connect(self.compare_sentinel_devices)
         registry_layout.addWidget(self.registry_compare_button)
+        report_button = QPushButton("Zapisz raport LAN HTML")
+        report_button.clicked.connect(self.save_network_report)
+        registry_layout.addWidget(report_button)
         self.registry_comparison = QPlainTextEdit()
         self.registry_comparison.setReadOnly(True)
         self.registry_comparison.setMaximumHeight(125)
@@ -854,6 +973,7 @@ class NetworkCenterWindow(QMainWindow):
         self.neighbors_data = None
         self.adapters_data = None
         self.last_discovery_result = None
+        self.report_button.setEnabled(False)
         self.save_button.setEnabled(False)
         self.status.setText("Odczytuję lokalną tablicę sąsiadów…")
         self.worker = NeighborWorker(self)
@@ -926,6 +1046,61 @@ class NetworkCenterWindow(QMainWindow):
     def update_save_state(self):
         self.save_button.setEnabled(self.neighbors_data is not None and self.adapters_data is not None)
 
+    def show_network_repair_plan(self):
+        plan = plan_repair(self.network_repair_operation.currentData())
+        self.network_repair_output.setPlainText(json.dumps(plan, ensure_ascii=False, indent=2))
+        self.status.setText("Plan naprawy bez wykonania. Brak gwarantowanego cofnięcia.")
+
+    def show_network_repair_journals(self):
+        directory = QFileDialog.getExistingDirectory(self, "Katalog dzienników napraw")
+        if not directory:
+            return
+        try:
+            rows = [row for row in list_repair_journals(directory)
+                    if row["operation"] in ("flush-dns", "dhcp-renew", "winsock-reset")]
+            self.network_repair_output.setPlainText(json.dumps(rows, ensure_ascii=False, indent=2))
+            self.status.setText(f"Odczytano {len(rows)} dzienników napraw sieci.")
+        except (OSError, ValueError) as error:
+            self.status.setText(f"Nie odczytano dzienników: {error}")
+
+    def start_network_repair(self):
+        if self.network_repair_worker is not None and self.network_repair_worker.isRunning():
+            return
+        operation = self.network_repair_operation.currentData()
+        plan = plan_repair(operation)
+        directory = QFileDialog.getExistingDirectory(self, "Katalog na dziennik i migawkę diagnostyczną")
+        if not directory:
+            return
+        answer = QMessageBox.question(
+            self, "Naprawa sieci bez rollbacku",
+            f"Uruchomić {' '.join(plan['command'])}?\n{plan['description']}\n"
+            "Wymagany administrator. Przed wykonaniem powstanie dziennik i migawka diagnostyczna. "
+            "Brak gwarantowanego cofnięcia. Połączenie może zostać przerwane.",
+            QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        if answer != QMessageBox.Yes:
+            return
+        self.network_repair_run_button.setEnabled(False)
+        self.network_repair_plan_button.setEnabled(False)
+        self.network_repair_operation.setEnabled(False)
+        self.status.setText(f"Wykonuję {operation}; poczekaj na zakończenie.")
+        self.network_repair_worker = NetworkRepairWorker(operation, directory, self)
+        self.network_repair_worker.loaded.connect(self.show_network_repair_result)
+        self.network_repair_worker.failed.connect(self.show_network_repair_error)
+        self.network_repair_worker.finished.connect(self.finish_network_repair)
+        self.network_repair_worker.start()
+
+    def show_network_repair_result(self, result):
+        self.network_repair_output.setPlainText(json.dumps(result, ensure_ascii=False, indent=2))
+        self.status.setText(f"Naprawa {result['operation']}: {result['status']}; dziennik: {result['journal']}")
+
+    def show_network_repair_error(self, message):
+        self.status.setText("Naprawa nie została ukończona: " + message)
+
+    def finish_network_repair(self):
+        self.network_repair_run_button.setEnabled(True)
+        self.network_repair_plan_button.setEnabled(True)
+        self.network_repair_operation.setEnabled(True)
+
     def show_help(self):
         QMessageBox.information(
             self, "Pomoc — Network Center",
@@ -935,6 +1110,8 @@ class NetworkCenterWindow(QMainWindow):
             "Karta Porty uruchamia ograniczone profile Nmap; cele poza localhost wymagają zaznaczenia zgody. "
             "Historia LAN zapisuje obserwacje MAC/IP w lokalnej bazie SQLite dopiero po włączeniu; brak wpisu cache nie oznacza offline. "
             "Optymalizacja odczytuje DNS/MTU/TCP i inne ustawienia adaptera bez ich zmiany. "
+            "Naprawa sieci pokazuje plan przed wykonaniem. Flush DNS czyści cache, nie zmienia adresów DNS. "
+            "Odnowienie DHCP może przerwać łączność, a reset Winsock może wymagać restartu. Brak gwarantowanego cofnięcia. "
             "Ruch analizuje wskazany log Windows/JSONL/Linux; alerty są heurystyką, a nie dowodem ataku. "
             "Adaptery i DNS pochodzą z bieżącej konfiguracji Windows; to nie jest test Internetu. "
             "Migawka zawiera lokalne adresy IP i MAC. Zapis następuje tylko po wyborze nowego pliku. "
@@ -1067,7 +1244,8 @@ class NetworkCenterWindow(QMainWindow):
     def read_sentinel_registry(self):
         self.auto_protection.setChecked(False)
         local = os.environ.get("LOCALAPPDATA")
-        folder = Path(local) / "PrestigeTech" / "NetworkSentinel" / "database" if local else None
+        folder = (self.sentinel_registry_folder or
+                  (Path(local) / "PrestigeTech" / "NetworkSentinel" / "database" if local else None))
         if folder is None or not folder.is_dir():
             selected = QFileDialog.getExistingDirectory(self, "Wybierz katalog database Network Sentinel")
             if not selected:
@@ -1083,6 +1261,7 @@ class NetworkCenterWindow(QMainWindow):
             self.registry_note.setText(f"Listy Sentinel niedostępne: {error}")
             return
         rows = result["devices"]
+        self.sentinel_registry_folder = folder
         self.sentinel_registry_result = result
         if result["status"] != "COMPLETE":
             self.auto_protection.setChecked(False)
@@ -1096,6 +1275,55 @@ class NetworkCenterWindow(QMainWindow):
         quality = "częściowy odczyt" if result["status"] != "COMPLETE" else "pełny odczyt"
         self.registry_note.setText(f"{quality}; {len(rows)} urządzeń, {mismatches} rozbieżności IP między listami. ")
 
+    def change_selected_trust(self, enable):
+        registry = self.sentinel_registry_result
+        index = self.registry_table.currentRow()
+        if (registry is None or registry["status"] != "COMPLETE"
+                or not 0 <= index < len(registry["devices"]) or self.sentinel_registry_folder is None):
+            self.registry_note.setText("Wczytaj kompletne listy i wybierz urządzenie.")
+            return
+        row = registry["devices"][index]
+        if not row["known"]:
+            self.registry_note.setText("Zaufanie można zmieniać tylko dla znanego urządzenia.")
+            return
+        answer = QMessageBox.question(
+            self, "Lista zaufanych Sentinel",
+            f"{'Dodać' if enable else 'Usunąć'} zaufanie dla {row['key']}? "
+            "Przed zmianą powstanie kopia JSON. Aktywna ochrona zostanie wyłączona.",
+            QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        if answer != QMessageBox.Yes:
+            return
+        self.auto_protection.setChecked(False)
+        folder = self.sentinel_registry_folder
+        try:
+            result = change_trust(folder / "known-devices.json", folder / "trusted-devices.json",
+                                  row["key"], enable)
+        except (OSError, ValueError, RuntimeError) as error:
+            self.registry_note.setText(f"Nie zmieniono zaufania: {error}")
+            return
+        self.read_sentinel_registry()
+        if result["status"] == "APPLIED":
+            self.registry_note.setText(f"Zmieniono zaufanie; kopia do cofnięcia: {result['backup']}")
+
+    def undo_trust_change(self):
+        if self.sentinel_registry_folder is None:
+            self.registry_note.setText("Najpierw odczytaj listy Sentinel.")
+            return
+        backup, _ = QFileDialog.getOpenFileName(self, "Kopia zmiany zaufania", "", "JSON (*.json)")
+        if not backup:
+            return
+        if QMessageBox.question(self, "Cofnięcie zaufania", "Przywrócić listę z kopii, jeśli nie była później zmieniana?",
+                                QMessageBox.Yes | QMessageBox.No, QMessageBox.No) != QMessageBox.Yes:
+            return
+        self.auto_protection.setChecked(False)
+        try:
+            rollback_trust(self.sentinel_registry_folder / "trusted-devices.json", backup)
+        except (OSError, ValueError, RuntimeError) as error:
+            self.registry_note.setText(f"Nie cofnięto zaufania: {error}")
+            return
+        self.read_sentinel_registry()
+        self.registry_note.setText("Przywrócono listę zaufanych z kopii.")
+
     def compare_sentinel_devices(self):
         try:
             result = assess_observations(self.sentinel_registry_result,
@@ -1104,6 +1332,28 @@ class NetworkCenterWindow(QMainWindow):
             self.registry_comparison.setPlainText(str(error))
             return
         self.registry_comparison.setPlainText(json.dumps(result, ensure_ascii=False, indent=2))
+
+    def save_network_report(self):
+        path, _ = QFileDialog.getSaveFileName(self, "Nowy raport LAN", "network-report.html", "HTML (*.html)")
+        if not path:
+            return
+        try:
+            saved = export_network_report(self.last_discovery_result,
+                                          self.sentinel_registry_result, path)
+            self.registry_note.setText(f"Zapisano raport LAN: {saved}")
+        except (OSError, ValueError) as error:
+            self.registry_note.setText(f"Nie zapisano raportu LAN: {error}")
+
+    def open_discovery_report(self):
+        if self.last_discovery_result is None:
+            return
+        try:
+            prefill = summarize_live_result("Network", self.last_discovery_result)
+        except ValueError as error:
+            self.discovery_note.setText("Nie przekazano skanu do raportu: " + str(error))
+            return
+        self.report_dialog = ReportDialog(self, prefill=prefill)
+        self.report_dialog.show()
 
     def choose_discovery_oui(self):
         path, _ = QFileDialog.getOpenFileName(self, "Wybierz lokalną bazę OUI", "", "JSON (*.json)")
@@ -1121,6 +1371,7 @@ class NetworkCenterWindow(QMainWindow):
                 (self.discovery_worker is not None and self.discovery_worker.isRunning())):
             return
         self.last_discovery_result = None
+        self.report_button.setEnabled(False)
         self.discovery_table.setRowCount(0)
         self.discover_button.setEnabled(False)
         self.discovery_note.setText("Wykrywam lokalne podsieci…")
@@ -1143,6 +1394,7 @@ class NetworkCenterWindow(QMainWindow):
                 self.discovery_note.setText("Skan anulowany przed rozpoczęciem.")
                 return
             selected = scopes[labels.index(label)]
+        self.last_discovery_scope = dict(selected)
         self.discovery_note.setText(f"Skanuję {selected['scope']} przez ICMP…")
         self.stop_discovery_button.setEnabled(True)
         self.discovery_worker = DiscoveryWorker(selected, self.discovery_oui,
@@ -1155,6 +1407,7 @@ class NetworkCenterWindow(QMainWindow):
 
     def show_discovery(self, result):
         self.last_discovery_result = result
+        self.report_button.setEnabled(True)
         rows = result.get("observed", result["responsive"])
         self.discovery_table.setRowCount(len(rows))
         for index, row in enumerate(rows):
@@ -1177,6 +1430,7 @@ class NetworkCenterWindow(QMainWindow):
 
     def show_discovery_error(self, message):
         self.last_discovery_result = None
+        self.report_button.setEnabled(False)
         self.discovery_table.setRowCount(0)
         self.discovery_note.setText(f"Skan niedostępny: {message}")
         self.discover_button.setEnabled(True)
@@ -1190,6 +1444,61 @@ class NetworkCenterWindow(QMainWindow):
     def finish_discovery(self):
         self.discover_button.setEnabled(True)
         self.stop_discovery_button.setEnabled(False)
+
+    def start_discovery_schedule(self):
+        scope = self.last_discovery_scope
+        if scope is None:
+            self.discovery_note.setText("Najpierw uruchom ręcznie skan i wybierz lokalną podsieć.")
+            return
+        answer = QMessageBox.question(
+            self, "Harmonogram skanów LAN",
+            f"Uruchamiać tylko ICMP w {scope['scope']} ({scope['interface']}) co "
+            f"{self.schedule_minutes.value()} minut, maksymalnie {self.schedule_runs.value()} razy?\n"
+            "Bez Nmap, bez reverse DNS i bez automatycznych blokad. "
+            "Harmonogram działa tylko w tej sesji.",
+            QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        if answer != QMessageBox.Yes:
+            return
+        self.scheduled_scope = dict(scope)
+        self.scheduled_remaining = self.schedule_runs.value()
+        self.discovery_timer.start(self.schedule_minutes.value() * 60 * 1000)
+        self.discovery_note.setText(f"Harmonogram aktywny: {self.scheduled_remaining} skanów ICMP.")
+
+    def stop_discovery_schedule(self):
+        self.discovery_timer.stop()
+        self.scheduled_scope = None
+        self.scheduled_remaining = 0
+        self.discovery_note.setText("Harmonogram skanów wyłączony.")
+
+    def run_scheduled_discovery(self):
+        if self.scheduled_scope is None or self.scheduled_remaining <= 0:
+            self.stop_discovery_schedule()
+            return
+        if self.discovery_worker is not None and self.discovery_worker.isRunning():
+            return
+        try:
+            current = local_scopes()
+        except RuntimeError as error:
+            self.stop_discovery_schedule()
+            self.discovery_note.setText(f"Harmonogram zatrzymany: {error}")
+            return
+        if not any(all(row.get(key) == self.scheduled_scope.get(key)
+                       for key in ("index", "ip", "scope")) for row in current):
+            self.stop_discovery_schedule()
+            self.discovery_note.setText("Harmonogram zatrzymany: interfejs lub podsieć zmieniły się.")
+            return
+        self.scheduled_remaining -= 1
+        self.discover_button.setEnabled(False)
+        self.stop_discovery_button.setEnabled(True)
+        self.discovery_worker = DiscoveryWorker(self.scheduled_scope, self.discovery_oui,
+                                                False, False, self)
+        self.discovery_worker.loaded.connect(self.show_discovery)
+        self.discovery_worker.failed.connect(self.show_discovery_error)
+        self.discovery_worker.finished.connect(self.finish_discovery)
+        self.discovery_worker.start()
+        if self.scheduled_remaining == 0:
+            self.discovery_timer.stop()
+            self.scheduled_scope = None
 
     def start_internet_context(self):
         if self.internet_context_worker is not None and self.internet_context_worker.isRunning():
@@ -1223,20 +1532,37 @@ class NetworkCenterWindow(QMainWindow):
         self.internet_cancel_button.setEnabled(True)
         self.internet_worker = InternetWorker(self.internet_target.text().strip(), gateway,
                                              self.internet_count.value(), self.internet_trace.isChecked(),
-                                             self.internet_mtu.isChecked(), self)
+                                             self.internet_mtu.isChecked(), self.internet_http.isChecked(), self)
         self.internet_worker.loaded.connect(self.show_internet_diagnostic)
         self.internet_worker.failed.connect(self.show_internet_error)
         self.internet_worker.finished.connect(self.finish_internet_diagnostic)
         self.internet_worker.start()
 
+    def start_guided_internet_diagnostic(self):
+        self.tabs.setCurrentIndex(self.tabs.indexOf(self.internet_result.parentWidget()))
+        self.internet_target.setText("1.1.1.1")
+        self.internet_count.setValue(3)
+        self.internet_trace.setChecked(False)
+        self.internet_mtu.setChecked(False)
+        self.internet_http.setChecked(True)
+        self.internet_plan_button.setEnabled(False)
+        self.start_internet_diagnostic()
+
+    def show_guided_internet_plan(self):
+        self.tabs.setCurrentIndex(self.tabs.indexOf(self.network_repair_output.parentWidget()))
+        self.show_network_repair_plan()
+
     def show_internet_diagnostic(self, result):
         if result["status"] != "COMPLETE":
+            self.internet_plan_button.setEnabled(False)
             self.internet_result.setText(f"INCOMPLETE: {result['reason']}")
             return
+        self.internet_plan_button.setEnabled(True)
         internet = result["internet"]
         dns = result["dns"]
         trace = result.get("traceroute")
         mtu = result.get("mtu")
+        web = result.get("web", {})
         link = result.get("link_context", {"status": "UNKNOWN"})
         self.internet_trace_output.setPlainText(trace["output"] if trace else "")
         self.internet_result.setText(
@@ -1247,11 +1573,14 @@ class NetworkCenterWindow(QMainWindow):
             f"Ocena: {result['classification']['category']}. {result['classification']['reason']} "
             f"Trasa: {trace['status'] if trace else 'nie wybrano'}. "
             f"MTU: {mtu['estimated_ipv4_mtu'] if mtu else 'nie wybrano'}. "
+            f"HTTP: {web.get('http', {}).get('http_status', web.get('http', {}).get('status', 'nie wybrano'))}; "
+            f"HTTPS: {web.get('https', {}).get('http_status', web.get('https', {}).get('status', 'nie wybrano'))}. "
             f"Wi-Fi: {link.get('signal_percent', 'UNKNOWN')}%; "
             f"{link.get('category', link.get('reason', 'korelacja niedostępna'))}. {result['note']}"
         )
 
     def show_internet_error(self, message):
+        self.internet_plan_button.setEnabled(False)
         self.internet_trace_output.clear()
         self.internet_result.setText(f"Pomiar niedostępny: {message}")
 
@@ -1587,12 +1916,13 @@ class NetworkCenterWindow(QMainWindow):
         if self.dns_change_worker is not None and self.dns_change_worker.isRunning():
             return
         index = self.optimizer_adapter.currentData()
+        family = self.dns_family.currentText()
         backup = None
         if action != "rollback" and index is None:
             self.optimizer_note.setText("Najpierw odczytaj adaptery i wybierz interfejs.")
             return
         if action == "rollback":
-            backup, _ = QFileDialog.getOpenFileName(self, "Wybierz kopię DNS Center", "", "JSON (*.json)")
+            backup, _ = QFileDialog.getOpenFileName(self, f"Wybierz kopię DNS {family}", "", "JSON (*.json)")
             if not backup:
                 return
             answer = QMessageBox.question(self, "Przywrócenie DNS",
@@ -1606,27 +1936,40 @@ class NetworkCenterWindow(QMainWindow):
             raw = self.dns_addresses.text().strip()
             servers = [part.strip() for part in raw.split(",")] if raw else None
             if action == "apply":
-                backup, _ = QFileDialog.getSaveFileName(self, "Nowa kopia ustawień DNS", "dns-backup.json",
+                backup, _ = QFileDialog.getSaveFileName(self, f"Nowa kopia ustawień DNS {family}", f"dns-{family.lower()}-backup.json",
                                                          "JSON (*.json)")
                 if not backup:
                     return
                 description = ", ".join(servers) if servers else "automatyczne DNS"
                 answer = QMessageBox.question(self, "Zmiana DNS Windows",
-                                              f"Czy ustawić {description} na interfejsie #{index}?\n"
+                                              f"Czy ustawić {description} ({family}) na interfejsie #{index}?\n"
                                               f"Kopia: {backup}\nWymaga administratora.",
                                               QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
                 if answer != QMessageBox.Yes:
                     return
         for button in (self.dns_plan_button, self.dns_apply_button, self.dns_rollback_button):
             button.setEnabled(False)
+        self.dns_family.setEnabled(False)
         self.optimizer_note.setText("Sprawdzam ustawienia DNS…")
         self.dns_change_worker = DnsChangeWorker(action, index=index, servers=servers,
-                                                backup=backup, parent=self)
+                                                backup=backup, family=family, parent=self)
         self.dns_change_worker.loaded.connect(self.show_dns_change_result)
         self.dns_change_worker.failed.connect(
             lambda message: self.optimizer_note.setText(f"DNS: {message}"))
         self.dns_change_worker.finished.connect(self.finish_dns_change)
         self.dns_change_worker.start()
+
+    def show_dns_backups(self):
+        folder = QFileDialog.getExistingDirectory(self, "Wybierz katalog kopii DNS")
+        if not folder:
+            return
+        try:
+            rows = list_dns_backups(folder)
+        except (OSError, ValueError) as error:
+            self.optimizer_note.setText(f"Kopie DNS: {error}")
+            return
+        self.optimizer_output.setPlainText(json.dumps(rows, ensure_ascii=False, indent=2))
+        self.optimizer_note.setText(f"Znaleziono {len(rows)} kopii DNS (maksymalnie 200).")
 
     def show_dns_change_result(self, result):
         self.optimizer_output.setPlainText(json.dumps(result, ensure_ascii=False, indent=2))
@@ -1635,6 +1978,7 @@ class NetworkCenterWindow(QMainWindow):
     def finish_dns_change(self):
         for button in (self.dns_plan_button, self.dns_apply_button, self.dns_rollback_button):
             button.setEnabled(True)
+        self.dns_family.setEnabled(True)
 
     def start_mtu_change(self, action):
         if self.mtu_change_worker is not None and self.mtu_change_worker.isRunning():
@@ -2000,6 +2344,7 @@ class NetworkCenterWindow(QMainWindow):
         )
 
     def closeEvent(self, event):
+        self.discovery_timer.stop()
         self.traffic_timer.stop()
         if self.deep_capture_worker is not None and self.deep_capture_worker.isRunning():
             self.deep_capture_worker.cancel_event.set()
@@ -2044,7 +2389,8 @@ class NetworkCenterWindow(QMainWindow):
                        self.optimizer_worker, self.traffic_worker,
                        self.traffic_stream_worker, self.firewall_worker,
                        self.internet_context_worker, self.dns_change_worker,
-                       self.mtu_change_worker, self.dns_system_worker):
+                       self.mtu_change_worker, self.dns_system_worker,
+                       self.network_repair_worker):
             if worker is not None and worker.isRunning():
                 self.refresh_button.setEnabled(False)
                 worker.wait(11000)

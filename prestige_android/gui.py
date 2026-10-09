@@ -1,15 +1,19 @@
 """GUI Android Center z odczytami ADB bez zmian telefonu."""
 
 import json
+from pathlib import Path
 
 from PySide6.QtCore import QThread, Signal
-from PySide6.QtWidgets import (QCheckBox, QComboBox, QFrame, QHBoxLayout, QLabel,
+from PySide6.QtWidgets import (QCheckBox, QComboBox, QFileDialog, QFrame, QHBoxLayout, QLabel,
                                QMainWindow, QMessageBox, QPlainTextEdit, QPushButton,
                                QSpinBox, QTabWidget, QTableWidget, QTableWidgetItem,
                                QVBoxLayout, QWidget, QHeaderView)
 
 from prestige_core.android_adb import AdbBackend, inspect_apps, list_devices, read_diagnostic
+from prestige_core.android_snapshots import compare_apps_snapshots, load_apps_snapshot
+from prestige_core.report_live import summarize_live_result
 from prestige_core.ui_theme import APP_QSS, COLORS
+from prestige_report.gui import ReportDialog
 
 
 class AndroidWorker(QThread):
@@ -52,6 +56,8 @@ class AndroidCenterWindow(QMainWindow):
         self.worker = None
         self.devices = []
         self.apps = []
+        self.apps_snapshot = None
+        self.report_dialog = None
         root = QWidget()
         self.setCentralWidget(root)
         layout = QHBoxLayout(root)
@@ -133,7 +139,17 @@ class AndroidCenterWindow(QMainWindow):
         self.apps_button = QPushButton("Odczytaj aplikacje")
         self.apps_button.clicked.connect(self.start_apps)
         app_controls.addWidget(self.apps_button)
+        save_apps = QPushButton("Zapisz migawkę")
+        save_apps.clicked.connect(self.save_apps_snapshot)
+        app_controls.addWidget(save_apps)
+        compare_apps = QPushButton("Porównaj migawki")
+        compare_apps.clicked.connect(self.compare_saved_apps)
+        app_controls.addWidget(compare_apps)
         apps_layout.addLayout(app_controls)
+        self.report_button = QPushButton("Ostatni odczyt aplikacji → Repair Report")
+        self.report_button.setEnabled(False)
+        self.report_button.clicked.connect(self.open_report)
+        apps_layout.addWidget(self.report_button)
         self.apps_table = QTableWidget(0, 4)
         self.apps_table.setHorizontalHeaderLabels(["Pakiet", "Wersja", "Ocena", "Deklaracje szczególne"])
         self.apps_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
@@ -144,6 +160,12 @@ class AndroidCenterWindow(QMainWindow):
         self.app_details.setReadOnly(True)
         apps_layout.addWidget(self.app_details, 1)
         tabs.addTab(apps_card, "Android Inspector")
+        offline_card = QFrame()
+        offline_layout = QVBoxLayout(offline_card)
+        self.offline_result = QPlainTextEdit()
+        self.offline_result.setReadOnly(True)
+        offline_layout.addWidget(self.offline_result)
+        tabs.addTab(offline_card, "Porównanie offline")
         main.addWidget(tabs, 1)
         layout.addWidget(content, 1)
         if autoload:
@@ -160,6 +182,9 @@ class AndroidCenterWindow(QMainWindow):
         if action != "devices" and serial is None:
             self.status.setText("Wybierz autoryzowane urządzenie z listy.")
             return
+        if action == "apps":
+            self.apps_snapshot = None
+            self.report_button.setEnabled(False)
         self._busy(True)
         self.status.setText("Trwa odczyt ADB…")
         self.worker = AndroidWorker(action, serial=serial,
@@ -204,6 +229,8 @@ class AndroidCenterWindow(QMainWindow):
                     self.diagnostic_table.setItem(index, column, QTableWidgetItem(text))
             self.status.setText(f"Diagnostyka: {result['status']}; {len(rows)} sekcji.")
         else:
+            self.apps_snapshot = result
+            self.report_button.setEnabled(True)
             self.apps = result["apps"]
             self.permission_package.clear()
             self.permission_package.addItem("Bez szczegółów pakietu", None)
@@ -226,9 +253,51 @@ class AndroidCenterWindow(QMainWindow):
             self.diagnostic_table.setRowCount(0)
         else:
             self.apps = []
+            self.apps_snapshot = None
+            self.report_button.setEnabled(False)
             self.apps_table.setRowCount(0)
             self.app_details.clear()
         self.status.setText(f"Odczyt niedostępny: {message}")
+
+    def save_apps_snapshot(self):
+        if self.apps_snapshot is None:
+            self.status.setText("Najpierw odczytaj aplikacje.")
+            return
+        path, _ = QFileDialog.getSaveFileName(self, "Nowa migawka Android", "android-apps.json", "JSON (*.json)")
+        if not path:
+            return
+        try:
+            with Path(path).open("x", encoding="utf-8") as stream:
+                json.dump(self.apps_snapshot, stream, ensure_ascii=False, indent=2)
+            self.status.setText("Zapisano migawkę aplikacji; zawiera dane urządzenia i uprawnienia.")
+        except (OSError, ValueError) as error:
+            self.status.setText(f"Nie zapisano migawki: {error}")
+
+    def open_report(self):
+        if self.apps_snapshot is None or self.apps_snapshot.get("serial") != self.device_choice.currentData():
+            self.status.setText("Wybierz urządzenie zgodne z ostatnim odczytem aplikacji.")
+            return
+        try:
+            prefill = summarize_live_result("Android", self.apps_snapshot)
+        except ValueError as error:
+            self.status.setText("Nie przekazano wyniku do raportu: " + str(error))
+            return
+        self.report_dialog = ReportDialog(self, prefill=prefill)
+        self.report_dialog.show()
+
+    def compare_saved_apps(self):
+        first, _ = QFileDialog.getOpenFileName(self, "Wcześniejsza migawka Android", "", "JSON (*.json)")
+        if not first:
+            return
+        second, _ = QFileDialog.getOpenFileName(self, "Późniejsza migawka Android", "", "JSON (*.json)")
+        if not second:
+            return
+        try:
+            result = compare_apps_snapshots(load_apps_snapshot(first), load_apps_snapshot(second))
+            self.offline_result.setPlainText(json.dumps(result, ensure_ascii=False, indent=2))
+            self.status.setText(f"Porównanie offline: {result['status']}.")
+        except (OSError, ValueError, KeyError) as error:
+            self.status.setText(f"Nie porównano migawek: {error}")
 
     def show_selected_app(self):
         index = self.apps_table.currentRow()

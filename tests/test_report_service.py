@@ -22,10 +22,16 @@ class ReportServiceTests(unittest.TestCase):
             html_path = next(Path(path) for path in output["files"] if path.endswith(".html"))
             html = html_path.read_text(encoding="utf-8")
             self.assertIn("&lt;script&gt;", html)
+            self.assertIn("Niepotwierdzona — brak udokumentowanego testu po naprawie", html)
             self.assertNotIn("<script>", html)
             self.assertTrue(all(Path(path).is_file() for path in output["files"]))
             with self.assertRaises(ValueError):
                 validate({**sample(), "czas_pracy_min": -1})
+            with self.assertRaises(ValueError):
+                validate({**sample(), "status_weryfikacji": "Potwierdzona — test po naprawie wykonano i opisano"})
+            confirmed = validate({**sample(), "test_koncowy": "Po naprawie otwarto trzy strony i sprawdzono DNS.",
+                                  "status_weryfikacji": "Potwierdzona — test po naprawie wykonano i opisano"})
+            self.assertTrue(confirmed["status_weryfikacji"].startswith("Potwierdzona"))
 
     @unittest.skipUnless(importlib.util.find_spec("reportlab"), "reportlab unavailable")
     def test_pdf_unicode_and_no_overwrite(self):

@@ -1,6 +1,7 @@
 """Pomiary połączenia znane z Internet Diagnostic, bez zmian konfiguracji sieci."""
 
 import ipaddress
+import http.client
 import os
 import re
 import statistics
@@ -90,8 +91,29 @@ def mtu_probe(address, *, runner=subprocess.run, platform=None):
             "note": "Brak odpowiedzi ICMP nie dowodzi fragmentacji; zakres 576–1500."}
 
 
+def http_probe(host, *, secure=False, connection_factory=None):
+    """HEAD / bez przekierowań i bez pobierania treści; status HTTP to nie diagnoza Internetu."""
+    if not _HOST.fullmatch(host) or ":" in host or host.startswith("-"):
+        raise ValueError("Nieprawidłowa nazwa hosta HTTP.")
+    factory = connection_factory or (http.client.HTTPSConnection if secure
+                                     else http.client.HTTPConnection)
+    started = time.perf_counter()
+    connection = None
+    try:
+        connection = factory(host, timeout=5)
+        connection.request("HEAD", "/", headers={"User-Agent": "PrestigeTech-Diagnostic/1"})
+        response = connection.getresponse()
+        return {"status": "RESPONSE", "http_status": response.status,
+                "elapsed_ms": round((time.perf_counter() - started) * 1000, 2)}
+    except (OSError, http.client.HTTPException) as error:
+        return {"status": "UNKNOWN", "error_type": type(error).__name__}
+    finally:
+        if connection is not None:
+            connection.close()
+
+
 def diagnose(target, *, gateway=None, dns_name="example.com", count=5,
-             traceroute=False, test_mtu=False, cancel_event=None,
+             traceroute=False, test_mtu=False, test_http=False, cancel_event=None,
              runner=subprocess.run, platform=None):
     target = str(ipaddress.ip_address(target))
     gateway = str(ipaddress.ip_address(gateway)) if gateway else None
@@ -131,4 +153,11 @@ def diagnose(target, *, gateway=None, dns_name="example.com", count=5,
             result["traceroute"] = {"status": "UNKNOWN", "output": ""}
     if test_mtu:
         result["mtu"] = mtu_probe(target, runner=runner, platform=platform)
+    if test_http:
+        result["web"] = {}
+        for scheme, secure in (("http", False), ("https", True)):
+            if cancel_event is not None and cancel_event.is_set():
+                result["web"][scheme] = {"status": "INCOMPLETE"}
+            else:
+                result["web"][scheme] = http_probe(dns_name, secure=secure)
     return result

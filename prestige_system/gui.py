@@ -10,11 +10,12 @@ from PySide6.QtWidgets import (QComboBox, QFileDialog, QFrame, QHBoxLayout, QLab
 
 from prestige_core.system_snapshot import collect, compare, load_snapshot, save_snapshot
 from prestige_core.windows_toolkit import collect as collect_toolkit
-from prestige_core.windows_repairs import OPERATIONS, plan_repair, run_repair
-from prestige_core.pc_cleanup import clean, profiles, restore, scan, scan_recycle
+from prestige_core.windows_repairs import OPERATIONS, list_repair_journals, plan_repair, run_repair
+from prestige_core.pc_cleanup import clean, profiles, restore, scan, scan_recycle, scan_usage
 from prestige_core.ui_theme import APP_QSS, COLORS
 from prestige_report.gui import ReportDialog
 from prestige_core.report_prefill import summarize_center_result
+from prestige_core.senior_assistant import check_disk_space, help_plan
 from prestige_ai.gui import AiDialog
 
 
@@ -57,7 +58,9 @@ class CleanupWorker(QThread):
 
     def run(self):
         try:
-            if self.action == "scan":
+            if self.action == "usage":
+                result = scan_usage(self.directory)
+            elif self.action == "scan":
                 available = profiles()
                 if self.profile not in available:
                     raise ValueError("Profil nie jest dostępny w tym systemie.")
@@ -141,6 +144,16 @@ class SystemCenterWindow(QMainWindow):
         self.ai_button.clicked.connect(self.open_ai)
         controls.addWidget(self.ai_button)
         main.addLayout(controls)
+        problem_controls = QHBoxLayout()
+        self.problem_choice = QComboBox()
+        for key in ("low_disk_space", "no_sound", "printer_unavailable"):
+            plan = help_plan(key)
+            self.problem_choice.addItem(plan["title"], key)
+        problem_controls.addWidget(self.problem_choice)
+        self.problem_plan_button = QPushButton("Pokaż, co sprawdzić")
+        self.problem_plan_button.clicked.connect(self.show_problem_plan)
+        problem_controls.addWidget(self.problem_plan_button)
+        main.addLayout(problem_controls)
         repair_controls = QHBoxLayout()
         self.repair_operation = QComboBox()
         for operation in OPERATIONS:
@@ -152,6 +165,9 @@ class SystemCenterWindow(QMainWindow):
         self.repair_run_button = QPushButton("Wykonaj naprawę")
         self.repair_run_button.clicked.connect(self.start_repair)
         repair_controls.addWidget(self.repair_run_button)
+        journal_button = QPushButton("Dziennik napraw")
+        journal_button.clicked.connect(self.show_repair_journals)
+        repair_controls.addWidget(journal_button)
         main.addLayout(repair_controls)
         cleanup_controls = QHBoxLayout()
         self.cleanup_profile = QComboBox()
@@ -165,6 +181,9 @@ class SystemCenterWindow(QMainWindow):
         self.cleanup_scan_button = QPushButton("Skan PC Cleanup")
         self.cleanup_scan_button.clicked.connect(self.start_cleanup_scan)
         cleanup_controls.addWidget(self.cleanup_scan_button)
+        self.usage_button = QPushButton("Zajętość i duże pliki")
+        self.usage_button.clicked.connect(self.start_usage_scan)
+        cleanup_controls.addWidget(self.usage_button)
         self.cleanup_apply_button = QPushButton("Przenieś do kwarantanny")
         self.cleanup_apply_button.setEnabled(False)
         self.cleanup_apply_button.clicked.connect(self.choose_cleanup_apply)
@@ -183,6 +202,23 @@ class SystemCenterWindow(QMainWindow):
         self.result.setReadOnly(True)
         card_layout.addWidget(self.result)
         main.addWidget(card, 1)
+
+    def show_problem_plan(self):
+        problem_id = self.problem_choice.currentData()
+        plan = help_plan(problem_id)
+        lines = [plan["title"], plan["introduction"], "",
+                 *(f"{number}. {step['title']}" for number, step in enumerate(plan["steps"], 1))]
+        if problem_id == "low_disk_space":
+            try:
+                measurement = check_disk_space()
+                lines.extend(("", f"Wolne miejsce: {measurement['free_percent']}% "
+                              f"({measurement['free_bytes']:,} bajtów)."))
+            except (OSError, ValueError) as error:
+                lines.extend(("", f"Nie udało się odczytać wolnego miejsca: {error}"))
+        else:
+            lines.extend(("", "To plan. Automatyczny pomiar tego problemu nie jest jeszcze dostępny."))
+        self.result.setPlainText("\n".join(lines))
+        self.status.setText("Pokazano plan bez zmiany ustawień i bez usuwania plików.")
 
     def choose_capture(self):
         destination, _ = QFileDialog.getSaveFileName(self, "Nowy plik migawki", "system-snapshot.json", "JSON (*.json)")
@@ -219,6 +255,17 @@ class SystemCenterWindow(QMainWindow):
         plan = plan_repair(self.repair_operation.currentData())
         self.result.setPlainText(json.dumps(plan, ensure_ascii=False, indent=2))
         self.status.setText("Plan bez wykonania. Operacja nie ma gwarantowanego cofnięcia.")
+
+    def show_repair_journals(self):
+        directory = QFileDialog.getExistingDirectory(self, "Katalog dzienników napraw")
+        if not directory:
+            return
+        try:
+            rows = list_repair_journals(directory)
+            self.result.setPlainText(json.dumps(rows, ensure_ascii=False, indent=2))
+            self.status.setText(f"Znaleziono {len(rows)} dzienników napraw.")
+        except (OSError, ValueError) as error:
+            self.status.setText(f"Nie odczytano dzienników: {error}")
 
     def start_repair(self):
         if self._busy():
@@ -276,6 +323,22 @@ class SystemCenterWindow(QMainWindow):
         self.cleanup_worker.finished.connect(self._cleanup_finished)
         self.cleanup_worker.start()
 
+    def start_usage_scan(self):
+        if self._busy():
+            return
+        directory = QFileDialog.getExistingDirectory(self, "Katalog do odczytowej analizy zajętości")
+        if not directory:
+            return
+        self.cleanup_plan = None
+        self.cleanup_apply_button.setEnabled(False)
+        self.usage_button.setEnabled(False)
+        self.status.setText("Analizuję zajętość i duże pliki; niczego nie usuwam…")
+        self.cleanup_worker = CleanupWorker("usage", directory=directory, parent=self)
+        self.cleanup_worker.loaded.connect(self.show_cleanup_result)
+        self.cleanup_worker.failed.connect(self.show_error)
+        self.cleanup_worker.finished.connect(self._cleanup_finished)
+        self.cleanup_worker.start()
+
     def choose_cleanup_apply(self):
         if self._busy() or not self.cleanup_plan or not self.cleanup_plan.get("clean_allowed"):
             return
@@ -318,7 +381,12 @@ class SystemCenterWindow(QMainWindow):
         except (ValueError, KeyError, TypeError):
             self.report_prefill = None
         result = data["result"]
-        if data["action"] == "scan":
+        if data["action"] == "usage":
+            self.cleanup_plan = None
+            self.cleanup_apply_button.setEnabled(False)
+            self.status.setText(f"Odczytano {result['file_count']} plików, {result['total_bytes']} bajtów. "
+                                f"Błędy dostępu: {result['errors']}; pełny odczyt: {result['complete']}.")
+        elif data["action"] == "scan":
             self.cleanup_plan = result
             allowed = result.get("clean_allowed", False) and bool(result.get("files"))
             self.cleanup_apply_button.setEnabled(allowed)
@@ -334,6 +402,7 @@ class SystemCenterWindow(QMainWindow):
     def _cleanup_finished(self):
         self.cleanup_profile.setEnabled(True)
         self.cleanup_scan_button.setEnabled(True)
+        self.usage_button.setEnabled(True)
         self.cleanup_restore_button.setEnabled(True)
 
     def _finished(self):

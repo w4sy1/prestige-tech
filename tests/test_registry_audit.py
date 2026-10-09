@@ -27,6 +27,19 @@ class RegistryAuditTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             audit_catalog((OPERATIONS[0], OPERATIONS[0]))
 
+    def test_audit_separates_unset_from_access_denied(self):
+        catalog = (OPERATIONS[5], OPERATIONS[12])
+
+        class DistinctRegistry(FakeRegistry):
+            def OpenKey(self, hive, key, reserved, access):
+                if key == OPERATIONS[12].key:
+                    raise PermissionError("odmowa")
+                return super().OpenKey(hive, key, reserved, access)
+
+        result = audit_catalog(catalog, registry=DistinctRegistry(), platform="nt")
+        self.assertEqual(result["details"]["VALUE_NOT_SET"], 1)
+        self.assertEqual(result["details"]["ACCESS_DENIED"], 1)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -73,6 +73,22 @@ class RegistryReadTests(unittest.TestCase):
     def test_missing_autorun_key_is_unavailable(self):
         result = read_operation(OPERATIONS[2], registry=FakeRegistry(missing_key=True), platform="nt")
         self.assertEqual(result["status"], "Niedostępne")
+        self.assertEqual(result["reason_code"], "KEY_NOT_FOUND")
+
+    def test_missing_value_is_not_reported_as_a_system_failure(self):
+        result = read_operation(OPERATIONS[5], registry=FakeRegistry(), platform="nt")
+        self.assertEqual(result["status"], "Niedostępne")
+        self.assertEqual(result["reason_code"], "VALUE_NOT_SET")
+        self.assertIn("nie oznacza awarii", result["reason"])
+
+    def test_access_denied_is_distinct_from_unset_value(self):
+        class DeniedRegistry(FakeRegistry):
+            def OpenKey(self, *args):
+                raise PermissionError("odmowa")
+
+        result = read_operation(OPERATIONS[5], registry=DeniedRegistry(), platform="nt")
+        self.assertEqual(result["reason_code"], "ACCESS_DENIED")
+        self.assertIn("uprawnień", result["reason"])
 
     def test_autorun_fixture_enumerates_values(self):
         fake = FakeRegistry({"Example": (r"C:\Example\app.exe", 1)})

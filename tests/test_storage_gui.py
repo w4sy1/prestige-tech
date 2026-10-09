@@ -137,9 +137,15 @@ class StorageGuiTests(unittest.TestCase):
         window.show_disks([disk])
         window.table.selectRow(0)
         self.assertTrue(window.image_button.isEnabled())
+        self.assertFalse(window.readonly_button.isEnabled())
+        window.show_disks([dict(disk, read_only=False)])
+        window.table.selectRow(0)
+        self.assertTrue(window.readonly_button.isEnabled())
+        self.assertFalse(window.image_button.isEnabled())
         window.show_disks([dict(disk, system=True)])
         window.table.selectRow(0)
         self.assertFalse(window.image_button.isEnabled())
+        self.assertFalse(window.readonly_button.isEnabled())
         window.close()
 
     def test_system_disk_warning_and_error_clear(self):

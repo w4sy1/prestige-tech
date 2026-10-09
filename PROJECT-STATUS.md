@@ -6,6 +6,197 @@ projektu i nie zastępują bieżącego pliku licencji.
 
 Bieżący plik przekazania pracy i lista końcowych testów: `development/CONTINUE-HANDOFF.txt`.
 
+## Etap 2026-10-09 — pomoc w codziennych problemach
+
+Rozbudowana koncepcja prostego systemu pomocy i mapa wszystkich nowych
+pomysłów do istniejących Centrów są w `development/USER-HELP-DESIGN.md`.
+Dodano odczytowy katalog czterech problemów, sygnalizator, rzeczywisty odczyt
+wolnego miejsca oraz opakowanie istniejącej diagnostyki Internetu w
+`prestige_core/senior_assistant.py`. To początek silnika planów, bez wykonania
+napraw i harmonogramu. System Center ma teraz prosty wybór problemu z odczytem
+wolnego miejsca; ścieżki dźwięku i drukarki uczciwie pokazują plan bez pomiaru.
+Ochrona przeglądarki, sejf i zdalne SOS pozostają do zrobienia. Nie należy
+przedstawiać tych funkcji jako gotowych.
+
+## Etap 2026-10-09 — dostępność drugiego stylu i prostsze ścieżki
+
+Drugi styl Dashboardu obejmuje teraz również pozostałe strony przez wspólną
+paletę; wybór stylu niebieskiego przywraca jego kolory. Registry Manager pokazuje
+po zapisaniu lub cofnięciu zmian prosty wynik: wykonana czynność, sprawdzenie
+efektu, cofnięcie i informacja o ponownym uruchomieniu. Network Center ma
+przycisk „Mam problem z Internetem”, który przygotowuje krótki pomiar i prowadzi
+do planu naprawy bez automatycznego jej wykonania. Testy kodu Centrów:
+297 uruchomionych, 296 zaliczonych, 1 pominięty; Dashboard: 19 zaliczonych.
+Nie wykonywano rzeczywistych zmian w Windows, skanów sieci ani pomiarów na
+urządzeniach. Katalog Registry nadal ma 20/600 zmian; pozostałych 580 nie
+uznano za zweryfikowane. Klucz wydawcy i warunki edycji PRO są nadal otwarte.
+
+## Etap 2026-10-08 — drugi wygląd Dashboardu według przesłanych grafik
+
+Użytkownik dostarczył dwa obrazy referencyjne: główny Dashboard Prestige Tech
+oraz System & Protection Center. W `prestige-tech-dashboard` drugi styl strony
+głównej ma teraz górskie tło, czarno-złote menu, pięć głównych kafli, sekcję
+stanu i baner. Kafle kierują do istniejących Centrów; nie pokazujemy
+fikcyjnych procentów zdrowia, statusu ochrony ani historii z wizualizacji.
+Niebieski styl pozostał dostępny. Zrzut działającego drugiego GUI:
+`C:\Users\01dwa\Documents\PrestigeTech-Facebook\dashboard-drugi-gui.png`.
+To odwzorowanie kierunku i układu, nie pikselowa kopia renderu referencyjnego.
+
+## Etap 2026-10-08 — zabezpieczenia dla osoby nietechnicznej
+
+Registry Manager zapisuje kopie zmian HKCU w lokalnym zarządzanym katalogu,
+pokazuje ostatnie kopie i umożliwia podgląd/cofnięcie zakończonych zmian.
+Odczyt i audyt osobno oznaczają wartość nieustawioną, odmowę dostępu i błąd.
+Repair Report domyślnie drukuje status „niepotwierdzona”; status potwierdzony
+wymaga jawnego wyboru i opisu testu końcowego. Obejmuje HTML/TXT/JSON/PDF.
+Testy: 295 uruchomionych, 294 zaliczone, 1 pominięty. To testy kodu i GUI
+offscreen; nie wykonywano prawdziwych zmian rejestru ani naprawy komputera.
+Nadal otwarte: pozostałe punkty symulacji, 580/600 zmian Registry, rzeczywiste
+testy Windows/urządzeń oraz warunki i klucz wydawcy edycji PRO.
+
+## Etap 2026-10-08 — symulacja osoby nietechnicznej
+
+Przeprowadzono symulację poznawczą użytkownika na podstawie GUI i kodu
+Dashboardu oraz Centrów: `development/SENIOR-USER-SIMULATION.md`. To nie jest
+badanie z udziałem seniorów ani potwierdzenie zachowania urządzeń. W Registry
+Managerze przy minimalnym oknie tabela wyników miała tylko 7 px wysokości;
+po zmianie układu i dodaniu przewijania offscreen smoke pokazuje co najmniej
+170 px oraz brak przewijania poziomego. Potwierdzenia zmian zaczynają się od
+skutku w zwykłym języku, a domyślna odpowiedź jest odmowna. Help rozróżnia
+cel 600 zmian od odczytów ADMX. Priorytety P0/P1/P2 w dokumencie są propozycją
+do wyboru z użytkownikiem, nie gotowymi funkcjami.
+
+## Etap 2026-10-08 — audyt praktycznych zmian Registry Manager
+
+Rozpoczęto weryfikację pomysłów z artykułu Hetman w
+`development/REGISTRY-TWEAKS-AUDIT.md`. Artykuł jest inspiracją, a skutki i
+zgodność ustalamy z dokumentacji Microsoft. Dodano cztery polityki HKCU z
+kopią istniejącej lub nieistniejącej wartości, kontrolą edycji Windows,
+podglądem i cofaniem oraz ShowStatusBar i trzema ustawieniami wyglądu
+użytkownika oraz kolor akcentu pasków tytułu. Razem jest 20 zmian w kodzie.
+Użytkownik potwierdził cel 200/200/200, czyli 600 unikalnych zmian;
+580 pozostaje otwartych. Bez testów rzeczywistego zapisu Windows.
+Pełna suita po tej iteracji: 286 testów, 285 PASS, 1 skip.
+Na bieżącym komputerze polityki 012–015 odmawiają planu z uwagi na edycję
+Windows niewymienioną przez Microsoft jako wspierana; ShowStatusBar odczytano
+lokalnie jako istniejący DWORD. Wyścig zmiany przez inny proces przed zapisem
+polityki jest teraz odmową bez nadpisywania obcej wartości.
+Na życzenie użytkownika GUI ma sesyjny tryb eksperymentalny dla niewspieranej
+edycji, domyślnie wyłączony i z ostrzeżeniem w planie/potwierdzeniu.
+Zwykłe ustawienia motywu/przezroczystości działają niezależnie od tego trybu.
+
+## Etap 2026-10-08 — Registry Manager dla początkujących i podział edycji
+
+Registry Manager pokazuje krótkie opisy skutku, ryzyka i sposobu sprawdzenia
+11 zmian HKCU Explorer (w tym 2 nowe: chronione pliki systemowe i ikona typu
+na miniaturze). Trzy istniejące zmiany oznaczono FREE; pozostałe PRO i ich
+zapis jest blokowany bez podpisanej licencji. Odczyt, plan i cofnięcie nadal
+są dostępne bez PRO. Dodano weryfikację podpisu Ed25519 i ważności klucza
+offline, lokalne narzędzie wydawcy oraz zapamiętanie ścieżki klucza klienta.
+Prywatny klucz nie powstał i nie należy do repozytorium; publiczny klucz
+wydawcy trzeba wygenerować i dołączyć przed wydaniem PRO. Obecna Prestige
+Tech Free Use License mówi o darmowym korzystaniu z kompilacji, więc warunki
+edycji płatnej wymagają osobnej aktualizacji przed dystrybucją. Docelowych
+20/20/20 lub 50/50/50 zmian jeszcze nie ma. Zapisy testowano tylko na
+symulowanym rejestrze, bez VM.
+Macierz zamierzonego zakresu FREE/PRO dla całego zestawu jest w
+`development/EDITION-MATRIX.md`; poza Registry Managerem bramki nie są jeszcze
+wdrożone. Pełna suita po tym etapie: 280 testów, 279 PASS, 1 skip.
+
+## Etap 2026-10-08 — uzupełnienie inwentaryzacji, Internetu i analizy miejsca
+
+System Snapshot zbiera dodatkowo CPU, GPU, BIOS, dyski fizyczne i liczniki
+niezawodności (w tym temperaturę, jeśli sterownik ją udostępnia). Stare
+migawki v1 bez nowych sekcji nadal można wczytać; porównanie brakującej sekcji
+oznacza UNKNOWN. Internet Diagnostic ma opcjonalne sondy HEAD HTTP/HTTPS do
+example.com z limitem czasu, bez pobierania treści i bez śledzenia przekierowań.
+PC Cleanup analizuje zajętość wybranego katalogu i największe pliki bez
+uprawnienia do usuwania. Pomiary i nowe kolektory sprawdzono testami
+symulowanymi; temperatury sprzętowe mogą być niedostępne.
+Storage & Recovery odczytuje obecne urządzenia PnP USB z VID/PID i stanem;
+lista obejmuje również koncentratory i peryferia, więc nie jest testem nośnika.
+AI Center ma też lokalne połączenie 2–10 zapisanych raportów JSON w jedną
+ocenę regułową z licznikami źródeł i SHA-256 plików. To fragment funkcji
+iDiagnostics, bez ustalania pewnej przyczyny ani zdalnego dostępu.
+Po tym etapie pełna suita ma 276 testów: 275 zaliczonych, 1 pominięty.
+
+## Etap 2026-10-08 — USB tylko do odczytu przed obrazowaniem
+
+Storage & Recovery ma kontrolowane ustawienie atrybutu read-only przez DiskPart
+dla wybranego niesystemowego dysku USB. Backend porównuje numer, identyfikator
+i rozmiar nośnika przed poleceniem oraz potwierdza IsReadOnly przez Get-Disk po
+wykonaniu. GUI wymaga jawnego potwierdzenia, potem ponownego odświeżenia i
+wyboru źródła przed istniejącym obrazowaniem RAW do nowego pliku `.img` na
+innym dysku. Obraz jest weryfikowany SHA-256. Atrybut nie jest sprzętową
+blokadą zapisu; realnego pendrive'a i administratora nie testowano.
+
+## Etap 2026-10-08 — kolejne funkcje Centrów i drugi widok Dashboardu
+
+Network Center ma kartę „Naprawa sieci” dla flush DNS, odnowienia DHCP i
+resetu Winsock. Korzysta ze wspólnego backendu System Center: plan przed
+wykonaniem, wybór katalogu dziennika, osobne potwierdzenie i odczyt historii.
+Operacje wymagają administratora i nie mają gwarantowanego cofnięcia.
+Potwierdzenie odmowne sprawdzono testem GUI; realnych napraw nie uruchamiano.
+
+Dashboard (`prestige-tech-dashboard`) ma drugi widok strony głównej oparty na
+tym samym katalogu 10 Centrów oraz wybór stylu zapisywany w ustawieniach.
+Oryginalny niebieski widok pozostaje dostępny. Nowego widoku nie nazywamy
+odwzorowaniem 1:1, ponieważ brak obrazów referencyjnych.
+
+Network Center pokazuje listę kopii DNS IPv4/IPv6 z wybranego katalogu.
+Ma też odczytowy raport LAN HTML, sesyjny harmonogram ICMP z wyborem podsieci,
+potwierdzeniem i limitem oraz zmianę listy zaufanych urządzeń Sentinel z kopią
+i warunkowym cofnięciem. Zmiana zaufania wyłącza automatyczną ochronę sesji.
+Monitor filtruje historię według ścieżki, rodzaju zdarzenia i czasu UTC.
+Porównuje dwa rozłączne okresy zapisanych zdarzeń bez zmiany baseline oraz
+zapisuje profile skanu/pollingu z wykluczonymi podfolderami. Tryb natywny jest
+wyłączony przy aktywnych wykluczeniach, bo nie stosuje tego samego filtra.
+Registry Manager pokazuje plan cofnięcia wartości HKCU przed potwierdzeniem
+i zapisuje różnicę wartości z kopii oraz bieżącego odczytu do pliku JSON.
+Storage & Recovery pokazuje dysk docelowy i wolne bajty przed obrazowaniem;
+backend nadal ponawia kontrolę źródło–cel i miejsca przed zapisem.
+Android Center zapisuje migawkę aplikacji i porównuje dwa wyniki offline,
+również uprawnienia. Security Center porównuje zakres dwóch audytów offline
+i zapisuje ostatni audyt do nowego JSON.
+System Center pokazuje metadane dzienników napraw bez treści diagnostycznej.
+Termux Center ma odczytowy przegląd środowiska i porównanie pakietów profilu
+Setup z wynikiem `dpkg-query`, bez instalacji. Ostatni odczyt stanu można
+zapisać jako nowy JSON. AI Center zapamiętuje tryb
+„tylko lokalnie”. Report Center sprawdza wymagane pola oraz zapisuje manifest
+SHA-256 wskazanych plików bez kopiowania załączników.
+Report Center importuje także zapisane JSON z dziewięciu Centrów (Network,
+Monitor, Registry, Storage, Android, Security, System, Termux i AI), gdy plik
+odpowiada rozpoznanemu formatowi. Dodaje wyłącznie neutralny opis i odniesienie
+do manifestu; źródło jest ponownie sprawdzane przed zapisem. Nie wypełnia
+diagnozy ani testu końcowego. Nie wszystkie Centra mają osobny przycisk
+eksportu tego wyniku, więc nie jest to automatyczne zasilanie raportu.
+Bieżący wynik skanu LAN, historia zdarzeń Monitora, audyt Registry,
+podsumowanie utworzonej kopii Storage, lista aplikacji Android,
+odczyt środowiska Termux i analiza AI mogą teraz otworzyć bezpośrednio
+formularz Repair Report. Przekazywany
+jest tylko neutralny opis czynności; bez automatycznego zapisu pliku, diagnozy
+i testu końcowego. Zmiana źródła lub modelu AI usuwa poprzedni wynik z okna.
+System i Security Center mają wcześniejsze wejścia do Report. Żadne z tych
+wejść nie obejmuje jeszcze wszystkich operacji danego Centrum.
+
+Pełna suita `prestige-tech`: 267 testów, 266 zaliczonych i 1 pominięty.
+Suita `prestige-tech-dashboard`: 18 testów zaliczonych. Dane urządzeń i
+zmiany systemowe w testach były symulowane.
+
+To są częściowe funkcje; nie zamykają całej listy rozbudowy. Testy na telefonie,
+realne zmiany systemu/sieci/dysku i wydanie EXE pozostają otwarte.
+
+## Etap 2026-10-07 — DNS IPv6 w Network Center
+
+Dodano osobny plan, zapis DNS IPv6 z nową kopią JSON, odczyt kontrolny i
+warunkowe cofnięcie. GUI pozwala wybrać rodzinę IPv4/IPv6. Zapis IPv6 używa
+poleceń `netsh interface ipv6`, żeby nie zmieniać listy IPv4. Pełna suita:
+240 testów, 239 PASS, 1 skip; źródłowy smoke Network Center PASS. Testy
+potwierdzają logikę na symulowanym backendzie, nie rzeczywistą zmianę DNS
+ani rollback na interfejsie Windows z uprawnieniami administratora.
+Drugi styl Dashboardu i brakujące funkcje pozostałych Centrów pozostają otwarte;
+dostępny opis referencyjnego wyglądu nie zawiera obrazów do odwzorowania 1:1.
+
 ## Etap 2026-09-30 — lokalne archiwum i porządek GitHub
 
 Na życzenie właściciela zakończono migrację starych repozytoriów jako kierunek

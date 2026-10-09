@@ -15,6 +15,9 @@ from PySide6.QtWidgets import (
 )
 
 from prestige_core.event_history import EventJournal, append_comparison, load_history, load_journal, new_history, save_history
+from prestige_core.monitor_timeline import compare_periods, filter_events
+from prestige_core.monitor_profiles import load_profile, save_profile
+from prestige_core.report_live import summarize_live_result
 from prestige_core.baseline_update import update_baseline
 from prestige_core.legacy_integrity import convert_baseline
 from prestige_core.file_snapshot import classify_file_events, compare_files, scan_files
@@ -22,6 +25,7 @@ from prestige_core.network_snapshot import save_snapshot
 from prestige_core.native_events import NativeEventStream, collect_native_events
 from prestige_core.native_correlation import correlate_extended
 from prestige_core.ui_theme import APP_QSS, COLORS
+from prestige_report.gui import ReportDialog
 from prestige_core.watch_state import WatchStateStore
 from prestige_core.watch_state_import import import_legacy_watch_database
 from prestige_core.baseline_signing import new_key, sign, verify
@@ -33,16 +37,17 @@ class ScanWorker(QThread):
     loaded = Signal(dict)
     failed = Signal(str)
 
-    def __init__(self, root, parent=None, extended=False):
+    def __init__(self, root, parent=None, extended=False, exclude_paths=()):
         super().__init__(parent)
         self.root = root
         self.extended = extended
+        self.exclude_paths = tuple(exclude_paths)
         self.cancel_event = Event()
 
     def run(self):
         try:
             self.loaded.emit(scan_files(self.root, cancel_event=self.cancel_event,
-                                        extended=self.extended))
+                                        extended=self.extended, exclude_paths=self.exclude_paths))
         except (OSError, ValueError) as error:
             self.failed.emit(str(error))
 
@@ -52,12 +57,13 @@ class WatchWorker(QThread):
     failed = Signal(str)
     FULL_REHASH_EVERY = 30
 
-    def __init__(self, root, parent=None, state_path=None, extended=False):
+    def __init__(self, root, parent=None, state_path=None, extended=False, exclude_paths=()):
         super().__init__(parent)
         self.root = root
         self.stop_event = Event()
         self.state_path = state_path
         self.extended = extended
+        self.exclude_paths = tuple(exclude_paths)
 
     def run(self):
         store = None
@@ -68,9 +74,13 @@ class WatchWorker(QThread):
             if previous is not None and bool(previous.get("options", {}).get("extended", False)) != self.extended:
                 self.failed.emit("Baza SQLite ma inny tryb ACL/ADS; wybierz osobną bazę albo zgodny tryb.")
                 return
+            if previous is not None and previous.get("options", {}).get("exclude_paths", []) != list(self.exclude_paths):
+                self.failed.emit("Baza SQLite ma inne wykluczenia; wybierz osobną bazę albo zgodny profil.")
+                return
             initial = scan_files(self.root, previous=previous,
                                  force_rehash=previous is not None,
-                                 cancel_event=self.stop_event, extended=self.extended)
+                                 cancel_event=self.stop_event, extended=self.extended,
+                                 exclude_paths=self.exclude_paths)
             if not initial["complete"]:
                 self.failed.emit("Początkowy skan jest niepełny; obserwacja nie wystartowała.")
                 return
@@ -92,7 +102,7 @@ class WatchWorker(QThread):
                 current = scan_files(
                     self.root, previous=previous, cancel_event=self.stop_event,
                     force_rehash=scan_count % self.FULL_REHASH_EVERY == 0,
-                    extended=self.extended,
+                    extended=self.extended, exclude_paths=self.exclude_paths,
                 )
                 result = classify_file_events(previous, current)
                 if result["status"] != "COMPLETE":
@@ -240,9 +250,11 @@ class MonitorWindow(QMainWindow):
         self.hash_worker = None
         self.manifest_worker = None
         self.history = None
+        self.report_dialog = None
         self.history_dirty = False
         self.journal = None
         self.state_path = None
+        self.exclude_paths = []
 
         root = QWidget()
         self.setCentralWidget(root)
@@ -316,6 +328,23 @@ class MonitorWindow(QMainWindow):
         self.help_button.clicked.connect(self.show_help)
         secondary_actions.addWidget(self.help_button)
         main.addLayout(secondary_actions)
+        profile_actions = QHBoxLayout()
+        add_exclusion = QPushButton("Wyklucz podfolder")
+        add_exclusion.clicked.connect(self.choose_exclusion)
+        profile_actions.addWidget(add_exclusion)
+        clear_exclusions = QPushButton("Wyczyść wykluczenia")
+        clear_exclusions.clicked.connect(self.clear_exclusions)
+        profile_actions.addWidget(clear_exclusions)
+        save_profile_button = QPushButton("Zapisz profil")
+        save_profile_button.clicked.connect(self.save_watch_profile)
+        profile_actions.addWidget(save_profile_button)
+        load_profile_button = QPushButton("Wczytaj profil")
+        load_profile_button.clicked.connect(self.load_watch_profile)
+        profile_actions.addWidget(load_profile_button)
+        main.addLayout(profile_actions)
+        self.exclusion_note = QLabel("Brak wykluczeń. Profil dotyczy skanu ręcznego i pollingowego.")
+        self.exclusion_note.setWordWrap(True)
+        main.addWidget(self.exclusion_note)
         signing_actions = QHBoxLayout()
         self.key_button = QPushButton("Nowe klucze podpisu")
         self.key_button.clicked.connect(self.generate_signing_keys)
@@ -389,6 +418,41 @@ class MonitorWindow(QMainWindow):
         self.event_filter.setPlaceholderText("Filtruj ścieżki zdarzeń")
         self.event_filter.textChanged.connect(self.render_history)
         events_layout.addWidget(self.event_filter)
+        timeline_filters = QHBoxLayout()
+        self.event_kind = QComboBox()
+        self.event_kind.addItems(["Wszystkie", "Nowy", "Usunięty", "Zmieniony", "Zmieniono nazwę"])
+        self.event_kind.currentTextChanged.connect(self.render_history)
+        timeline_filters.addWidget(self.event_kind)
+        self.event_from = QLineEdit()
+        self.event_from.setPlaceholderText("Od UTC, np. 2026-10-01T00:00:00Z")
+        self.event_from.editingFinished.connect(self.render_history)
+        timeline_filters.addWidget(self.event_from)
+        self.event_to = QLineEdit()
+        self.event_to.setPlaceholderText("Do UTC, np. 2026-10-08T23:59:59Z")
+        self.event_to.editingFinished.connect(self.render_history)
+        timeline_filters.addWidget(self.event_to)
+        events_layout.addLayout(timeline_filters)
+        period_controls = QHBoxLayout()
+        self.period_first_start = QLineEdit()
+        self.period_first_start.setPlaceholderText("Okres 1 od UTC")
+        period_controls.addWidget(self.period_first_start)
+        self.period_first_end = QLineEdit()
+        self.period_first_end.setPlaceholderText("Okres 1 do UTC")
+        period_controls.addWidget(self.period_first_end)
+        self.period_second_start = QLineEdit()
+        self.period_second_start.setPlaceholderText("Okres 2 od UTC")
+        period_controls.addWidget(self.period_second_start)
+        self.period_second_end = QLineEdit()
+        self.period_second_end.setPlaceholderText("Okres 2 do UTC")
+        period_controls.addWidget(self.period_second_end)
+        compare_button = QPushButton("Porównaj okresy")
+        compare_button.clicked.connect(self.compare_history_periods)
+        period_controls.addWidget(compare_button)
+        events_layout.addLayout(period_controls)
+        self.period_result = QPlainTextEdit()
+        self.period_result.setReadOnly(True)
+        self.period_result.setMaximumHeight(100)
+        events_layout.addWidget(self.period_result)
         history_actions = QHBoxLayout()
         self.history_save_button = QPushButton("Zapisz historię")
         self.history_save_button.setEnabled(False)
@@ -410,6 +474,10 @@ class MonitorWindow(QMainWindow):
         self.import_button.setEnabled(False)
         self.import_button.clicked.connect(self.choose_legacy_import)
         events_layout.addWidget(self.import_button)
+        self.report_button = QPushButton("Zapisana historia → Repair Report")
+        self.report_button.setEnabled(False)
+        self.report_button.clicked.connect(self.open_history_report)
+        events_layout.addWidget(self.report_button)
         self.events_table = QTableWidget(0, 3)
         self.events_table.setHorizontalHeaderLabels(["Czas UTC", "Plik", "Zdarzenie"])
         self.events_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
@@ -429,6 +497,88 @@ class MonitorWindow(QMainWindow):
                 self.set_folder(folder)
             except ValueError as error:
                 QMessageBox.warning(self, "Nie zmieniono katalogu", str(error))
+
+    def _profile_busy(self):
+        return any(worker is not None and worker.isRunning() for worker in
+                   (self.worker, self.watch_worker, self.native_worker,
+                    self.native_stream_worker, self.import_worker))
+
+    def update_exclusion_note(self):
+        if self.exclude_paths:
+            self.exclusion_note.setText("Wykluczone podfoldery (skan/polling): "
+                                        + ", ".join(self.exclude_paths)
+                                        + ". Tryb natywny jest wyłączony dla tego profilu.")
+        else:
+            self.exclusion_note.setText("Brak wykluczeń. Profil dotyczy skanu ręcznego i pollingowego.")
+        enabled = os.name == "nt" and Path(self.folder.text()).is_dir() and not self.exclude_paths
+        self.native_button.setEnabled(enabled)
+        self.native_stream_button.setEnabled(enabled)
+
+    def choose_exclusion(self):
+        if self._profile_busy():
+            self.status.setText("Zatrzymaj obserwację przed zmianą wykluczeń.")
+            return
+        root = Path(self.folder.text())
+        if not root.is_dir():
+            self.status.setText("Najpierw wybierz katalog źródłowy.")
+            return
+        selected = QFileDialog.getExistingDirectory(self, "Podfolder do wykluczenia", str(root))
+        if not selected:
+            return
+        path = Path(selected).resolve()
+        if not path.is_relative_to(root.resolve()) or path == root.resolve():
+            self.status.setText("Wykluczenie musi być podfolderem wybranego katalogu.")
+            return
+        relative = path.relative_to(root.resolve()).as_posix()
+        self.exclude_paths = sorted(set((*self.exclude_paths, relative)))
+        self.state_path = None
+        self.snapshot = None
+        self.save_button.setEnabled(False)
+        self.update_button.setEnabled(False)
+        self.update_exclusion_note()
+
+    def clear_exclusions(self):
+        if self._profile_busy():
+            self.status.setText("Zatrzymaj obserwację przed zmianą wykluczeń.")
+            return
+        self.exclude_paths = []
+        self.state_path = None
+        self.snapshot = None
+        self.save_button.setEnabled(False)
+        self.update_button.setEnabled(False)
+        self.update_exclusion_note()
+
+    def save_watch_profile(self):
+        if not Path(self.folder.text()).is_dir():
+            self.status.setText("Najpierw wybierz katalog źródłowy.")
+            return
+        destination, _ = QFileDialog.getSaveFileName(self, "Nowy profil Monitora", "monitor-profile.json", "JSON (*.json)")
+        if not destination:
+            return
+        try:
+            saved = save_profile({"schema_version": 1, "root": self.folder.text(),
+                                  "extended": self.extended_checkbox.isChecked(),
+                                  "exclude_paths": self.exclude_paths}, destination)
+            self.status.setText(f"Zapisano profil: {saved}")
+        except (OSError, ValueError) as error:
+            self.status.setText(f"Nie zapisano profilu: {error}")
+
+    def load_watch_profile(self):
+        if self._profile_busy():
+            self.status.setText("Zatrzymaj obserwację przed wczytaniem profilu.")
+            return
+        source, _ = QFileDialog.getOpenFileName(self, "Profil Monitora", "", "JSON (*.json)")
+        if not source:
+            return
+        try:
+            profile = load_profile(source)
+            self.set_folder(profile["root"])
+            self.extended_checkbox.setChecked(profile["extended"])
+            self.exclude_paths = profile["exclude_paths"]
+            self.update_exclusion_note()
+            self.status.setText("Wczytano profil. Zrób nowy skan; stary baseline może mieć inne wykluczenia.")
+        except (OSError, ValueError) as error:
+            self.status.setText(f"Nie wczytano profilu: {error}")
 
     def set_folder(self, folder):
         if self.import_worker is not None and self.import_worker.isRunning():
@@ -450,6 +600,8 @@ class MonitorWindow(QMainWindow):
             self.journal.close()
             self.journal = None
         self.folder.setText(str(path.resolve()))
+        self.exclude_paths = []
+        self.update_exclusion_note()
         self.history = new_history(path)
         self.history_dirty = False
         self.history_save_button.setEnabled(False)
@@ -467,8 +619,8 @@ class MonitorWindow(QMainWindow):
         self.update_button.setEnabled(False)
         self.scan_button.setEnabled(True)
         self.watch_button.setEnabled(True)
-        self.native_button.setEnabled(os.name == "nt")
-        self.native_stream_button.setEnabled(os.name == "nt")
+        self.native_button.setEnabled(os.name == "nt" and not self.exclude_paths)
+        self.native_stream_button.setEnabled(os.name == "nt" and not self.exclude_paths)
         self.status.setText("Katalog wybrany. Uruchom skan.")
 
     def start_scan(self):
@@ -488,7 +640,8 @@ class MonitorWindow(QMainWindow):
         self.scan_button.setEnabled(False)
         self.cancel_button.setEnabled(True)
         self.status.setText("Skanuję pliki…")
-        self.worker = ScanWorker(self.folder.text(), self, extended=self.extended_checkbox.isChecked())
+        self.worker = ScanWorker(self.folder.text(), self, extended=self.extended_checkbox.isChecked(),
+                                 exclude_paths=self.exclude_paths)
         self.worker.loaded.connect(self.show_snapshot)
         self.worker.failed.connect(self.show_error)
         self.worker.finished.connect(self.finish_scan)
@@ -528,7 +681,8 @@ class MonitorWindow(QMainWindow):
         self.status.setText("Uruchamiam obserwację. Pierwszy skan może potrwać…")
         self.sqlite_button.setEnabled(False)
         self.watch_worker = WatchWorker(self.folder.text(), self, state_path=self.state_path,
-                                        extended=self.extended_checkbox.isChecked())
+                                        extended=self.extended_checkbox.isChecked(),
+                                        exclude_paths=self.exclude_paths)
         self.watch_worker.changed.connect(self.show_events)
         self.watch_worker.failed.connect(self.show_watch_error)
         self.watch_worker.finished.connect(self.finish_watch)
@@ -565,6 +719,9 @@ class MonitorWindow(QMainWindow):
         return True
 
     def start_native_capture(self):
+        if self.exclude_paths:
+            self.status.setText("Tryb natywny nie obsługuje wykluczeń tego profilu.")
+            return
         if ((self.native_worker is not None and self.native_worker.isRunning())
                 or (self.native_stream_worker is not None and self.native_stream_worker.isRunning())
                 or (self.worker is not None and self.worker.isRunning())
@@ -601,16 +758,19 @@ class MonitorWindow(QMainWindow):
             self.status.setText(f"Natywny odczyt zakończony: {len(rows)} zdarzeń.")
 
     def finish_native_capture(self):
-        self.native_button.setEnabled(os.name == "nt")
+        self.native_button.setEnabled(os.name == "nt" and not self.exclude_paths)
         self.scan_button.setEnabled(True)
         self.watch_button.setEnabled(True)
         self.select_button.setEnabled(True)
         self.history_load_button.setEnabled(True)
         self.sqlite_button.setEnabled(True)
-        self.native_stream_button.setEnabled(os.name == "nt")
+        self.native_stream_button.setEnabled(os.name == "nt" and not self.exclude_paths)
         self.import_button.setEnabled(True)
 
     def toggle_native_stream(self):
+        if self.exclude_paths:
+            self.status.setText("Tryb natywny nie obsługuje wykluczeń tego profilu.")
+            return
         if self.native_stream_worker is not None and self.native_stream_worker.isRunning():
             self.native_stream_worker.stop()
             self.native_stream_button.setEnabled(False)
@@ -654,9 +814,9 @@ class MonitorWindow(QMainWindow):
                                     f"{correlated} z potwierdzoną zmianą ACL/ADS/treści.")
 
     def finish_native_stream(self):
-        self.native_stream_button.setEnabled(os.name == "nt")
+        self.native_stream_button.setEnabled(os.name == "nt" and not self.exclude_paths)
         self.native_stream_button.setText("Natywnie: start")
-        self.native_button.setEnabled(os.name == "nt")
+        self.native_button.setEnabled(os.name == "nt" and not self.exclude_paths)
         self.scan_button.setEnabled(True)
         self.watch_button.setEnabled(True)
         self.select_button.setEnabled(True)
@@ -666,9 +826,15 @@ class MonitorWindow(QMainWindow):
 
     def render_history(self):
         rows = self.history["events"] if self.history is not None else []
-        needle = self.event_filter.text().casefold()
-        visible = [row for row in rows if needle in row["path"].casefold()
-                   or needle in row.get("old_path", "").casefold()]
+        self.report_button.setEnabled(bool(rows))
+        try:
+            visible = filter_events(rows, path=self.event_filter.text(),
+                                    kind=self.event_kind.currentText(),
+                                    start=self.event_from.text().strip(),
+                                    end=self.event_to.text().strip())
+        except (ValueError, KeyError) as error:
+            self.status.setText(f"Filtr osi czasu: {error}")
+            visible = []
         self.events_table.setRowCount(len(visible))
         for index, row in enumerate(visible):
             path_label = (f"{row['old_path']} → {row['path']}"
@@ -677,6 +843,31 @@ class MonitorWindow(QMainWindow):
                                    if row.get("changes") else "")
             for column, value in enumerate((row["at_utc"], path_label, label)):
                 self.events_table.setItem(index, column, QTableWidgetItem(value))
+
+    def compare_history_periods(self):
+        if self.history is None:
+            self.period_result.setPlainText("Najpierw wczytaj historię zdarzeń.")
+            return
+        try:
+            result = compare_periods(self.history["events"],
+                                     self.period_first_start.text().strip(),
+                                     self.period_first_end.text().strip(),
+                                     self.period_second_start.text().strip(),
+                                     self.period_second_end.text().strip())
+            self.period_result.setPlainText(json.dumps(result, ensure_ascii=False, indent=2))
+        except (ValueError, KeyError) as error:
+            self.period_result.setPlainText(f"Nie porównano okresów: {error}")
+
+    def open_history_report(self):
+        if self.history is None or not self.history["events"]:
+            return
+        try:
+            prefill = summarize_live_result("Monitor", self.history)
+        except ValueError as error:
+            self.status.setText("Nie przekazano historii do raportu: " + str(error))
+            return
+        self.report_dialog = ReportDialog(self, prefill=prefill)
+        self.report_dialog.show()
 
     def save_event_history(self):
         if self.history is None or not self.history["events"]:
@@ -730,8 +921,8 @@ class MonitorWindow(QMainWindow):
         self.folder.setText(history["root"])
         self.scan_button.setEnabled(Path(history["root"]).is_dir())
         self.watch_button.setEnabled(Path(history["root"]).is_dir())
-        self.native_button.setEnabled(os.name == "nt" and Path(history["root"]).is_dir())
-        self.native_stream_button.setEnabled(os.name == "nt" and Path(history["root"]).is_dir())
+        self.native_button.setEnabled(os.name == "nt" and not self.exclude_paths and Path(history["root"]).is_dir())
+        self.native_stream_button.setEnabled(os.name == "nt" and not self.exclude_paths and Path(history["root"]).is_dir())
         self.history_save_button.setEnabled(bool(history["events"]))
         self.journal_button.setEnabled(True)
         self.journal_button.setText("Włącz dziennik")
@@ -748,8 +939,8 @@ class MonitorWindow(QMainWindow):
         self.watch_button.setEnabled(True)
         self.watch_button.setText("Obserwuj")
         self.sqlite_button.setEnabled(True)
-        self.native_button.setEnabled(os.name == "nt")
-        self.native_stream_button.setEnabled(os.name == "nt")
+        self.native_button.setEnabled(os.name == "nt" and not self.exclude_paths)
+        self.native_stream_button.setEnabled(os.name == "nt" and not self.exclude_paths)
         self.import_button.setEnabled(True)
 
     def choose_state_database(self):

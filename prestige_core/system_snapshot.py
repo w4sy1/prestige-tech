@@ -20,6 +20,16 @@ QUERIES={
  'drivers':'Get-CimInstance Win32_PnPSignedDriver | Select-Object DeviceID,DeviceName,DriverVersion,DriverProviderName,IsSigned',
 }
 
+# Starsze migawki v1 mają tylko powyższe sekcje; nowe odczyty są opcjonalne.
+REQUIRED_SECTIONS = frozenset(QUERIES)
+QUERIES.update({
+ 'cpu':'Get-CimInstance Win32_Processor -ErrorAction Stop | Select-Object DeviceID,Name,NumberOfCores,NumberOfLogicalProcessors,MaxClockSpeed',
+ 'gpu':'Get-CimInstance Win32_VideoController -ErrorAction Stop | Select-Object PNPDeviceID,Name,AdapterRAM,DriverVersion,Status',
+ 'bios':'Get-CimInstance Win32_BIOS -ErrorAction Stop | Select-Object Manufacturer,SMBIOSBIOSVersion,ReleaseDate',
+ 'physical_disks':'Get-PhysicalDisk -ErrorAction Stop | Select-Object UniqueId,FriendlyName,MediaType,HealthStatus,OperationalStatus,Size',
+ 'smart':'Get-PhysicalDisk -ErrorAction Stop | Get-StorageReliabilityCounter -ErrorAction Stop | Select-Object DeviceId,Temperature,Wear,PowerOnHours,ReadErrorsTotal,WriteErrorsTotal',
+})
+
 IDENTITIES={'programs':('RegistryKey',),'services':('Name',),'tasks':('TaskPath','TaskName'),
     'updates':('HotFixID',),'disk':('DeviceID',),'drivers':('DeviceID',),'network':('InterfaceAlias','IPAddress'),
     'startup':('Name','Location')}
@@ -62,7 +72,10 @@ def validate_snapshot(data):
     if (not isinstance(data,dict) or data.get('schema_version') != 1
             or not isinstance(data.get('sections'),dict)):
         raise ValueError('Nieobsługiwany snapshot.')
-    for name in QUERIES:
+    for name in REQUIRED_SECTIONS:
+        if name not in data['sections']:
+            raise ValueError('Snapshot ma brakującą sekcję: '+name)
+    for name in data['sections']:
         row=data['sections'].get(name)
         if not isinstance(row,dict) or row.get('status') not in ('OK','UNKNOWN'):
             raise ValueError('Snapshot ma brakującą lub nieprawidłową sekcję: '+name)

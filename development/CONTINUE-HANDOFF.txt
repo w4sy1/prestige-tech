@@ -1,5 +1,94 @@
 PRESTIGE TECH — PLIK PRZEKAZANIA PRACY I TESTÓW
-Stan: 2026-09-30. Aktualizuj ten plik po każdym istotnym etapie.
+Stan: 2026-10-08. Aktualizuj ten plik po każdym istotnym etapie.
+
+ETAP 2026-10-09 — POMOC DLA UŻYTKOWNIKA: nazwy funkcji uproszczono.
+Mapa wszystkich nowych pomysłów, Centrów i warunków ukończenia jest w
+development/USER-HELP-DESIGN.md. prestige_core/senior_assistant.py zawiera
+plany czterech problemów oraz odczytowe testy miejsca i połączenia. Funkcje
+z oznaczeniem „Do zrobienia” w mapie nie są gotowe. Nie deklarować zakończenia
+automatycznych napraw, integracji przeglądarki, zdalnego SOS ani sejfu.
+System Center ma wybór trzech prostych problemów i odczyt wolnego miejsca;
+dźwięk oraz drukarka są wyłącznie planami bez automatycznego pomiaru.
+Po tej zmianie testy Centrów: 305 uruchomionych, 304 OK, 1 skip.
+
+ETAP 2026-10-09: drugi styl Dashboardu został rozszerzony na pozostałe strony
+przez paletę czarno-złotą; przełączenie na niebieski działa w teście. Registry
+pokazuje prosty wynik zapisu/cofnięcia. Network Center ma prowadzoną diagnozę
+Internetu i przejście do planu naprawy. Testy: Centra 297 (296 OK, 1 skip),
+Dashboard 19 OK. Nadal otwarte: Registry 580/600, klucz i warunki PRO,
+pełny parytet grafiki referencyjnej, trwały harmonogram sieci i Deep Capture,
+pozostałe punkty modułów z najnowszej listy użytkownika oraz testy sprzętowe.
+
+DASHBOARD 2026-10-08: użytkownik dostarczył wzorzec drugiego stylu z górskim
+tłem i czarno-złotymi panelami. W sąsiednim prestige-tech-dashboard drugi
+widok strony głównej został przebudowany w tym kierunku: menu, pięć kafli,
+cztery karty stanu i baner. To działające GUI z trasami do Centrów, nie
+statyczny obraz. Nie podaje fikcyjnych 92% zdrowia ani statusu ochrony.
+Zrzut: C:\Users\01dwa\Documents\PrestigeTech-Facebook\dashboard-drugi-gui.png.
+Nadal otwarte: dalsze dopracowanie 1:1 i pozostałe strony w drugim stylu.
+
+OSTATNI ETAP 2026-10-08: Registry Manager ma automatyczne kopie w
+%LOCALAPPDATA%/PrestigeTech/RegistryBackups, listę kopii i cofnięcie po
+podglądzie. Audyt rozróżnia nieustawioną wartość, odmowę dostępu i błąd.
+Repair Report domyślnie oznacza naprawę jako niepotwierdzoną; status
+potwierdzony wymaga jawnego wyboru i opisu testu końcowego. Testy:
+295 uruchomionych, 294 PASS, 1 skip. Nie testowano zapisu rejestru na żywym
+Windows, sprzętu ani prawdziwej naprawy. Następne punkty z symulacji:
+prosty ekran końcowy Registry i prowadzenie od diagnostyki Internetu do
+planu naprawy; reszta w development/SENIOR-USER-SIMULATION.md.
+
+REGISTRY MANAGER 2026-10-08: użytkownik potwierdził cel 200 zmian dla
+początkujących, 200 średniozaawansowanych i 200 zaawansowanych (600 łącznie).
+W kodzie jest 20 zmian, 580 pozostaje do indywidualnego opracowania.
+Nowe REG-WRITE-012–015 używają osobnego backendu polityk HKCU z kopią również
+nieistniejącej wartości i kontrolą edycji Windows. GUI ma plan, opis,
+potwierdzenie, zapis i cofnięcie. REG-WRITE-016 pokazuje pasek stanu Eksploratora,
+017–020 zmieniają wygląd Windows przez istniejący backend. Użytkownik wybrał
+sesyjny tryb eksperymentalny dla polityk na niewspieranej edycji; domyślnie
+jest wyłączony. Symulacja osoby nietechnicznej i kandydaci P0/P1/P2:
+development/SENIOR-USER-SIMULATION.md. Registry GUI ma przewijanie i czytelniejszy
+tekst potwierdzeń. Pełna suita: 286 testów, 285 PASS, 1 skip.
+Nie wykonywano rzeczywistego zapisu Windows; publiczny klucz PRO nadal nie
+powstał. Audyt przykładów: development/REGISTRY-TWEAKS-AUDIT.md.
+
+AKTUALNY ETAP — KOD CENTRÓW I DWA WIDOKI DASHBOARDU
+Niecommitowane zmiany w prestige-tech i prestige-tech-dashboard z 2026-10-07/08
+należy zachować. Dashboard ma alternatywną stronę główną i zapamiętywany
+wybór stylu, ale bez obrazów referencyjnych nie jest to odwzorowanie 1:1.
+Network ma DNS IPv6, listę kopii DNS, raport LAN HTML, sesyjny harmonogram
+ICMP oraz zmianę zaufania Sentinel z kopią i warunkowym cofnięciem.
+Monitor ma filtrowaną oś czasu, porównanie okresów i profile skanu/pollingu
+z wykluczeniami. Tryb natywny jest przy nich niedostępny. Registry ma
+podgląd cofnięcia i eksport różnicy JSON. Android porównuje migawki offline,
+Security porównuje audyty, System pokazuje metadane dzienników, Termux
+odczytuje stan i porównuje pakiety profilu, AI zapamiętuje tryb lokalny,
+Report pokazuje braki i tworzy manifest SHA-256 załączników. Storage pokazuje
+źródło, cel i miejsce przed akwizycją. Pełna suita prestige-tech: 266 testów
+(265 PASS, 1 skip); Dashboard: 18 PASS. Testy realnych zmian/urządzeń i EXE
+są odłożone. Otwarte: automatyczne przekazanie bieżących wyników do Report, pełne
+zarządzanie Sentinel, dopięcie pozostałych funkcji z tabeli statusu i design
+Dashboardu według nieudostępnionych obrazów.
+
+Dalszy krok 2026-10-08: Report importuje rozpoznane pliki JSON dziewięciu
+Centrów, pokazuje neutralny opis, zapisuje odniesienie i sprawdza źródłowy
+SHA-256 przed raportem. Nie wpisuje diagnozy ani testu końcowego. Część Centrów
+nie ma jeszcze osobnego eksportu wyniku JSON w GUI; automatyczne przekazanie
+bieżącego wyniku do Report nadal jest otwarte. Pełna suita po tym kroku:
+266 testów (265 PASS, 1 skip); Dashboard 18 PASS.
+Termux Center zapisuje teraz ostatni odczyt środowiska do nowego JSON,
+który może być zaimportowany przez Report; zapis nie uruchamia pkg.
+Security Center zapisuje ostatni audyt do nowego JSON; fixture pokazuje,
+że zapis można zaimportować do Report bez uzupełniania diagnozy.
+Następny etap: Android (lista aplikacji), Termux (stan środowiska) i AI
+(ostatnia analiza) otwierają teraz Repair Report z neutralnym opisem bieżącego
+wyniku. Nie przekazują diagnozy ani testu końcowego; AI kasuje stary wynik
+po zmianie źródła/modelu. Pozostałe Centra wymagają takiego połączenia lub
+jednoznacznego wskazania odczytu, który można bezpiecznie podsumować.
+Network (ostatni jawny skan LAN) i Monitor (zapisana historia zdarzeń) również
+otwierają Repair Report tylko z licznikami i ograniczeniami obserwacji.
+Registry (ostatni audyt) i Storage (ostatnia utworzona kopia) mają analogiczne
+wejścia. Wynik PrestigeUSB nie nadpisuje podsumowania kopii. System/Security
+miały już własne wejścia. Nadal brak podsumowań dla każdej operacji Centrów.
 
 NAJNOWSZA DECYZJA — STARE REPOZYTORIA
 Użytkownik zakończył kierunek migracji starego kodu. 19 osobnych starych
@@ -269,6 +358,14 @@ i smoke GUI PASS. Parytet pozostałych zachowań Monitora nadal do audytu.
 6. Aktualizować PROJECT-STATUS.md, macierz migracji i ten plik po każdym etapie; raportować uczciwie co działa, a co jest tylko szkieletem lub planem.
 
 TESTY RĘCZNE NA KONIEC — LISTA DLA UŻYTKOWNIKA
+[ ] Registry PRO: przed dystrybucją wygenerować zaszyfrowany klucz prywatny poza repo i publiczny w prestige_core/assets/pro-public.pem poleceniem python -m development.license_issuer init; zaktualizować warunki licencji i sprawdzić ważność, manipulację plikiem oraz aktywację offline w EXE. Nie publikować prywatnego klucza.
+[ ] Registry zmiany 001–011: sprawdzić każdą w VM na wspieranych wersjach Windows, odczyt przed/po, kopię, cofnięcie, brak klucza i brak uprawnień. Katalog 20/20/20 pozostaje do dalszego opracowania.
+[ ] AI/iDiagnostics: sprawdzić łączenie różnych zapisanych raportów w trybie lokalnym, duże pliki, rozbieżne dane i zmianę pliku podczas odczytu; nie traktować wspólnej metryki jako potwierdzonej przyczyny. Distant nadal nie ma pełnej sesji zdalnej.
+[ ] USB Toolkit: zweryfikować listę VID/PID na różnych urządzeniach i brak mylenia koncentratorów z dyskiem; testy odczytu/zapisu pamięci USB pozostają osobnym, niewykonanym zakresem.
+[ ] System/Network: sprawdzić nowe sekcje CPU/GPU/BIOS/SMART na różnych komputerach, temperaturę UNKNOWN przy braku danych, opcjonalny HTTP/HTTPS (także DNS/TLS/proxy) oraz odczyt dużego katalogu PC Cleanup bez zmiany plików.
+[ ] Storage: na odłączonym testowym USB sprawdzić wybór numeru/ID/rozmiaru, DiskPart readonly, ponowny odczyt Get-Disk, obraz RAW na innym dysku, SHA-256, przerwanie i brak zapisu do źródła. Programowy atrybut nie zastępuje sprzętowego write blockera.
+[ ] Pozostałe rozszerzenia sieciowe: porównanie konfiguracji adapterów przed/po naprawie, kontrolowana zmiana DoH z kopią/cofnięciem, metryki jakości adaptera i dalszy parytet Sentinel. Nie przedstawiać ich jako ukończonych.
+[ ] Network Center / Naprawa sieci: w VM jako administrator sprawdzić flush DNS, DHCP renew i Winsock reset, przerwanie łączności, restart, dziennik oraz stan sieci przed/po. Kod GUI ma plan i potwierdzenie, bez testu realnej naprawy.
 [ ] Uruchomić każdy EXE na czystym Windows bez Pythona; sprawdzić start, zamknięcie, pomoc „?”, błędy i logi.
 [ ] Sprawdzić GUI przy 1366x768 i 1920x1080, skalowaniu 100/125/150%, obsługę klawiaturą i długie komunikaty.
 [ ] Network: adaptery Wi-Fi/Ethernet/VPN, brak sieci, migawki, porównanie, odmowę nadpisania, brak niezamówionego skanowania.

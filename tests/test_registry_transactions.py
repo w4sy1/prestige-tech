@@ -4,7 +4,8 @@ import tempfile
 import unittest
 
 from prestige_core.registry_transactions import (OPERATIONS, apply_change,
-                                                 plan_change, rollback_change)
+                                                 export_change_diff, plan_change, preview_rollback_change,
+                                                 rollback_change)
 
 
 class FakeKey:
@@ -59,6 +60,14 @@ class RegistryTransactionTests(unittest.TestCase):
                                                   registry=fake, platform="nt")["status"], "APPLIED")
                     self.assertEqual(json.loads(path.read_text(encoding="utf-8"))["status"], "APPLIED")
                     self.assertEqual(fake.value, item.target)
+                    preview = preview_rollback_change(path, registry=fake, platform="nt")
+                    self.assertEqual(preview["status"], "PLAN")
+                    self.assertEqual(preview["restore"], previous)
+                    self.assertEqual(fake.writes, [item.target])
+                    diff = export_change_diff(path, Path(directory) / (item.id + "-diff.json"),
+                                              registry=fake, platform="nt")
+                    self.assertEqual(diff["before"], previous)
+                    self.assertEqual(diff["current"], item.target)
                     self.assertEqual(rollback_change(path, accept_changes=True,
                                                      registry=fake, platform="nt")["status"], "ROLLED_BACK")
                     self.assertEqual(fake.value, previous)

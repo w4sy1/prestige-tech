@@ -5,7 +5,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from prestige_core.pc_cleanup import clean, restore, scan
+from prestige_core.pc_cleanup import clean, restore, scan, scan_usage
 
 
 def aged(path):
@@ -15,6 +15,17 @@ def aged(path):
 
 
 class PCCleanupTests(unittest.TestCase):
+    def test_usage_scan_is_read_only_and_skips_symlinks(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "small.txt").write_bytes(b"a")
+            (root / "large.txt").write_bytes(b"a" * 20)
+            result = scan_usage(root)
+            self.assertEqual(result["total_bytes"], 21)
+            self.assertEqual(result["largest_files"][0]["path"], "large.txt")
+            self.assertFalse(result["clean_allowed"])
+            self.assertTrue((root / "large.txt").exists())
+
     def test_fixture_quarantine_and_restore(self):
         with tempfile.TemporaryDirectory() as directory:
             source = Path(directory) / "temp"

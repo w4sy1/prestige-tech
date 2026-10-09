@@ -2,6 +2,7 @@
 
 from threading import Event
 from pathlib import Path
+import shutil
 from uuid import uuid4
 
 from PySide6.QtCore import QThread, Signal
@@ -12,13 +13,17 @@ from PySide6.QtWidgets import (
 )
 
 from prestige_core.storage_inventory import read_disks
-from prestige_core.physical_imaging import image_readonly_disk
+from prestige_core.physical_imaging import destination_disk_number, image_readonly_disk
+from prestige_core.usb_readonly import set_usb_readonly
+from prestige_core.usb_inventory import read_usb_devices
 from prestige_core.backup import backup, known_folders, plan, restore, verify
 from prestige_core.backup.vss import backup as vss_backup
 from prestige_core.backup.vss import recover as recover_vss
 from prestige_core.usb import plan_prepare as plan_usb_prepare, prepare as prepare_usb, verify as verify_usb
 from prestige_core.usb import update as update_usb, rollback as rollback_usb
 from prestige_core.ui_theme import APP_QSS, COLORS
+from prestige_core.report_live import summarize_live_result
+from prestige_report.gui import ReportDialog
 
 
 class DiskWorker(QThread):
@@ -29,6 +34,17 @@ class DiskWorker(QThread):
         try:
             self.loaded.emit(read_disks())
         except RuntimeError as error:
+            self.failed.emit(str(error))
+
+
+class UsbInventoryWorker(QThread):
+    loaded = Signal(dict)
+    failed = Signal(str)
+
+    def run(self):
+        try:
+            self.loaded.emit(read_usb_devices())
+        except (OSError, ValueError, RuntimeError) as error:
             self.failed.emit(str(error))
 
 
@@ -47,6 +63,22 @@ class PhysicalImageWorker(QThread):
             self.loaded.emit(image_readonly_disk(self.number, self.destination,
                                                  cancel_event=self.cancel_event))
         except (OSError, ValueError, RuntimeError) as error:
+            self.failed.emit(str(error))
+
+
+class UsbReadonlyWorker(QThread):
+    loaded = Signal(dict)
+    failed = Signal(str)
+
+    def __init__(self, disk, parent=None):
+        super().__init__(parent)
+        self.disk = disk.copy()
+
+    def run(self):
+        try:
+            self.loaded.emit(set_usb_readonly(self.disk["number"], self.disk["unique_id"],
+                                            self.disk["size_bytes"]))
+        except (OSError, ValueError, RuntimeError, PermissionError) as error:
             self.failed.emit(str(error))
 
 
@@ -121,9 +153,14 @@ class StorageWindow(QMainWindow):
         self.setMinimumSize(820, 560)
         self.setStyleSheet(APP_QSS)
         self.worker = None
+        self.usb_inventory_worker = None
         self.image_worker = None
+        self.readonly_worker = None
         self.backup_worker = None
         self.usb_worker = None
+        self.active_backup_operation = None
+        self.last_backup_result = None
+        self.report_dialog = None
         self.disks = []
         root = QWidget()
         self.setCentralWidget(root)
@@ -160,6 +197,13 @@ class StorageWindow(QMainWindow):
         self.image_button.setEnabled(False)
         self.image_button.clicked.connect(self.start_physical_image)
         actions.addWidget(self.image_button)
+        self.readonly_button = QPushButton("USB: ustaw tylko odczyt")
+        self.readonly_button.setEnabled(False)
+        self.readonly_button.clicked.connect(self.start_usb_readonly)
+        actions.addWidget(self.readonly_button)
+        self.usb_inventory_button = QPushButton("Urządzenia USB VID/PID")
+        self.usb_inventory_button.clicked.connect(self.start_usb_inventory)
+        actions.addWidget(self.usb_inventory_button)
         self.cancel_image_button = QPushButton("Przerwij obraz")
         self.cancel_image_button.setEnabled(False)
         self.cancel_image_button.clicked.connect(self.cancel_physical_image)
@@ -196,6 +240,10 @@ class StorageWindow(QMainWindow):
         self.restore_button.clicked.connect(self.start_restore)
         backup_actions.addWidget(self.restore_button)
         backup_layout.addLayout(backup_actions)
+        self.report_button = QPushButton("Ostatnia utworzona kopia → Repair Report")
+        self.report_button.setEnabled(False)
+        self.report_button.clicked.connect(self.open_backup_report)
+        backup_layout.addWidget(self.report_button)
         standard = QHBoxLayout()
         standard.addWidget(QLabel("Foldery standardowe (wybierz; ręczny wybór można anulować):"))
         self.standard_folder_checks = {}
@@ -253,6 +301,10 @@ class StorageWindow(QMainWindow):
     def _run_backup_operation(self, operation, source, destination=None):
         if self.backup_worker is not None and self.backup_worker.isRunning():
             return
+        self.active_backup_operation = operation
+        if operation == "backup":
+            self.last_backup_result = None
+            self.report_button.setEnabled(False)
         self.backup_worker = BackupWorker(
             operation, source, destination, self.acl_checkbox.isChecked(),
             self.system_export_checkbox.isChecked(), self.drivers_checkbox.isChecked(),
@@ -380,13 +432,30 @@ class StorageWindow(QMainWindow):
             self._run_backup_operation("vss-recover", journal)
 
     def show_backup_result(self, result):
+        if self.active_backup_operation == "backup":
+            self.last_backup_result = result
+            self.report_button.setEnabled(True)
         if result.get("ok") is False:
             self.status.setText(f"Operacja niepełna: {result}")
         else:
             self.status.setText(f"Operacja zakończona: {result}")
 
     def show_backup_error(self, message):
+        if self.active_backup_operation == "backup":
+            self.last_backup_result = None
+            self.report_button.setEnabled(False)
         self.status.setText(f"Błąd kopii: {message}")
+
+    def open_backup_report(self):
+        if self.last_backup_result is None:
+            return
+        try:
+            prefill = summarize_live_result("Storage", self.last_backup_result)
+        except ValueError as error:
+            self.status.setText("Nie przekazano kopii do raportu: " + str(error))
+            return
+        self.report_dialog = ReportDialog(self, prefill=prefill)
+        self.report_dialog.show()
 
     def finish_backup_operation(self):
         for button in (self.backup_button, self.verify_button, self.restore_button,
@@ -400,14 +469,21 @@ class StorageWindow(QMainWindow):
         for button in self.usb_buttons:
             button.setEnabled(False)
         self.status.setText(f"PrestigeUSB {operation}: operacja trwa…")
-        self.usb_worker.loaded.connect(self.show_backup_result)
-        self.usb_worker.failed.connect(self.show_backup_error)
+        self.usb_worker.loaded.connect(self.show_usb_result)
+        self.usb_worker.failed.connect(self.show_usb_error)
         self.usb_worker.finished.connect(self.finish_usb_operation)
         self.usb_worker.start()
 
     def finish_usb_operation(self):
         for button in self.usb_buttons:
             button.setEnabled(True)
+
+    def show_usb_result(self, result):
+        self.status.setText(("Operacja PrestigeUSB niepełna: " if result.get("ok") is False
+                             else "Operacja PrestigeUSB zakończona: ") + str(result))
+
+    def show_usb_error(self, message):
+        self.status.setText("Błąd PrestigeUSB: " + message)
 
     def start_usb_prepare(self):
         tools = self.select_directories("Wybierz katalog narzędzia prestige-*")
@@ -467,7 +543,8 @@ class StorageWindow(QMainWindow):
 
     def refresh(self):
         if ((self.worker is not None and self.worker.isRunning()) or
-                (self.image_worker is not None and self.image_worker.isRunning())):
+                (self.image_worker is not None and self.image_worker.isRunning()) or
+                (self.readonly_worker is not None and self.readonly_worker.isRunning())):
             return
         self.refresh_button.setEnabled(False)
         self.status.setText("Odczytuję listę dysków…")
@@ -477,9 +554,31 @@ class StorageWindow(QMainWindow):
         self.worker.finished.connect(lambda: self.refresh_button.setEnabled(True))
         self.worker.start()
 
+    def start_usb_inventory(self):
+        if self.usb_inventory_worker is not None and self.usb_inventory_worker.isRunning():
+            return
+        self.usb_inventory_button.setEnabled(False)
+        self.status.setText("Odczytuję obecne urządzenia USB PnP…")
+        self.usb_inventory_worker = UsbInventoryWorker(self)
+        self.usb_inventory_worker.loaded.connect(self.show_usb_inventory)
+        self.usb_inventory_worker.failed.connect(self.show_usb_inventory_error)
+        self.usb_inventory_worker.finished.connect(lambda: self.usb_inventory_button.setEnabled(True))
+        self.usb_inventory_worker.start()
+
+    def show_usb_inventory(self, result):
+        lines = [f"{row['vid']}:{row['pid']}  {row['name']}  [{row['class']}, {row['status']}]"
+                 for row in result["devices"]]
+        QMessageBox.information(self, "Obecne urządzenia USB", "\n".join(lines) or "Brak urządzeń USB z VID/PID.")
+        self.status.setText(f"USB PnP: {result['count']} urządzeń. To nie jest test pamięci ani zapis na nośnik.")
+
+    def show_usb_inventory_error(self, message):
+        self.status.setText("Nie odczytano USB PnP: " + message)
+
     def show_disks(self, disks):
+        self.table.clearSelection()
         self.disks = disks
         self.image_button.setEnabled(False)
+        self.readonly_button.setEnabled(False)
         self.table.setRowCount(len(disks))
         for index, disk in enumerate(disks):
             readonly = "tylko odczyt" if disk["read_only"] is True else "zapis możliwy" if disk["read_only"] is False else "stan zapisu nieznany"
@@ -503,6 +602,48 @@ class StorageWindow(QMainWindow):
             "Numer urządzenia i litera woluminu to różne identyfikatory."
         )
         self.image_button.setEnabled(disk["read_only"] is True and not disk["system"])
+        self.readonly_button.setEnabled(
+            disk["bus"].upper() == "USB" and not disk["system"]
+            and disk["read_only"] is False and disk["unique_id"] not in ("", "Niedostępne"))
+
+    def start_usb_readonly(self):
+        index = self.table.currentRow()
+        if not 0 <= index < len(self.disks) or not self.readonly_button.isEnabled():
+            return
+        disk = self.disks[index]
+        answer = QMessageBox.question(
+            self, "Ustaw USB tylko do odczytu",
+            f"Wybrany: {disk['device']} — {disk['model']}\n"
+            f"ID: {disk['unique_id']}\nRozmiar: {disk['size_bytes']} bajtów.\n"
+            "DiskPart ustawi programowy atrybut tylko do odczytu dla całego dysku. "
+            "Nie jest to sprzętowa blokada zapisu. Program nie zdejmie go automatycznie po obrazowaniu. "
+            "Upewnij się, że to źródłowy pendrive, a nie dysk docelowy.",
+            QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        if answer != QMessageBox.Yes:
+            return
+        self.readonly_button.setEnabled(False)
+        self.image_button.setEnabled(False)
+        self.refresh_button.setEnabled(False)
+        self.status.setText("Ustawiam programowy atrybut USB read-only przez DiskPart…")
+        self.readonly_worker = UsbReadonlyWorker(disk, self)
+        self.readonly_worker.loaded.connect(self.show_usb_readonly_result)
+        self.readonly_worker.failed.connect(self.show_usb_readonly_error)
+        self.readonly_worker.finished.connect(self.finish_usb_readonly)
+        self.readonly_worker.start()
+
+    def show_usb_readonly_result(self, result):
+        self.status.setText(f"Dysk #{result['number']}: {result['status']}. Odświeżam listę przed obrazowaniem.")
+
+    def show_usb_readonly_error(self, message):
+        self.status.setText(f"Nie potwierdzono atrybutu USB read-only: {message}")
+
+    def finish_usb_readonly(self):
+        self.refresh_button.setEnabled(True)
+        self.readonly_button.setEnabled(False)
+        self.image_button.setEnabled(False)
+        self.disks = []
+        self.table.setRowCount(0)
+        self.details.setText("Odśwież listę dysków i ponownie wybierz źródło.")
 
     def start_physical_image(self):
         index = self.table.currentRow()
@@ -514,9 +655,20 @@ class StorageWindow(QMainWindow):
         destination, _ = QFileDialog.getSaveFileName(self, "Nowy obraz RAW na innym dysku", "disk.img", "Obraz RAW (*.img)")
         if not destination:
             return
+        try:
+            target_disk = destination_disk_number(destination)
+            free_bytes = shutil.disk_usage(Path(destination).parent).free
+            if target_disk == disk["number"]:
+                raise ValueError("Cel obrazu znajduje się na dysku źródłowym.")
+            if free_bytes < disk["size_bytes"] + 1024 * 1024:
+                raise ValueError("Za mało wolnego miejsca na obraz i metadane.")
+        except (OSError, ValueError, RuntimeError) as error:
+            self.status.setText(f"Nie można zaplanować obrazu: {error}")
+            return
         answer = QMessageBox.question(
             self, "Obraz dysku fizycznego",
-            f"Czytać {disk['device']} ({disk['size_bytes']} bajtów) do nowego pliku {destination}? "
+            f"Źródło: {disk['device']} ({disk['size_bytes']} bajtów).\n"
+            f"Cel: dysk #{target_disk}, {free_bytes} bajtów wolnych, plik {destination}.\n"
             "Atrybut read-only Windows nie jest sprzętową blokadą zapisu. "
             "Cel musi być na innym dysku; operacja może trwać długo."
         )
@@ -555,6 +707,7 @@ class StorageWindow(QMainWindow):
     def show_error(self, message):
         self.disks = []
         self.image_button.setEnabled(False)
+        self.readonly_button.setEnabled(False)
         self.table.setRowCount(0)
         self.details.setText("Identyfikator niedostępny.")
         self.status.setText(f"Niedostępne: {message}")
@@ -566,6 +719,9 @@ class StorageWindow(QMainWindow):
             "niesystemowego dysku z atrybutem read-only i celu na innym dysku. Otwiera źródło "
             "wyłącznie do odczytu, tworzy nowy .img i weryfikuje SHA-256. Get-Disk może pomijać "
             "dyski dynamiczne. Atrybut read-only Windows nie daje gwarancji sprzętowej blokady zapisu; "
+            "Dla niesystemowego USB można ustawić ten atrybut przez DiskPart, po sprawdzeniu numeru i identyfikatora. "
+            "Lista VID/PID pokazuje obecne urządzenia USB PnP, także inne niż pamięć masowa. "
+            "Po operacji trzeba odświeżyć listę, wybrać dysk ponownie i dopiero utworzyć obraz. "
             "BitLocker i RAM nie są obsługiwane. Kopia folderu zapisuje manifest SHA-256, "
             "pomija znane magazyny sekretów i odtwarza wyłącznie do nowego katalogu. "
             "Opcja ACL dotyczy kopii i odtwarzania. VSS tworzy migawki Windows i wymaga "
@@ -578,6 +734,16 @@ class StorageWindow(QMainWindow):
         )
 
     def closeEvent(self, event):
+        if self.usb_inventory_worker is not None and self.usb_inventory_worker.isRunning():
+            self.usb_inventory_worker.wait(31000)
+            if self.usb_inventory_worker.isRunning():
+                event.ignore()
+                return
+        if self.readonly_worker is not None and self.readonly_worker.isRunning():
+            self.readonly_worker.wait(65000)
+            if self.readonly_worker.isRunning():
+                event.ignore()
+                return
         if self.image_worker is not None and self.image_worker.isRunning():
             self.image_worker.cancel_event.set()
             self.image_worker.wait()
