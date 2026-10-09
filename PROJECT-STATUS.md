@@ -6,6 +6,18 @@ projektu i nie zastępują bieżącego pliku licencji.
 
 Bieżący plik przekazania pracy i lista końcowych testów: `development/CONTINUE-HANDOFF.txt`.
 
+## Etap 2026-10-09 — Dashboard i 10 Centrów w paczce EXE
+
+Dashboard 1.1.4 zachowuje niebieski i czarno-złoty styl oraz jeden katalog
+Centrów. Wykrywa ich EXE w folderze `centers/` obok własnego pliku. Skrypt
+`build_centers.py` buduje 10 osobnych EXE, a skrypt Dashboardu
+`package_desktop.py` testuje start 11 EXE i składa lokalny ZIP z sumami SHA-256.
+Usunięto konflikt biblioteki ICU w paczce PyInstaller oraz poprawiono ścieżkę
+czcionki w spakowanych Centrach. Lokalny ZIP przeszedł test integralności.
+Kod Centrów: 340 uruchomionych (339 OK, 1 pominięty); Dashboard: 22 testy OK.
+Testy `--smoke` potwierdzają start i zamknięcie GUI, nie działanie sprzętu,
+uprawnień administratora, zmian systemowych, skanów sieci ani publikację wydania.
+
 ## Etap 2026-10-09 — optymalizacja i rozszerzenie Security Center
 
 System Center ma odczytowy audyt autostartu, procesów Edge, zasad pracy w tle,

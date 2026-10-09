@@ -8,8 +8,10 @@ def install_font(application):
     """Użyj załączonej czcionki także w uruchomionym EXE."""
     from PySide6.QtGui import QFont, QFontDatabase
 
-    base = Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parent))
-    path = base / "DejaVuSans.ttf" if getattr(sys, "frozen", False) else base / "assets" / "DejaVuSans.ttf"
+    if getattr(sys, "frozen", False):
+        path = Path(sys._MEIPASS) / "prestige_core" / "assets" / "DejaVuSans.ttf"
+    else:
+        path = Path(__file__).resolve().parent / "assets" / "DejaVuSans.ttf"
     font_id = QFontDatabase.addApplicationFont(str(path))
     if font_id < 0:
         raise RuntimeError("Brak czcionki interfejsu DejaVu Sans.")

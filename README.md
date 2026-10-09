@@ -3,7 +3,8 @@ by Dominik Wasilak
 
 PRESTIGE TECH rozwija 26 samodzielnych narzędzi w połączone Centra. Stare
 repozytoria i wydania pozostają dostępne jako historia projektu. Obecny kod
-źródłowy Centrów jest wersją testową; nie zastępuje jeszcze sprawdzonej paczki EXE.
+źródłowy Centrów jest wersją testową. Nowa paczka EXE przeszła testy startu,
+lecz operacje na urządzeniach i zmiany systemowe wymagają osobnej weryfikacji.
 
 Własny kod jest udostępniony na [Prestige Tech Free Use License](LICENSE).
 Zależności i czcionki zachowują swoje odrębne licencje.
@@ -28,11 +29,13 @@ ADB, Nmap, PowerShell lub uprawnień administratora. Po sklonowaniu tego repo
 uruchom w nim `python -m pip install -e ".[gui,pdf,signing]"`, a potem wybrane
 Centrum. Test okna bez urządzeń: `python network_center.py --smoke`.
 
-[Dashboard](https://github.com/w4sy1/prestige-tech-dashboard) może uruchamiać
-Centra z kodu, gdy oba repozytoria są w sąsiednich katalogach. Nie zmienia to
-wyglądu Dashboardu. Nowe EXE nie są jeszcze gotowe: testowe pakowanie PySide6
-kończy się błędem ładowania QtWidgets. Nie pobieraj archiwalnej paczki 0.3.4
-z oczekiwaniem, że zawiera te Centra.
+[Dashboard](https://github.com/w4sy1/prestige-tech-dashboard) uruchamia Centra
+z kodu, gdy oba repozytoria są w sąsiednich katalogach. W paczce Windows
+wykrywa też dziesięć EXE w folderze `centers/`. Skrypt `build_centers.py`
+buduje je na Windows z Pythonem 3.13, PyInstaller i zależnościami z
+`.[gui,pdf,signing]`. Po lokalnej budowie paczkę składa skrypt
+`package_desktop.py` w repozytorium Dashboardu. Archiwalne wydanie 0.3.4
+nie zawiera obecnych Centrów.
 
 [Stan funkcji i ograniczenia](PROJECT-STATUS.md) ·
 [Macierz migracji](development/CENTER-MIGRATION-MATRIX.md) ·

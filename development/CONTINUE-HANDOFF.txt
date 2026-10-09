@@ -1,5 +1,14 @@
 PRESTIGE TECH — PLIK PRZEKAZANIA PRACY I TESTÓW
-Stan: 2026-10-08. Aktualizuj ten plik po każdym istotnym etapie.
+Stan: 2026-10-09. Aktualizuj ten plik po każdym istotnym etapie.
+
+ETAP 2026-10-09: Zbudowano lokalnie Dashboard 1.1.4 z oboma stylami i 10
+osobnych EXE Centrów. PyInstaller wymaga wyłączenia błędnie dołączanego
+icuuc.dll; czcionka Centrów jest czytana z prestige_core/assets w paczce.
+Skrypt prestige-tech-dashboard/package_desktop.py sprawdził start 11 EXE
+i utworzył ZIP z sumami SHA-256. Dashboard wykrywa folder centers obok EXE.
+Testy: 339 PASS, 1 skip w Centrach; 22 PASS w Dashboardzie; ZIP integralny.
+To weryfikacja uruchomienia GUI, nie fizycznych urządzeń, skanów czy napraw.
+Nie opublikowano GitHub Release; decyzja o publikacji paczki pozostaje osobna.
 
 ETAP 2026-10-09: System Center ma odczytowy audyt spowolnień (autostart,
 Edge, zasady pracy w tle, aktualizacje, ochrona, wolne miejsce) i przycisk
