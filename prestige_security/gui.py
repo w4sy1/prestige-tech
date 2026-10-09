@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 from PySide6.QtCore import QThread, Signal
-from PySide6.QtWidgets import (QCheckBox, QFileDialog, QFrame, QHBoxLayout, QLabel, QSpinBox,
+from PySide6.QtWidgets import (QCheckBox, QFileDialog, QFrame, QHBoxLayout, QLabel, QLineEdit, QSpinBox,
                                QMainWindow, QMessageBox, QPlainTextEdit, QPushButton,
                                QVBoxLayout, QWidget)
 
@@ -13,6 +13,7 @@ from prestige_core.file_inspector_report import build_file_report, export_file_r
 from prestige_core.security_check import audit_windows, load_evidence
 from prestige_core.security_rules import audit
 from prestige_core.security_compare import compare_audits
+from prestige_core.link_check import inspect_link
 from prestige_core.malware_triage import triage_windows
 from prestige_core.malware_rules import analyze
 from prestige_core.ui_theme import APP_QSS, COLORS
@@ -90,6 +91,14 @@ class SecurityCenterWindow(QMainWindow):
         self.report_button.clicked.connect(self.open_report)
         controls.addWidget(self.report_button)
         main.addLayout(controls)
+        link_controls = QHBoxLayout()
+        self.link_input = QLineEdit()
+        self.link_input.setPlaceholderText("Wklej podejrzany adres strony")
+        link_controls.addWidget(self.link_input)
+        self.link_check_button = QPushButton("Sprawdź adres")
+        self.link_check_button.clicked.connect(self.check_link)
+        link_controls.addWidget(self.link_check_button)
+        main.addLayout(link_controls)
         export_controls = QHBoxLayout()
         self.export_file_button = QPushButton("Eksport analizy")
         self.export_file_button.setEnabled(False)
@@ -147,6 +156,18 @@ class SecurityCenterWindow(QMainWindow):
         self.result.setReadOnly(True)
         card_layout.addWidget(self.result)
         main.addWidget(card, 1)
+
+    def check_link(self):
+        try:
+            analysis = inspect_link(self.link_input.text())
+        except ValueError as error:
+            self.status.setText(f"Nie sprawdzono adresu: {error}")
+            return
+        lines = [analysis["message"], f"Rzeczywista domena w adresie: {analysis['domain']}"]
+        lines.extend(f"• {finding}" for finding in analysis["findings"])
+        lines.append("To odczyt samego adresu. Strony nie otwarto i niczego nie wysłano.")
+        self.result.setPlainText("\n".join(lines))
+        self.status.setText("Adres sprawdzony lokalnie. Wynik nie potwierdza bezpieczeństwa strony.")
 
     def choose_file(self):
         if self.worker is not None and self.worker.isRunning():

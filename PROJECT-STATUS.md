@@ -17,6 +17,10 @@ napraw i harmonogramu. System Center ma teraz prosty wybór problemu z odczytem
 wolnego miejsca; ścieżki dźwięku i drukarki uczciwie pokazują plan bez pomiaru.
 Ochrona przeglądarki, sejf i zdalne SOS pozostają do zrobienia. Nie należy
 przedstawiać tych funkcji jako gotowych.
+Security Center ma lokalne sprawdzenie wpisanego adresu: pokazuje rzeczywistą
+domenę, ostrzega o wybranych cechach i nie otwiera strony ani nie wysyła linku.
+Brak ostrzeżeń nie oznacza, że strona jest bezpieczna; analiza treści,
+reputacji i automatyczne ostrzeganie w przeglądarce pozostają do zrobienia.
 
 ## Etap 2026-10-09 — dostępność drugiego stylu i prostsze ścieżki
 

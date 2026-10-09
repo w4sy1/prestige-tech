@@ -143,7 +143,7 @@ ale nie samodzielnie zatwierdza naprawy ani nie diagnozuje oszustwa z pewności�
 | Pomoc z dźwiękiem | System Center | Pokazuje rzeczywiste wyciszenie i wyjście audio; nie zmienia ustawień bez potwierdzenia | Do zrobienia |
 | Pomoc z drukarką | System Center | Odczytuje usługę i kolejkę; po ewentualnym restarcie sprawdza stan ponownie | Do zrobienia |
 | Zwolnij miejsce | System Center / Storage & Recovery | Lista pokazuje ścieżki i bajty, nie obejmuje Dokumentów ani Pobranych bez wyboru | Częściowo: istnieje analiza i kontrolowane czyszczenie |
-| Sprawdź podejrzany link | Security Center / AI Center | Wynik podaje domenę, dowody, niepewność i nie wysyła treści bez zgody | Do zrobienia |
+| Sprawdź podejrzany link | Security Center / AI Center | Wynik podaje domenę, dowody, niepewność i nie wysyła treści bez zgody | Częściowo: lokalna analiza adresu; bez treści strony i reputacji |
 | Powiadomienia ze stron | Security Center | Pokazuje uprawnienia witryn i prowadzi do ich wyłączenia w przeglądarce | Do zrobienia; potrzebna integracja przeglądarki |
 | Bezpieczne logowanie | Security Center | Hasła nie trafiają do logów ani AI; można sprawdzić powtórzenia lokalnie | Do zrobienia; własny sejf wymaga audytu |
 | Bezpieczeństwo Wi-Fi | Network Center / Sentinel | Otwarta sieć daje ostrzeżenie; nieznany host nie jest nazywany intruzem | Do zrobienia |

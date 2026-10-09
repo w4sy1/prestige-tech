@@ -10,6 +10,9 @@ automatycznych napraw, integracji przeglądarki, zdalnego SOS ani sejfu.
 System Center ma wybór trzech prostych problemów i odczyt wolnego miejsca;
 dźwięk oraz drukarka są wyłącznie planami bez automatycznego pomiaru.
 Po tej zmianie testy Centrów: 305 uruchomionych, 304 OK, 1 skip.
+Security Center ma lokalną analizę wklejonego adresu bez otwierania strony,
+bez wysyłania danych i bez deklarowania, że brak ostrzeżeń oznacza bezpieczeństwo.
+Testy Centrów po tej zmianie: 309 uruchomionych, 308 OK, 1 skip.
 
 ETAP 2026-10-09: drugi styl Dashboardu został rozszerzony na pozostałe strony
 przez paletę czarno-złotą; przełączenie na niebieski działa w teście. Registry
